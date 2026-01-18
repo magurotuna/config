@@ -172,15 +172,7 @@
       PAGER = "less";
       LESS = "-R -f -X -i -P ?f%f:(stdin). ?lb%lb?L/%L.. [?eEOF:?pb%pb\\%..]";
       LESSCHARSET = "utf-8";
-
-      # LESS man page colors
-      LESS_TERMCAP_mb = "\\E[01;31m";
-      LESS_TERMCAP_md = "\\E[01;31m";
-      LESS_TERMCAP_me = "\\E[0m";
-      LESS_TERMCAP_se = "\\E[0m";
-      LESS_TERMCAP_so = "\\E[00;44;37m";
-      LESS_TERMCAP_ue = "\\E[0m";
-      LESS_TERMCAP_us = "\\E[01;32m";
+      # Note: LESS_TERMCAP_* variables are set in initContent with proper escaping
 
       # ls colors
       LSCOLORS = "exfxcxdxbxegedabagacad";
@@ -193,8 +185,7 @@
       # fzf
       FZF_DEFAULT_OPTS = "--extended --ansi --multi";
 
-      # GPG
-      GPG_TTY = "$(tty)";
+      # GPG - Note: GPG_TTY is set in initContent since $(tty) needs evaluation
 
       # k8s
       KUBECONFIG = "$HOME/.kube/config";
@@ -257,6 +248,18 @@
       # Disable accept-line-and-down-history
       bindkey -r "^O"
 
+      # LESS man page colors (must use $'...' for escape codes)
+      export LESS_TERMCAP_mb=$'\E[01;31m'
+      export LESS_TERMCAP_md=$'\E[01;31m'
+      export LESS_TERMCAP_me=$'\E[0m'
+      export LESS_TERMCAP_se=$'\E[0m'
+      export LESS_TERMCAP_so=$'\E[00;44;37m'
+      export LESS_TERMCAP_ue=$'\E[0m'
+      export LESS_TERMCAP_us=$'\E[01;32m'
+
+      # GPG
+      export GPG_TTY=$(tty)
+
       # Additional PATH entries
       export PATH="/usr/local/bin:$HOME/bin:$PATH"
       export PATH="$HOME/go/bin:$PATH"
@@ -283,8 +286,7 @@
       export PATH="$BUN_INSTALL/bin:$PATH"
       [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-      # uv (Python)
-      [ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+      # uv (Python) - managed by Nix
       if command -v uv &> /dev/null; then
         eval "$(uv generate-shell-completion zsh)"
       fi
