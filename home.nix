@@ -25,6 +25,8 @@
     tree
     dust
     tokei
+    neovim
+    tmux
 
     # Git tools
     gh
