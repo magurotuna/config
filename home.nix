@@ -62,6 +62,26 @@
         clean = "git-lfs clean -- %f";
         smudge = "git-lfs smudge -- %f";
       };
+      credential = {
+        "https://github.com" = {
+          helper = [
+            ""
+            "!gh auth git-credential"
+          ];
+        };
+        "https://gist.github.com" = {
+          helper = [
+            ""
+            "!gh auth git-credential"
+          ];
+        };
+        "https://github.gatech.edu" = {
+          helper = [
+            ""
+            "!gh auth git-credential"
+          ];
+        };
+      };
     };
   };
 }
