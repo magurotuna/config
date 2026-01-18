@@ -247,13 +247,12 @@
       [ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
       # llvm/lld from Homebrew (if present)
+      # NOTE: Do NOT set LD_LIBRARY_PATH globally to Homebrew libs - it conflicts with Nix binaries
       if [ -n "$HOMEBREW_PREFIX" ]; then
         export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH"
         export PATH="$HOMEBREW_PREFIX/opt/openjdk/bin:$PATH"
         export PATH="$HOMEBREW_PREFIX/opt/openssl@3/bin:$PATH"
-        export LD_LIBRARY_PATH="$HOMEBREW_PREFIX/lib:$HOMEBREW_PREFIX/opt/lld@20/lib:$LD_LIBRARY_PATH"
         export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/opt/openssl/lib/pkgconfig:$PKG_CONFIG_PATH"
-        export LD_LIBRARY_PATH="$HOMEBREW_PREFIX/opt/openssl/lib:$LD_LIBRARY_PATH"
       fi
 
       # ─────────────────────────────────────────────────────────────
