@@ -26,18 +26,64 @@
     dust
     tokei
     neovim
+    neofetch
+    tree-sitter
 
     # Git tools
     gh
     ghq
     git-lfs
-    delta  # git-delta
+    delta
+    gnupg
 
-    # Shell enhancements
-    # direnv, starship, atuin are configured via programs.* below
+    # Shell / terminal
+    zellij
+
+    # Network / HTTP
+    oha
+    websocat
+
+    # Kubernetes
+    k9s
+    stern
+    kubectl
+    kubernetes-helm
+    minikube
+    talosctl
+
+    # Cloud / Infrastructure
+    awscli2
+    terraform
+    google-cloud-sql-proxy
+    minio
+    minio-client
+
+    # Databases
+    duckdb
+    redis
+
+    # Languages / Build tools
+    protobuf
+    typst
+    ast-grep
+
+    # Other
+    imagemagick
+
+    # Load testing
+    k6
+    hey
+
+    # Python
+    uv
+
+    # Learning
+    codecrafters-cli
 
     # AI
     codex
+    gemini-cli
+    claude-code
   ];
 
   # ──────────────────────────────────────────────────────────────

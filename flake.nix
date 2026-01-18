@@ -9,23 +9,30 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, ... }: {
-    homeConfigurations = {
-      "yusuke@wsl" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        extraSpecialArgs = {
-          homeDirectory = "/home/yusuke";
-        };
-        modules = [ ./home.nix ];
+  outputs = { nixpkgs, home-manager, ... }:
+    let
+      mkPkgs = system: import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
       };
-
-      "yusuke@macbook" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.aarch64-darwin;
-        extraSpecialArgs = {
-          homeDirectory = "/Users/yusuke";
+    in
+    {
+      homeConfigurations = {
+        "yusuke@wsl" = home-manager.lib.homeManagerConfiguration {
+          pkgs = mkPkgs "x86_64-linux";
+          extraSpecialArgs = {
+            homeDirectory = "/home/yusuke";
+          };
+          modules = [ ./home.nix ];
         };
-        modules = [ ./home.nix ];
+
+        "yusuke@macbook" = home-manager.lib.homeManagerConfiguration {
+          pkgs = mkPkgs "aarch64-darwin";
+          extraSpecialArgs = {
+            homeDirectory = "/Users/yusuke";
+          };
+          modules = [ ./home.nix ];
+        };
       };
     };
-  };
 }
