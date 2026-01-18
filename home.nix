@@ -1,9 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, homeDirectory, ... }:
 
 {
   # Home Manager needs these to know where to install things
   home.username = "yusuke";
-  home.homeDirectory = "/home/yusuke";
+  home.homeDirectory = homeDirectory;
 
   # Version of Home Manager state - don't change this casually
   home.stateVersion = "24.11";

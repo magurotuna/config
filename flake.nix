@@ -13,14 +13,19 @@
     homeConfigurations = {
       "yusuke@wsl" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        extraSpecialArgs = {
+          homeDirectory = "/home/yusuke";
+        };
         modules = [ ./home.nix ];
       };
 
-      # Uncomment when you set up your Mac:
-      # "yusuke@macbook" = home-manager.lib.homeManagerConfiguration {
-      #   pkgs = nixpkgs.legacyPackages.aarch64-darwin;
-      #   modules = [ ./home.nix ];
-      # };
+      "yusuke@macbook" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.aarch64-darwin;
+        extraSpecialArgs = {
+          homeDirectory = "/Users/yusuke";
+        };
+        modules = [ ./home.nix ];
+      };
     };
   };
 }
