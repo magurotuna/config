@@ -35,9 +35,7 @@
     delta  # git-delta
 
     # Shell enhancements
-    direnv
-    starship
-    atuin
+    # direnv, starship, atuin are configured via programs.* below
 
     # AI
     codex
@@ -88,5 +86,265 @@
         };
       };
     };
+  };
+
+  # ──────────────────────────────────────────────────────────────
+  # Zsh
+  # ──────────────────────────────────────────────────────────────
+  programs.zsh = {
+    enable = true;
+
+    # History settings
+    history = {
+      size = 100000;
+      save = 1000000;
+      path = "$HOME/.zsh_history";
+      ignoreDups = true;
+      ignoreAllDups = true;
+      expireDuplicatesFirst = true;
+      share = true;
+    };
+
+    # Shell options
+    autocd = true;
+    defaultKeymap = "emacs";
+
+    # Environment variables
+    sessionVariables = {
+      # Language
+      LANGUAGE = "en_US.UTF-8";
+      LANG = "en_US.UTF-8";
+      LC_ALL = "en_US.UTF-8";
+      LC_CTYPE = "en_US.UTF-8";
+
+      # Editor
+      EDITOR = "nvim";
+      CVSEDITOR = "nvim";
+      SVN_EDITOR = "nvim";
+      GIT_EDITOR = "nvim";
+
+      # Pager
+      PAGER = "less";
+      LESS = "-R -f -X -i -P ?f%f:(stdin). ?lb%lb?L/%L.. [?eEOF:?pb%pb\\%..]";
+      LESSCHARSET = "utf-8";
+
+      # LESS man page colors
+      LESS_TERMCAP_mb = "\\E[01;31m";
+      LESS_TERMCAP_md = "\\E[01;31m";
+      LESS_TERMCAP_me = "\\E[0m";
+      LESS_TERMCAP_se = "\\E[0m";
+      LESS_TERMCAP_so = "\\E[00;44;37m";
+      LESS_TERMCAP_ue = "\\E[0m";
+      LESS_TERMCAP_us = "\\E[01;32m";
+
+      # ls colors
+      LSCOLORS = "exfxcxdxbxegedabagacad";
+      LS_COLORS = "di=34:ln=35:so=32:pi=33:ex=31:bd=46;34:cd=43;34:su=41;30:sg=46;30:tw=42;30:ow=43;30";
+
+      # XDG
+      XDG_CONFIG_HOME = "$HOME/.config";
+      XDG_DATA_HOME = "$HOME/.local/share";
+
+      # fzf
+      FZF_DEFAULT_OPTS = "--extended --ansi --multi";
+
+      # GPG
+      GPG_TTY = "$(tty)";
+
+      # k8s
+      KUBECONFIG = "$HOME/.kube/config";
+    };
+
+    # Aliases
+    shellAliases = {
+      # eza
+      l = "eza";
+      ls = "eza";
+      ll = "eza -l";
+      la = "eza -a";
+      lla = "eza -la";
+
+      # Common tools
+      cat = "bat";
+      cp = "cp -i";
+      mv = "mv -i";
+      rm = "rm -i";
+
+      # Docker
+      dc = "docker-compose";
+
+      # Git
+      g = "git";
+      gs = "git status";
+      gc = "git commit";
+      gco = "git checkout";
+      gsw = "git switch";
+      gr = "git restore";
+      ga = "git add";
+      gp = "git push origin HEAD";
+      gpf = "git push origin HEAD --force-with-lease";
+      gdi = "git diff";
+      gpu = "git pull";
+
+      # Editors
+      vi = "nvim";
+      vim = "nvim";
+
+      # Cargo
+      ca = "cargo";
+
+      # Clipboard (Linux)
+      pbcopy = "xsel --clipboard --input";
+      pbpaste = "xsel --clipboard --output | tr -d \"\\r\"";
+
+      # Deno Deploy environments
+      local_deployctl = "DENO_TLS_CA_STORE=system DEPLOY_API_ENDPOINT=\"https://deno-local.com\" deployctl";
+      dev_deployctl = "DEPLOY_API_ENDPOINT=\"https://dash.deno-dev.com\" deployctl";
+      staging_deployctl = "DEPLOY_API_ENDPOINT=\"https://deno-staging.com\" deployctl";
+    };
+
+    # Raw zsh configuration
+    initContent = ''
+      # Additional shell options
+      setopt no_global_rcs
+      setopt AUTO_PARAM_KEYS
+
+      # Disable accept-line-and-down-history
+      bindkey -r "^O"
+
+      # Additional PATH entries
+      export PATH="/usr/local/bin:$HOME/bin:$PATH"
+      export PATH="$HOME/go/bin:$PATH"
+      export PATH="/snap/bin:$PATH"
+
+      # Rust
+      [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+
+      # mise (runtime version manager)
+      if command -v mise &> /dev/null; then
+        eval "$(mise activate zsh)"
+      fi
+
+      # Deno
+      export DENO_INSTALL="$HOME/.deno"
+      export PATH="$DENO_INSTALL/bin:$PATH"
+
+      # Volta (Node version manager)
+      export VOLTA_HOME="$HOME/.volta"
+      export PATH="$VOLTA_HOME/bin:$PATH"
+
+      # bun
+      export BUN_INSTALL="$HOME/.bun"
+      export PATH="$BUN_INSTALL/bin:$PATH"
+      [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+      # uv (Python)
+      [ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+      if command -v uv &> /dev/null; then
+        eval "$(uv generate-shell-completion zsh)"
+      fi
+
+      # Homebrew (if still installed)
+      [ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+      # llvm/lld from Homebrew (if present)
+      if [ -n "$HOMEBREW_PREFIX" ]; then
+        export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH"
+        export PATH="$HOMEBREW_PREFIX/opt/openjdk/bin:$PATH"
+        export PATH="$HOMEBREW_PREFIX/opt/openssl@3/bin:$PATH"
+        export LD_LIBRARY_PATH="$HOMEBREW_PREFIX/lib:$HOMEBREW_PREFIX/opt/lld@20/lib:$LD_LIBRARY_PATH"
+        export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/opt/openssl/lib/pkgconfig:$PKG_CONFIG_PATH"
+        export LD_LIBRARY_PATH="$HOMEBREW_PREFIX/opt/openssl/lib:$LD_LIBRARY_PATH"
+      fi
+
+      # ─────────────────────────────────────────────────────────────
+      # Zinit (plugin manager)
+      # ─────────────────────────────────────────────────────────────
+      ZINIT_HOME="''${XDG_DATA_HOME:-''${HOME}/.local/share}/zinit/zinit.git"
+      if [[ ! -d $ZINIT_HOME ]]; then
+        mkdir -p "$(dirname $ZINIT_HOME)"
+        git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+      fi
+      source "''${ZINIT_HOME}/zinit.zsh"
+      autoload -Uz _zinit
+      (( ''${+_comps} )) && _comps[zinit]=_zinit
+
+      # Zinit annexes
+      zinit light-mode for \
+        zdharma-continuum/z-a-rust \
+        zdharma-continuum/z-a-as-monitor \
+        zdharma-continuum/z-a-patch-dl \
+        zdharma-continuum/z-a-bin-gem-node
+
+      # Completions
+      zinit ice blockf atpull'zinit creinstall -q .'
+      zinit light zsh-users/zsh-completions
+      autoload compinit
+      compinit
+
+      # Syntax highlighting and autosuggestions
+      zinit light zdharma/fast-syntax-highlighting
+      zinit light zsh-users/zsh-autosuggestions
+
+      # fzf integration
+      [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+      # ─────────────────────────────────────────────────────────────
+      # Custom functions
+      # ─────────────────────────────────────────────────────────────
+      # Repository fuzzy finder (ghq + fzf)
+      function select_ghq() {
+        local target_dir=$(ghq list -p | fzf --scheme=path --layout=reverse --no-multi --query="$LBUFFER" --prompt="Repo > ")
+        if [ -n "$target_dir" ]; then
+          BUFFER="cd ''${target_dir}"
+          zle accept-line
+        fi
+        zle reset-prompt
+      }
+      zle -N select_ghq
+      bindkey "^g" select_ghq
+
+      # ─────────────────────────────────────────────────────────────
+      # Secrets (not tracked in git)
+      # ─────────────────────────────────────────────────────────────
+      [ -f ~/.secrets.zsh ] && source ~/.secrets.zsh
+    '';
+  };
+
+  # ──────────────────────────────────────────────────────────────
+  # Starship prompt
+  # ──────────────────────────────────────────────────────────────
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+    settings = {
+      add_newline = true;
+      character = {
+        success_symbol = "[➜](bold green)";
+      };
+      package = {
+        disabled = false;
+      };
+      kubernetes = {
+        disabled = false;
+      };
+    };
+  };
+
+  # ──────────────────────────────────────────────────────────────
+  # Direnv
+  # ──────────────────────────────────────────────────────────────
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+    nix-direnv.enable = true;
+  };
+
+  # ──────────────────────────────────────────────────────────────
+  # Atuin (shell history)
+  # ──────────────────────────────────────────────────────────────
+  programs.atuin = {
+    enable = true;
+    enableZshIntegration = true;
   };
 }
