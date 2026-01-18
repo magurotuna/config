@@ -1,0 +1,50 @@
+{ pkgs, ... }:
+
+{
+  # Home Manager needs these to know where to install things
+  home.username = "yusuke";
+  home.homeDirectory = "/home/yusuke";
+
+  # Version of Home Manager state - don't change this casually
+  home.stateVersion = "24.11";
+
+  # Let Home Manager manage itself
+  programs.home-manager.enable = true;
+
+  # ──────────────────────────────────────────────────────────────
+  # Packages to install
+  # ──────────────────────────────────────────────────────────────
+  home.packages = with pkgs; [
+    # Add packages here, e.g.:
+    # ripgrep
+    # fd
+    # eza
+  ];
+
+  # ──────────────────────────────────────────────────────────────
+  # Git
+  # ──────────────────────────────────────────────────────────────
+  programs.git = {
+    enable = true;
+
+    signing = {
+      key = "5D866BB12F68CA51";
+      signByDefault = true;
+    };
+
+    settings = {
+      user = {
+        name = "Yusuke Tanaka";
+        email = "wing0920@gmail.com";
+      };
+      ghq.root = "~/Repo";
+      core.excludesfile = "~/.gitignore_global";
+      filter.lfs = {
+        process = "git-lfs filter-process";
+        required = true;
+        clean = "git-lfs clean -- %f";
+        smudge = "git-lfs smudge -- %f";
+      };
+    };
+  };
+}
