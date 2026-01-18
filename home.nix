@@ -15,10 +15,27 @@
   # Packages to install
   # ──────────────────────────────────────────────────────────────
   home.packages = with pkgs; [
-    # Add packages here, e.g.:
-    # ripgrep
-    # fd
-    # eza
+    # Core CLI tools
+    ripgrep
+    fd
+    eza
+    bat
+    fzf
+    jq
+    tree
+    dust
+    tokei
+
+    # Git tools
+    gh
+    ghq
+    git-lfs
+    delta  # git-delta
+
+    # Shell enhancements
+    direnv
+    starship
+    atuin
   ];
 
   # ──────────────────────────────────────────────────────────────
