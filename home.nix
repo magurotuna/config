@@ -26,7 +26,6 @@
     dust
     tokei
     neovim
-    tmux
 
     # Git tools
     gh
@@ -346,5 +345,81 @@
   programs.atuin = {
     enable = true;
     enableZshIntegration = true;
+  };
+
+  # ──────────────────────────────────────────────────────────────
+  # Tmux
+  # ──────────────────────────────────────────────────────────────
+  programs.tmux = {
+    enable = true;
+    shell = "${pkgs.zsh}/bin/zsh";
+    prefix = "C-t";
+    escapeTime = 0;
+    baseIndex = 1;
+    mouse = true;
+    keyMode = "vi";
+    terminal = "screen-256color";
+
+    extraConfig = ''
+      # enable true color
+      set -ga terminal-overrides ",xterm-256color:Tc"
+
+      # pane base index
+      set-option -g pane-base-index 1
+
+      # keybindings
+      bind h select-pane -L
+      bind j select-pane -D
+      bind k select-pane -U
+      bind l select-pane -R
+      bind -n C-s select-pane -t :.+
+      bind | split-window -h -c '#{pane_current_path}'
+      bind - split-window -v -c '#{pane_current_path}'
+      bind c new-window -c '#{pane_current_path}'
+      bind -r H resize-pane -L 5
+      bind -r J resize-pane -D 5
+      bind -r K resize-pane -U 5
+      bind -r L resize-pane -R 5
+
+      # reload config
+      bind r source-file ~/.config/tmux/tmux.conf \; display "Reloaded!"
+
+      # vi copy mode
+      bind-key -T copy-mode-vi v send -X begin-selection
+      bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
+      bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "pbcopy"
+      bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "pbcopy"
+
+      ##################
+      #   Appearance   #
+      ##################
+
+      # status bar
+      set-option -g status-left-length 90
+      set-option -g status-right-length 90
+      set-option -g status-right '[%Y-%m-%d(%a) %H:%M]'
+      set-option -g status-interval 1
+      set-option -g status-position top
+      set-option -g status-justify left
+      set-option -g status-left ' '
+      set-option -g status-left-length 10
+      set-option -g status-bg "colour238"
+      set-option -g status-fg "colour255"
+
+      # base16-gruvbox-dark-pale
+      set-option -g status-style "fg=#949494,bg=#3a3a3a"
+      set-window-option -g window-status-style "fg=#949494,bg=default"
+      set-window-option -g window-status-current-style "fg=#ffaf00,bg=default"
+      set-option -g pane-border-style "fg=#4e4e4e,bg=default"
+      set-option -g pane-active-border-style "fg=#ffaf00,bg=default,bold"
+      set-option -g pane-border-status top
+      set-option -g pane-border-format " #P: #{pane_current_command} "
+      set-option -g display-panes-active-colour "#afaf00"
+      set-option -g display-panes-colour "#ffaf00"
+      set-option -g message-style "fg=#dab997,bg=#3a3a3a"
+      set-window-option -g clock-mode-colour "#afaf00"
+      set-window-option -g mode-style "fg=#949494,bg=#4e4e4e"
+      set-window-option -g window-status-bell-style "fg=#3a3a3a,bg=#d75f5f"
+    '';
   };
 }
