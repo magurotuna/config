@@ -100,6 +100,7 @@
     hey
 
     # Python
+    python3
     uv
 
     # Learning
