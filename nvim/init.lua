@@ -95,15 +95,6 @@ vim.keymap.set('c', '<C-p>', '<Up>', { noremap = true })
 vim.keymap.set('c', '<M-b>', '<S-Left>', { noremap = true })
 vim.keymap.set('c', '<M-f>', '<S-Right>', { noremap = true })
 
--- LSP
-vim.keymap.set('n', 'gd', vim.lsp.buf.definition, lsp_keymap_opt)
-vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, lsp_keymap_opt)
-vim.keymap.set('n', 'gy', vim.lsp.buf.type_definition, lsp_keymap_opt)
-vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, lsp_keymap_opt)
-vim.keymap.set('n', '<leader>a', vim.lsp.buf.code_action, lsp_keymap_opt)
-vim.keymap.set('n', 'gr', vim.lsp.buf.references, lsp_keymap_opt)
-vim.keymap.set('n', 'gh', vim.lsp.buf.hover, lsp_keymap_opt)
-
 if vim.g.vscode then
   local vscode = require('vscode')
 
@@ -132,25 +123,169 @@ if vim.g.vscode then
     vscode.action('workbench.action.focusPreviousGroup')
   end)
 else
-    -- ordinary Neovim
+  -- LSP keymaps (only in regular Neovim, not VSCode)
+  local lsp_keymap_opts = { noremap = true, silent = true }
+  vim.keymap.set('n', 'gd', vim.lsp.buf.definition, lsp_keymap_opts)
+  vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, lsp_keymap_opts)
+  vim.keymap.set('n', 'gy', vim.lsp.buf.type_definition, lsp_keymap_opts)
+  vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, lsp_keymap_opts)
+  vim.keymap.set('n', '<leader>a', vim.lsp.buf.code_action, lsp_keymap_opts)
+  vim.keymap.set('n', 'gr', vim.lsp.buf.references, lsp_keymap_opts)
+  vim.keymap.set('n', 'gh', vim.lsp.buf.hover, lsp_keymap_opts)
+  vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, lsp_keymap_opts)
+  vim.keymap.set('n', ']d', vim.diagnostic.goto_next, lsp_keymap_opts)
+  vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, lsp_keymap_opts)
 end
 
 -- Setup lazy.nvim
 require('lazy').setup({
   spec = {
+    -- Colorscheme (skip in VSCode)
+    {
+      'rose-pine/neovim',
+      name = 'rose-pine',
+      cond = not vim.g.vscode,
+      priority = 1000,
+      config = function()
+        require('rose-pine').setup({
+          variant = 'main',
+          dark_variant = 'main',
+        })
+        vim.cmd('colorscheme rose-pine')
+      end,
+    },
+
+    -- Surround (works in VSCode too)
     {
       'echasnovski/mini.surround',
       version = '*',
       opts = {
         mappings = {
-          -- To avoid the keymap conflict with "go to the left pane"
           highlight = 'sH',
         },
       },
     },
+
+    -- Treesitter (skip in VSCode)
+    {
+      'nvim-treesitter/nvim-treesitter',
+      branch = 'master',
+      cond = not vim.g.vscode,
+      lazy = false,
+      build = ':TSUpdate',
+      config = function()
+        require('nvim-treesitter').setup({
+          install_dir = vim.fn.stdpath('data') .. '/site',
+        })
+        -- Install parsers
+        require('nvim-treesitter').install({
+          'lua', 'vim', 'vimdoc', 'query',
+          'javascript', 'typescript', 'tsx',
+          'rust', 'go', 'python',
+          'json', 'yaml', 'toml', 'markdown',
+          'html', 'css', 'bash', 'nix',
+        })
+      end,
+    },
+
+    -- LSP (skip in VSCode)
+    -- nvim-lspconfig provides server configs in lsp/ directory
+    -- We use Neovim 0.11's native vim.lsp.config() API
+    {
+      'neovim/nvim-lspconfig',
+      cond = not vim.g.vscode,
+      dependencies = {
+        'hrsh7th/cmp-nvim-lsp',
+      },
+      config = function()
+        local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+        -- Configure LSP servers using Neovim 0.11 API
+        vim.lsp.config('lua_ls', {
+          capabilities = capabilities,
+          settings = {
+            Lua = {
+              diagnostics = {
+                globals = { 'vim' },
+              },
+            },
+          },
+        })
+
+        vim.lsp.config('ts_ls', { capabilities = capabilities })
+        vim.lsp.config('rust_analyzer', { capabilities = capabilities })
+        vim.lsp.config('gopls', { capabilities = capabilities })
+        vim.lsp.config('pyright', { capabilities = capabilities })
+
+        -- Enable the servers
+        vim.lsp.enable({ 'lua_ls', 'ts_ls', 'rust_analyzer', 'gopls', 'pyright' })
+      end,
+    },
+
+    -- Completion (skip in VSCode)
+    {
+      'hrsh7th/nvim-cmp',
+      cond = not vim.g.vscode,
+      dependencies = {
+        'hrsh7th/cmp-nvim-lsp',
+        'hrsh7th/cmp-buffer',
+        'hrsh7th/cmp-path',
+      },
+      config = function()
+        local cmp = require('cmp')
+        cmp.setup({
+          mapping = cmp.mapping.preset.insert({
+            ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+            ['<C-f>'] = cmp.mapping.scroll_docs(4),
+            ['<C-Space>'] = cmp.mapping.complete(),
+            ['<C-e>'] = cmp.mapping.abort(),
+            ['<CR>'] = cmp.mapping.confirm({ select = true }),
+            ['<Tab>'] = cmp.mapping.select_next_item(),
+            ['<S-Tab>'] = cmp.mapping.select_prev_item(),
+          }),
+          sources = cmp.config.sources({
+            { name = 'nvim_lsp' },
+          }, {
+            { name = 'buffer' },
+            { name = 'path' },
+          }),
+        })
+      end,
+    },
+
+    -- Autopairs (skip in VSCode)
+    {
+      'windwp/nvim-autopairs',
+      cond = not vim.g.vscode,
+      event = 'InsertEnter',
+      config = function()
+        local autopairs = require('nvim-autopairs')
+        autopairs.setup({})
+
+        -- Integration with nvim-cmp
+        local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+        local cmp = require('cmp')
+        cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
+      end,
+    },
+
+    -- Telescope (skip in VSCode)
+    {
+      'nvim-telescope/telescope.nvim',
+      cond = not vim.g.vscode,
+      tag = 'v0.2.1',
+      dependencies = { 'nvim-lua/plenary.nvim' },
+      config = function()
+        local builtin = require('telescope.builtin')
+        vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Find files' })
+        vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = 'Live grep' })
+        vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = 'Buffers' })
+        vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Help tags' })
+        vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = 'Find files' })
+      end,
+    },
   },
-  install = { colorscheme = { 'habamax' } },
-  -- automatically check for plugin updates
+  install = { colorscheme = { 'rose-pine' } },
   checker = { enabled = true },
 })
 
