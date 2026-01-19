@@ -122,13 +122,46 @@
       signByDefault = true;
     };
 
+    # Global gitignore patterns
+    ignores = [
+      # Personal
+      "MAGURO_LOCAL_NOTE.md"
+
+      # macOS
+      ".DS_Store"
+      ".AppleDouble"
+      ".LSOverride"
+      "._*"
+
+      # Windows
+      "Thumbs.db"
+      "Desktop.ini"
+
+      # Editors
+      "*~"
+      "*.swp"
+      "*.swo"
+      ".idea/"
+      "*.iml"
+
+      # Vim
+      "Session.vim"
+      ".netrwhist"
+
+      # direnv
+      ".direnv/"
+
+      # Environment files (secrets)
+      ".env.local"
+      ".env.*.local"
+    ];
+
     settings = {
       user = {
         name = "Yusuke Tanaka";
         email = "wing0920@gmail.com";
       };
       ghq.root = "~/Repo";
-      core.excludesfile = "~/.gitignore_global";
       filter.lfs = {
         process = "git-lfs filter-process";
         required = true;
