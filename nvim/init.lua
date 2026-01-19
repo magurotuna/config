@@ -155,6 +155,18 @@ require('lazy').setup({
       end,
     },
 
+    -- Statusline (skip in VSCode)
+    {
+      'nvim-lualine/lualine.nvim',
+      cond = not vim.g.vscode,
+      dependencies = { 'nvim-tree/nvim-web-devicons' },
+      opts = {
+        options = {
+          theme = 'rose-pine',
+        },
+      },
+    },
+
     -- Surround (works in VSCode too)
     {
       'echasnovski/mini.surround',
