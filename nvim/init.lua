@@ -54,6 +54,11 @@ vim.opt.numberwidth = 5
 vim.opt.colorcolumn = '80'
 vim.opt.cursorline = true
 
+-- Auto-reload files when changed externally (not needed in VSCode)
+if not vim.g.vscode then
+  require('config.autoreload').setup()
+end
+
 -- Keymaps
 vim.keymap.set('n', 'j', 'gj')
 vim.keymap.set('n', 'k', 'gk')
