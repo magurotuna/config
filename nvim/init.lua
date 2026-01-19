@@ -237,14 +237,40 @@ require('lazy').setup({
           },
         })
 
-        vim.lsp.config('ts_ls', { capabilities = capabilities })
+        -- TypeScript: only start if NOT a Deno project
+        vim.lsp.config('ts_ls', {
+          capabilities = capabilities,
+          root_markers = { 'package.json', 'tsconfig.json', 'jsconfig.json' },
+          root_dir = function(bufnr, on_dir)
+            local fname = vim.api.nvim_buf_get_name(bufnr)
+            local root = vim.fs.root(bufnr, { 'package.json', 'tsconfig.json', 'jsconfig.json' })
+            -- Don't start if deno.json exists
+            local deno_root = vim.fs.root(bufnr, { 'deno.json', 'deno.jsonc' })
+            if deno_root then return end
+            on_dir(root)
+          end,
+        })
+
+        -- Deno: only start if deno.json exists
+        vim.lsp.config('denols', {
+          capabilities = capabilities,
+          root_markers = { 'deno.json', 'deno.jsonc' },
+          settings = {
+            deno = {
+              enable = true,
+              lint = true,
+              unstable = true,
+            },
+          },
+        })
+
         vim.lsp.config('rust_analyzer', { capabilities = capabilities })
         vim.lsp.config('gopls', { capabilities = capabilities })
         vim.lsp.config('pyright', { capabilities = capabilities })
         vim.lsp.config('zls', { capabilities = capabilities })
 
         -- Enable the servers
-        vim.lsp.enable({ 'lua_ls', 'ts_ls', 'rust_analyzer', 'gopls', 'pyright', 'zls' })
+        vim.lsp.enable({ 'lua_ls', 'ts_ls', 'denols', 'rust_analyzer', 'gopls', 'pyright', 'zls' })
       end,
     },
 
