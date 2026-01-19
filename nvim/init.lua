@@ -28,7 +28,7 @@ vim.opt.signcolumn = 'yes'
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
-vim.opt.clipboard = 'unnamedplus,unnamed'
+vim.opt.clipboard = 'unnamedplus'
 vim.opt.termguicolors = true
 vim.opt.autoread = true
 vim.opt.swapfile = false
@@ -184,6 +184,13 @@ require('lazy').setup({
       'nvim-treesitter/nvim-treesitter',
       cond = not vim.g.vscode,
       build = ':TSUpdate',
+    },
+
+    -- LSP progress indicator (skip in VSCode)
+    {
+      'j-hui/fidget.nvim',
+      cond = not vim.g.vscode,
+      opts = {},
     },
 
     -- LSP (skip in VSCode)
