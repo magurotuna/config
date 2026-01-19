@@ -72,6 +72,14 @@
     typst
     ast-grep
 
+    # Language servers
+    lua-language-server
+    nodePackages.typescript-language-server
+    rust-analyzer
+    gopls
+    pyright
+    zls
+
     # Other
     imagemagick
 

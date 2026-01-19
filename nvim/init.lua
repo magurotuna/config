@@ -167,25 +167,11 @@ require('lazy').setup({
     },
 
     -- Treesitter (skip in VSCode)
+    -- Note: Run :TSInstall <lang> manually to install parsers
     {
       'nvim-treesitter/nvim-treesitter',
-      branch = 'master',
       cond = not vim.g.vscode,
-      lazy = false,
       build = ':TSUpdate',
-      config = function()
-        require('nvim-treesitter').setup({
-          install_dir = vim.fn.stdpath('data') .. '/site',
-        })
-        -- Install parsers
-        require('nvim-treesitter').install({
-          'lua', 'vim', 'vimdoc', 'query',
-          'javascript', 'typescript', 'tsx',
-          'rust', 'go', 'python',
-          'json', 'yaml', 'toml', 'markdown',
-          'html', 'css', 'bash', 'nix',
-        })
-      end,
     },
 
     -- LSP (skip in VSCode)
@@ -216,9 +202,10 @@ require('lazy').setup({
         vim.lsp.config('rust_analyzer', { capabilities = capabilities })
         vim.lsp.config('gopls', { capabilities = capabilities })
         vim.lsp.config('pyright', { capabilities = capabilities })
+        vim.lsp.config('zls', { capabilities = capabilities })
 
         -- Enable the servers
-        vim.lsp.enable({ 'lua_ls', 'ts_ls', 'rust_analyzer', 'gopls', 'pyright' })
+        vim.lsp.enable({ 'lua_ls', 'ts_ls', 'rust_analyzer', 'gopls', 'pyright', 'zls' })
       end,
     },
 
