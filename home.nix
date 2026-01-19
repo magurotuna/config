@@ -73,7 +73,7 @@
     typst
     ast-grep
     deno
-    nodejs_22
+    nodejs
     pnpm
     zig
     rustc
