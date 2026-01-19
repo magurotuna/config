@@ -199,6 +199,13 @@ require('lazy').setup({
       opts = {},
     },
 
+    -- Git signs in gutter (skip in VSCode)
+    {
+      'lewis6991/gitsigns.nvim',
+      cond = not vim.g.vscode,
+      opts = {},
+    },
+
     -- LSP progress indicator (skip in VSCode)
     {
       'j-hui/fidget.nvim',
