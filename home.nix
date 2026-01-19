@@ -72,6 +72,17 @@
     protobuf
     typst
     ast-grep
+    deno
+    nodejs_22
+    pnpm
+    zig
+    rustc
+    cargo
+    clippy
+    rustfmt
+    cargo-edit
+    cargo-expand
+    bun
 
     # Language servers
     lua-language-server
@@ -279,43 +290,11 @@
       export PATH="$HOME/go/bin:$PATH"
       export PATH="/snap/bin:$PATH"
 
-      # Rust
-      [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
-
-      # mise (runtime version manager)
-      if command -v mise &> /dev/null; then
-        eval "$(mise activate zsh)"
-      fi
-
-      # Deno
-      export DENO_INSTALL="$HOME/.deno"
-      export PATH="$DENO_INSTALL/bin:$PATH"
-
-      # Volta (Node version manager)
-      export VOLTA_HOME="$HOME/.volta"
-      export PATH="$VOLTA_HOME/bin:$PATH"
-
-      # bun
-      export BUN_INSTALL="$HOME/.bun"
-      export PATH="$BUN_INSTALL/bin:$PATH"
-      [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
-
       # uv (Python) - managed by Nix
       if command -v uv &> /dev/null; then
         eval "$(uv generate-shell-completion zsh)"
       fi
 
-      # Homebrew (if still installed)
-      [ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-
-      # llvm/lld from Homebrew (if present)
-      # NOTE: Do NOT set LD_LIBRARY_PATH globally to Homebrew libs - it conflicts with Nix binaries
-      if [ -n "$HOMEBREW_PREFIX" ]; then
-        export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH"
-        export PATH="$HOMEBREW_PREFIX/opt/openjdk/bin:$PATH"
-        export PATH="$HOMEBREW_PREFIX/opt/openssl@3/bin:$PATH"
-        export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/opt/openssl/lib/pkgconfig:$PKG_CONFIG_PATH"
-      fi
 
       # ─────────────────────────────────────────────────────────────
       # Zinit (plugin manager)
