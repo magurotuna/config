@@ -228,6 +228,24 @@ require('lazy').setup({
       end,
     },
 
+    -- Copilot (skip in VSCode)
+    {
+      'zbirenbaum/copilot.lua',
+      cond = not vim.g.vscode,
+      cmd = 'Copilot',
+      event = 'InsertEnter',
+      opts = {
+        suggestion = { enabled = false },  -- disable inline suggestions, use cmp instead
+        panel = { enabled = false },
+      },
+    },
+    {
+      'zbirenbaum/copilot-cmp',
+      cond = not vim.g.vscode,
+      dependencies = { 'zbirenbaum/copilot.lua' },
+      opts = {},
+    },
+
     -- Completion (skip in VSCode)
     {
       'hrsh7th/nvim-cmp',
@@ -236,6 +254,7 @@ require('lazy').setup({
         'hrsh7th/cmp-nvim-lsp',
         'hrsh7th/cmp-buffer',
         'hrsh7th/cmp-path',
+        'zbirenbaum/copilot-cmp',
       },
       config = function()
         local cmp = require('cmp')
@@ -250,7 +269,8 @@ require('lazy').setup({
             ['<S-Tab>'] = cmp.mapping.select_prev_item(),
           }),
           sources = cmp.config.sources({
-            { name = 'nvim_lsp' },
+            { name = 'copilot', group_index = 1 },
+            { name = 'nvim_lsp', group_index = 1 },
           }, {
             { name = 'buffer' },
             { name = 'path' },
