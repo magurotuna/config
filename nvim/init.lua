@@ -136,10 +136,15 @@ else
   vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, lsp_keymap_opts)
   vim.keymap.set('n', '<leader>a', vim.lsp.buf.code_action, lsp_keymap_opts)
   vim.keymap.set('n', 'gr', vim.lsp.buf.references, lsp_keymap_opts)
-  vim.keymap.set('n', 'gh', vim.lsp.buf.hover, lsp_keymap_opts)
+  vim.keymap.set('n', 'gh', function()
+    vim.lsp.buf.hover({ border = 'rounded' })
+  end, lsp_keymap_opts)
   vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, lsp_keymap_opts)
   vim.keymap.set('n', ']d', vim.diagnostic.goto_next, lsp_keymap_opts)
-  vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, lsp_keymap_opts)
+  vim.keymap.set('n', '<leader>e', function()
+    vim.diagnostic.open_float({ border = 'rounded' })
+  end, lsp_keymap_opts)
+
 end
 
 -- Setup lazy.nvim
