@@ -191,6 +191,14 @@ require('lazy').setup({
       build = ':TSUpdate',
     },
 
+    -- Indent guides (skip in VSCode)
+    {
+      'lukas-reineke/indent-blankline.nvim',
+      cond = not vim.g.vscode,
+      main = 'ibl',
+      opts = {},
+    },
+
     -- LSP progress indicator (skip in VSCode)
     {
       'j-hui/fidget.nvim',
