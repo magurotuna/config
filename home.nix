@@ -488,6 +488,8 @@
       set-option -g pane-active-border-style "fg=#ffaf00,bg=default,bold"
       set-option -g pane-border-status top
       set-option -g pane-border-format " #P: #{pane_current_command} "
+      set-option -g pane-border-lines double
+      set-option -g pane-border-indicators arrows
       set-option -g display-panes-active-colour "#afaf00"
       set-option -g display-panes-colour "#ffaf00"
       set-option -g message-style "fg=#dab997,bg=#3a3a3a"
