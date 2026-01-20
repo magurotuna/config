@@ -92,6 +92,9 @@
     pyright
     zls
 
+    # File watching
+    watchman
+
     # Other
     imagemagick
 
@@ -288,6 +291,9 @@
       # Cargo
       ca = "cargo";
 
+      # Deno (same as `deno x --install-alias`, but in a nix friendly way)
+      dx = "deno x";
+
       # Clipboard (Linux)
       pbcopy = "xsel --clipboard --input";
       pbpaste = "xsel --clipboard --output | tr -d \"\\r\"";
@@ -318,6 +324,11 @@
 
       # GPG
       export GPG_TTY=$(tty)
+
+      # Library path for native npm modules (e.g., @parcel/watcher) - Linux only
+      if [[ "$(uname)" == "Linux" ]]; then
+        export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:''${LD_LIBRARY_PATH:-}"
+      fi
 
       # Additional PATH entries
       export PATH="/usr/local/bin:$HOME/bin:$PATH"
