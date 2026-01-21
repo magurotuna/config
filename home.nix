@@ -18,6 +18,61 @@
   xdg.configFile."nvim/lua".source = ./nvim/lua;
 
   # ──────────────────────────────────────────────────────────────
+  # Claude Code
+  # ──────────────────────────────────────────────────────────────
+  home.file.".claude/settings.json".text = ''
+    {
+      "statusLine": {
+        "type": "command",
+        "command": "${homeDirectory}/.claude/statusline-command.sh"
+      },
+      "enabledPlugins": {
+        "rust-analyzer-lsp@claude-plugins-official": true,
+        "code-simplifier@claude-plugins-official": true,
+        "gopls-lsp@claude-plugins-official": true,
+        "typescript-lsp@claude-plugins-official": true
+      },
+      "alwaysThinkingEnabled": true
+    }
+  '';
+
+  home.file.".claude/statusline-command.sh" = {
+    executable = true;
+    text = ''
+      #!/bin/bash
+
+      # Read JSON input
+      input=$(cat)
+
+      # Extract current directory from JSON
+      cwd=$(echo "$input" | jq -r '.workspace.current_dir')
+
+      # Get username
+      user=$(whoami)
+
+      # Get hostname (short form)
+      host=$(hostname -s)
+
+      # Get current directory (use basename for short form, or full path)
+      current_dir="$cwd"
+
+      # Get git branch if in a git repository
+      git_branch=""
+      if git -C "$cwd" rev-parse --git-dir > /dev/null 2>&1; then
+          # Skip optional locks to avoid blocking
+          branch=$(git -C "$cwd" --no-optional-locks symbolic-ref --short HEAD 2>/dev/null || git -C "$cwd" --no-optional-locks rev-parse --short HEAD 2>/dev/null)
+          if [ -n "$branch" ]; then
+              git_branch=" ($branch)"
+          fi
+      fi
+
+      # Format the output with colors (using printf for ANSI codes)
+      # Note: Colors will be dimmed by Claude Code
+      printf "\033[01;32m%s@%s\033[00m:\033[01;34m%s\033[00m%s" "$user" "$host" "$current_dir" "$git_branch"
+    '';
+  };
+
+  # ──────────────────────────────────────────────────────────────
   # Packages to install
   # ──────────────────────────────────────────────────────────────
   home.packages = with pkgs; [
