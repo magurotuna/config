@@ -69,6 +69,18 @@ vim.keymap.set('n', '<leader><leader>', '<C-^>', { noremap = true, desc = 'Alter
 vim.keymap.set('n', '<leader>w', ':w<CR>', { desc = 'Save file' })
 vim.keymap.set('n', 'n', 'nzz', { noremap = true, silent = true })
 vim.keymap.set('n', 'N', 'Nzz', { noremap = true, silent = true })
+-- Quickfix navigation
+vim.keymap.set('n', ']q', ':cnext<CR>zz', { desc = 'Next quickfix' })
+vim.keymap.set('n', '[q', ':cprev<CR>zz', { desc = 'Prev quickfix' })
+vim.keymap.set('n', ']Q', ':clast<CR>zz', { desc = 'Last quickfix' })
+vim.keymap.set('n', '[Q', ':cfirst<CR>zz', { desc = 'First quickfix' })
+vim.keymap.set('n', '<leader>q', function()
+  local qf_exists = false
+  for _, win in pairs(vim.fn.getwininfo()) do
+    if win.quickfix == 1 then qf_exists = true break end
+  end
+  if qf_exists then vim.cmd('cclose') else vim.cmd('copen') end
+end, { desc = 'Toggle quickfix' })
 vim.keymap.set('n', '*', '*zz', { noremap = true, silent = true })
 vim.keymap.set('n', '#', '#zz', { noremap = true, silent = true })
 vim.keymap.set('n', 'g*', 'g*zz', { noremap = true, silent = true })
