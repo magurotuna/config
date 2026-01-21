@@ -360,6 +360,7 @@ require('lazy').setup({
       tag = 'v0.2.1',
       dependencies = { 'nvim-lua/plenary.nvim' },
       config = function()
+        local actions = require('telescope.actions')
         require('telescope').setup({
           defaults = {
             layout_strategy = 'flex',  -- auto-switch between horizontal/vertical
@@ -369,6 +370,15 @@ require('lazy').setup({
               },
               vertical = {
                 preview_height = 0.4,
+              },
+            },
+          },
+          pickers = {
+            buffers = {
+              mappings = {
+                n = {
+                  ['dd'] = actions.delete_buffer,
+                },
               },
             },
           },
