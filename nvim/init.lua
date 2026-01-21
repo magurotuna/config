@@ -128,13 +128,9 @@ if vim.g.vscode then
     vscode.action('workbench.action.focusPreviousGroup')
   end)
 else
-  -- LSP keymaps (only in regular Neovim, not VSCode)
-  vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = 'Go to definition' })
-  vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, { desc = 'Go to implementation' })
-  vim.keymap.set('n', 'gy', vim.lsp.buf.type_definition, { desc = 'Go to type definition' })
+  -- LSP keymaps (non-Telescope ones, only in regular Neovim)
   vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, { desc = 'Rename symbol' })
   vim.keymap.set('n', '<leader>a', vim.lsp.buf.code_action, { desc = 'Code action' })
-  vim.keymap.set('n', 'gr', vim.lsp.buf.references, { desc = 'Find references' })
   vim.keymap.set('n', 'gh', function()
     vim.lsp.buf.hover({ border = 'rounded' })
   end, { desc = 'Hover documentation' })
@@ -314,7 +310,7 @@ require('lazy').setup({
             ['<C-f>'] = cmp.mapping.scroll_docs(4),
             ['<C-Space>'] = cmp.mapping.complete(),
             ['<C-e>'] = cmp.mapping.abort(),
-            ['<CR>'] = cmp.mapping.confirm({ select = true }),
+            ['<CR>'] = cmp.mapping.confirm({ select = false }),
             ['<Tab>'] = cmp.mapping.select_next_item(),
             ['<S-Tab>'] = cmp.mapping.select_prev_item(),
           }),
@@ -353,11 +349,17 @@ require('lazy').setup({
       dependencies = { 'nvim-lua/plenary.nvim' },
       config = function()
         local builtin = require('telescope.builtin')
+        -- File/search keymaps
         vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Find files' })
         vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = 'Live grep' })
         vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = 'Buffers' })
         vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Help tags' })
         vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = 'Find files' })
+        -- LSP keymaps via Telescope
+        vim.keymap.set('n', 'gd', builtin.lsp_definitions, { desc = 'Go to definition' })
+        vim.keymap.set('n', 'gi', builtin.lsp_implementations, { desc = 'Go to implementation' })
+        vim.keymap.set('n', 'gy', builtin.lsp_type_definitions, { desc = 'Go to type definition' })
+        vim.keymap.set('n', 'gr', builtin.lsp_references, { desc = 'Find references' })
       end,
     },
 
