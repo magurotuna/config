@@ -64,7 +64,7 @@ vim.keymap.set('n', 'j', 'gj')
 vim.keymap.set('n', 'k', 'gk')
 vim.keymap.set('i', 'jj', '<Esc>', { noremap = true, silent = true })
 vim.keymap.set('i', 'jk', '<Esc>', { noremap = true, silent = true })
-vim.keymap.set('n', '<Esc><Esc>', ':nohlsearch<CR><Esc>')
+vim.keymap.set('n', '<Esc>', ':nohlsearch<CR>')
 vim.keymap.set('n', '<leader><leader>', '<C-^>', { noremap = true })
 vim.keymap.set('n', '<leader>w', ':w<CR>')
 vim.keymap.set('n', 'n', 'nzz', { noremap = true, silent = true })
@@ -359,6 +359,22 @@ require('lazy').setup({
         vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = 'Buffers' })
         vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Help tags' })
         vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = 'Find files' })
+      end,
+    },
+
+    -- File explorer (skip in VSCode)
+    {
+      "stevearc/oil.nvim",
+      cond = not vim.g.vscode,
+      dependencies = { "nvim-tree/nvim-web-devicons" },
+      config = function()
+        require("oil").setup({
+          view_options = {
+            show_hidden = true,
+          },
+        })
+        vim.keymap.set("n", "-", "<cmd>Oil<cr>", { desc = "Open parent directory" })
+        vim.keymap.set("n", "<leader>t", "<cmd>Oil<cr>", { desc = "Open file explorer" })
       end,
     },
   },

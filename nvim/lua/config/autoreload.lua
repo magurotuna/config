@@ -24,18 +24,27 @@ local function start_watching(bufnr)
       watchers[bufnr] = nil
     end
 
-    -- Reload if buffer is valid and not modified
-    if vim.api.nvim_buf_is_valid(bufnr) then
-      if not vim.bo[bufnr].modified then
-        vim.api.nvim_buf_call(bufnr, function()
-          vim.cmd('checktime')
-        end)
-      end
-      -- Restart watcher
-      vim.defer_fn(function()
-        start_watching(bufnr)
-      end, 100)
+    -- Check if buffer is still valid
+    if not vim.api.nvim_buf_is_valid(bufnr) then return end
+
+    -- Check if file still exists (handles rename/delete)
+    local current_path = vim.api.nvim_buf_get_name(bufnr)
+    if not vim.uv.fs_stat(current_path) then
+      -- File was deleted or renamed, don't reload or restart watcher
+      return
     end
+
+    -- Reload if buffer is not modified
+    if not vim.bo[bufnr].modified then
+      vim.api.nvim_buf_call(bufnr, function()
+        vim.cmd('checktime')
+      end)
+    end
+
+    -- Restart watcher
+    vim.defer_fn(function()
+      start_watching(bufnr)
+    end, 100)
   end))
 
   watchers[bufnr] = w
