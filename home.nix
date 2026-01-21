@@ -27,7 +27,7 @@
         "command": "${homeDirectory}/.claude/statusline-command.sh"
       },
       "enabledPlugins": {
-        "rust-analyzer-lsp@claude-plugins-official": true,
+        "rust-analyzer-lsp@claude-plugins-official": false,
         "code-simplifier@claude-plugins-official": true,
         "gopls-lsp@claude-plugins-official": true,
         "typescript-lsp@claude-plugins-official": true
