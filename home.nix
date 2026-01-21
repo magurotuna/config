@@ -32,7 +32,8 @@
         "gopls-lsp@claude-plugins-official": true,
         "typescript-lsp@claude-plugins-official": true
       },
-      "alwaysThinkingEnabled": true
+      "alwaysThinkingEnabled": true,
+      "plansDirectory": "./plans"
     }
   '';
 
