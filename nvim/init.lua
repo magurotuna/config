@@ -65,8 +65,8 @@ vim.keymap.set('n', 'k', 'gk')
 vim.keymap.set('i', 'jj', '<Esc>', { noremap = true, silent = true })
 vim.keymap.set('i', 'jk', '<Esc>', { noremap = true, silent = true })
 vim.keymap.set('n', '<Esc>', ':nohlsearch<CR>')
-vim.keymap.set('n', '<leader><leader>', '<C-^>', { noremap = true })
-vim.keymap.set('n', '<leader>w', ':w<CR>')
+vim.keymap.set('n', '<leader><leader>', '<C-^>', { noremap = true, desc = 'Alternate buffer' })
+vim.keymap.set('n', '<leader>w', ':w<CR>', { desc = 'Save file' })
 vim.keymap.set('n', 'n', 'nzz', { noremap = true, silent = true })
 vim.keymap.set('n', 'N', 'Nzz', { noremap = true, silent = true })
 vim.keymap.set('n', '*', '*zz', { noremap = true, silent = true })
@@ -129,21 +129,20 @@ if vim.g.vscode then
   end)
 else
   -- LSP keymaps (only in regular Neovim, not VSCode)
-  local lsp_keymap_opts = { noremap = true, silent = true }
-  vim.keymap.set('n', 'gd', vim.lsp.buf.definition, lsp_keymap_opts)
-  vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, lsp_keymap_opts)
-  vim.keymap.set('n', 'gy', vim.lsp.buf.type_definition, lsp_keymap_opts)
-  vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, lsp_keymap_opts)
-  vim.keymap.set('n', '<leader>a', vim.lsp.buf.code_action, lsp_keymap_opts)
-  vim.keymap.set('n', 'gr', vim.lsp.buf.references, lsp_keymap_opts)
+  vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = 'Go to definition' })
+  vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, { desc = 'Go to implementation' })
+  vim.keymap.set('n', 'gy', vim.lsp.buf.type_definition, { desc = 'Go to type definition' })
+  vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, { desc = 'Rename symbol' })
+  vim.keymap.set('n', '<leader>a', vim.lsp.buf.code_action, { desc = 'Code action' })
+  vim.keymap.set('n', 'gr', vim.lsp.buf.references, { desc = 'Find references' })
   vim.keymap.set('n', 'gh', function()
     vim.lsp.buf.hover({ border = 'rounded' })
-  end, lsp_keymap_opts)
-  vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, lsp_keymap_opts)
-  vim.keymap.set('n', ']d', vim.diagnostic.goto_next, lsp_keymap_opts)
+  end, { desc = 'Hover documentation' })
+  vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Previous diagnostic' })
+  vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Next diagnostic' })
   vim.keymap.set('n', '<leader>e', function()
     vim.diagnostic.open_float({ border = 'rounded' })
-  end, lsp_keymap_opts)
+  end, { desc = 'Show diagnostics' })
 
 end
 
@@ -376,6 +375,14 @@ require('lazy').setup({
         vim.keymap.set("n", "-", "<cmd>Oil<cr>", { desc = "Open parent directory" })
         vim.keymap.set("n", "<leader>t", "<cmd>Oil<cr>", { desc = "Open file explorer" })
       end,
+    },
+
+    -- Show available keybindings (skip in VSCode)
+    {
+      "folke/which-key.nvim",
+      cond = not vim.g.vscode,
+      event = "VeryLazy",
+      opts = {},
     },
   },
   install = { colorscheme = { 'rose-pine' } },
