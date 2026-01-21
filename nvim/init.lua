@@ -348,6 +348,19 @@ require('lazy').setup({
       tag = 'v0.2.1',
       dependencies = { 'nvim-lua/plenary.nvim' },
       config = function()
+        require('telescope').setup({
+          defaults = {
+            layout_strategy = 'flex',  -- auto-switch between horizontal/vertical
+            layout_config = {
+              flex = {
+                flip_columns = 120,  -- use vertical layout when width < 120
+              },
+              vertical = {
+                preview_height = 0.4,
+              },
+            },
+          },
+        })
         local builtin = require('telescope.builtin')
         -- File/search keymaps
         vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Find files' })
