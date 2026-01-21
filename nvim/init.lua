@@ -409,7 +409,9 @@ require('lazy').setup({
       "folke/which-key.nvim",
       cond = not vim.g.vscode,
       event = "VeryLazy",
-      opts = {},
+      opts = {
+        delay = 500,  -- ms before popup shows (default uses timeoutlen)
+      },
     },
   },
   install = { colorscheme = { 'rose-pine' } },
