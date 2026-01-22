@@ -372,6 +372,11 @@ require('lazy').setup({
                 preview_height = 0.4,
               },
             },
+            -- Smart case: case-insensitive unless uppercase is used
+            vimgrep_arguments = {
+              'rg', '--color=never', '--no-heading', '--with-filename',
+              '--line-number', '--column', '--smart-case',
+            },
           },
           pickers = {
             buffers = {
