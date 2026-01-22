@@ -419,6 +419,61 @@ require('lazy').setup({
       end,
     },
 
+    -- Formatter (skip in VSCode)
+    {
+      "stevearc/conform.nvim",
+      cond = not vim.g.vscode,
+      event = { "BufWritePre" },
+      cmd = { "ConformInfo" },
+      config = function()
+        -- Detect JS/TS formatter based on project config (searches upward)
+        local function find_config(names)
+          local found = vim.fs.find(names, {
+            upward = true,
+            path = vim.fn.expand('%:p:h'),
+          })
+          return #found > 0
+        end
+
+        local function js_formatter()
+          if find_config({ "deno.json", "deno.jsonc" }) then
+            return { "deno_fmt" }
+          elseif find_config({ "biome.json", "biome.jsonc" }) then
+            return { "biome" }
+          else
+            return { "prettier" }
+          end
+        end
+
+        require("conform").setup({
+          formatters_by_ft = {
+            lua = { "stylua" },
+            javascript = js_formatter,
+            typescript = js_formatter,
+            javascriptreact = js_formatter,
+            typescriptreact = js_formatter,
+            json = js_formatter,
+            yaml = { "prettier" },
+            markdown = { "prettier" },
+            html = { "prettier" },
+            css = { "prettier" },
+            rust = { "rustfmt" },
+            go = { "gofmt" },
+            python = { "ruff_format" },
+            nix = { "nixfmt" },
+            zig = { "zigfmt" },
+          },
+          format_on_save = {
+            timeout_ms = 500,
+            lsp_fallback = true,
+          },
+        })
+        vim.keymap.set({ "n", "v" }, "<leader>fm", function()
+          require("conform").format({ async = true, lsp_fallback = true })
+        end, { desc = "Format buffer" })
+      end,
+    },
+
     -- Show available keybindings (skip in VSCode)
     {
       "folke/which-key.nvim",
