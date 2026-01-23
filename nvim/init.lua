@@ -474,6 +474,18 @@ require('lazy').setup({
       end,
     },
 
+    -- Highlight word under cursor (skip in VSCode)
+    {
+      "RRethy/vim-illuminate",
+      cond = not vim.g.vscode,
+      config = function()
+        require("illuminate").configure({
+          delay = 200,
+          filetypes_denylist = { "oil", "TelescopePrompt" },
+        })
+      end,
+    },
+
     -- Show available keybindings (skip in VSCode)
     {
       "folke/which-key.nvim",
