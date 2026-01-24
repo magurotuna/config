@@ -80,7 +80,6 @@ in
       terminal-shortcut = [ "<Control>period" ];
       vertical-size = 100;      # 100% of screen height
       horizontal-size = 70;     # 70% of screen width
-      auto-hide-window = true;  # Hide when loses focus
       animation-time = 10;      # Faster animation (ms)
       skip-taskbar = true;      # Don't show in Alt+Tab
     };
