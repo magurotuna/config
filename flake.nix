@@ -26,6 +26,17 @@
           modules = [ ./home.nix ];
         };
 
+        "yusuke@nixos-mini" = home-manager.lib.homeManagerConfiguration {
+          pkgs = mkPkgs "x86_64-linux";
+          extraSpecialArgs = {
+            homeDirectory = "/home/yusuke";
+          };
+          modules = [
+            ./home.nix
+            ./gnome.nix
+          ];
+        };
+
         "yusuke@macbook" = home-manager.lib.homeManagerConfiguration {
           pkgs = mkPkgs "aarch64-darwin";
           extraSpecialArgs = {

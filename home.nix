@@ -193,11 +193,6 @@ in
   programs.git = {
     enable = true;
 
-    signing = {
-      key = "5D866BB12F68CA51";
-      signByDefault = true;
-    };
-
     # Global gitignore patterns
     ignores = [
       # Personal
@@ -231,6 +226,12 @@ in
       ".env.local"
       ".env.*.local"
     ];
+
+    signing = {
+      # Don't specify the signing key so that git will look up a key maching the email
+      # key = "do-not-comment-out";
+      signByDefault = true;
+    };
 
     settings = {
       user = {
@@ -465,6 +466,16 @@ in
       # ─────────────────────────────────────────────────────────────
       [ -f ~/.secrets.zsh ] && source ~/.secrets.zsh
     '';
+  };
+
+  # ──────────────────────────────────────────────────────────────
+  # GPG
+  # ──────────────────────────────────────────────────────────────
+  programs.gpg.enable = true;
+  services.gpg-agent = {
+    enable = true;
+    # Set a default pinentry here. Use pinentry-curses unless another module overrides it.
+    pinentry.package = lib.mkDefault pkgs.pinentry-curses;
   };
 
   # ──────────────────────────────────────────────────────────────
