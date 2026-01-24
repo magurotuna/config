@@ -15,13 +15,17 @@ in
 {
   home.packages = [
     pkgs.gnomeExtensions.xremap         # For xremap app detection on Wayland
+    pkgs.gnomeExtensions.quake-terminal # Dropdown terminal toggle
     pkgs.ulauncher                      # App launcher
   ];
 
   dconf.settings = {
     "org/gnome/shell" = {
       disable-user-extensions = false;
-      enabled-extensions = [ pkgs.gnomeExtensions.xremap.extensionUuid ];
+      enabled-extensions = [
+        pkgs.gnomeExtensions.xremap.extensionUuid
+        pkgs.gnomeExtensions.quake-terminal.extensionUuid
+      ];
     };
 
     "org/gnome/desktop/interface" = { color-scheme = "prefer-dark"; };
@@ -57,6 +61,17 @@ in
       name = "App Launcher (Ulauncher)";
       command = "ulauncher-toggle";
       binding = "<Super>space";
+    };
+
+    # Quake-terminal extension settings
+    "org/gnome/shell/extensions/quake-terminal" = {
+      terminal-id = "com.mitchellh.ghostty.desktop";
+      terminal-shortcut = [ "<Control>period" ];
+      vertical-size = 100;      # 100% of screen height
+      horizontal-size = 70;     # 70% of screen width
+      auto-hide-window = true;  # Hide when loses focus
+      animation-time = 10;      # Faster animation (ms)
+      skip-taskbar = true;      # Don't show in Alt+Tab
     };
   };
 
