@@ -6,7 +6,7 @@ let
   # https://github.com/xremap/xremap/tree/2540f76e0b5d2546afc61d4fe312a18c3bdd2b7a?tab=readme-ov-file#gnome-wayland
   terminalApps = [
     "org.gnome.Console"
-    "wezterm"
+    "com.mitchellh.ghostty"
   ];
 
   # Apps excluded from Emacs/macOS keybindings
