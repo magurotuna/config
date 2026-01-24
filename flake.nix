@@ -33,6 +33,7 @@
           };
           modules = [
             ./home.nix
+            ./linux.nix
             ./gnome.nix
           ];
         };
