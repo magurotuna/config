@@ -2,17 +2,11 @@
 
 let
   # Terminal apps that need special handling (Ctrl+C = SIGINT, etc.)
+  # Tips: See this page for how to obtain application identifiers:
+  # https://github.com/xremap/xremap/tree/2540f76e0b5d2546afc61d4fe312a18c3bdd2b7a?tab=readme-ov-file#gnome-wayland
   terminalApps = [
-    "gnome-terminal"
-    "org.gnome.Console"  # GNOME Console
-    "kitty"
-    "alacritty"
+    "org.gnome.Console"
     "wezterm"
-    "foot"
-    "tilix"
-    "terminator"
-    "konsole"
-    "xterm"
   ];
 
   # Apps excluded from Emacs/macOS keybindings
