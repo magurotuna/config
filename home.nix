@@ -115,6 +115,10 @@ in
     # Shell / terminal
     zellij
 
+    # Clipboard
+    xsel          # X11
+    wl-clipboard  # Wayland
+
     # Network / HTTP
     oha
     websocat
@@ -367,9 +371,6 @@ in
       # Deno (same as `deno x --install-alias`, but in a nix friendly way)
       dx = "deno x";
 
-      # Clipboard (Linux)
-      pbcopy = "xsel --clipboard --input";
-      pbpaste = "xsel --clipboard --output | tr -d \"\\r\"";
 
       # Deno Deploy environments
       local_deployctl = "DENO_TLS_CA_STORE=system DEPLOY_API_ENDPOINT=\"https://deno-local.com\" deployctl";
@@ -397,6 +398,15 @@ in
 
       # GPG
       export GPG_TTY=$(tty)
+
+      # Clipboard (auto-detect X11 vs Wayland)
+      if [[ -n "$WAYLAND_DISPLAY" ]]; then
+        alias pbcopy='wl-copy'
+        alias pbpaste='wl-paste'
+      else
+        alias pbcopy='xsel --clipboard --input'
+        alias pbpaste='xsel --clipboard --output | tr -d "\r"'
+      fi
 
       # Library path for native npm modules (e.g., @parcel/watcher) - Linux only
       if [[ "$(uname)" == "Linux" ]]; then
@@ -554,9 +564,9 @@ in
 
       # vi copy mode
       bind-key -T copy-mode-vi v send -X begin-selection
-      bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
-      bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "pbcopy"
-      bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "pbcopy"
+      bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "sh -c 'if [ -n \"$WAYLAND_DISPLAY\" ]; then wl-copy; else xsel --clipboard --input; fi'"
+      bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "sh -c 'if [ -n \"$WAYLAND_DISPLAY\" ]; then wl-copy; else xsel --clipboard --input; fi'"
+      bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "sh -c 'if [ -n \"$WAYLAND_DISPLAY\" ]; then wl-copy; else xsel --clipboard --input; fi'"
 
       ##################
       #   Appearance   #

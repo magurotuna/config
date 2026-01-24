@@ -9,4 +9,8 @@ lib.mkIf pkgs.stdenv.isLinux {
       "x-scheme-handler/about" = "firefox.desktop";
     };
   };
+
+  home.packages = with pkgs; [
+    wl-clipboard
+  ];
 }
