@@ -82,6 +82,7 @@ in
       horizontal-size = 70;     # 70% of screen width
       animation-time = 10;      # Faster animation (ms)
       skip-taskbar = true;      # Don't show in Alt+Tab
+      hide-on-unfocus = false;  # Don't hide when focus is lost
     };
   };
 
