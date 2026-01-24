@@ -540,6 +540,7 @@ in
       background-opacity = 0.85;
       window-padding-x = 8;
       gtk-tabs-location = "hidden";
+      keybind = "ctrl+enter=unbind";
     };
   };
 
