@@ -7,9 +7,13 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    xremap = {
+      url = "github:xremap/nix-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs = { nixpkgs, home-manager, xremap, ... }:
     let
       mkPkgs = system: import nixpkgs {
         inherit system;
@@ -35,6 +39,7 @@
             ./home.nix
             ./linux.nix
             ./gnome.nix
+            xremap.homeManagerModules.default
           ];
         };
 
