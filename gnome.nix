@@ -13,8 +13,10 @@ let
   excludedApps = terminalApps ++ [ "Emacs" "emacs" ];
 in
 {
-  # xremap GNOME Shell extension for app detection on Wayland
-  home.packages = [ pkgs.gnomeExtensions.xremap ];
+  home.packages = [
+    pkgs.gnomeExtensions.xremap         # For xremap app detection on Wayland
+    pkgs.ulauncher                      # App launcher
+  ];
 
   dconf.settings = {
     "org/gnome/shell" = {
@@ -23,6 +25,9 @@ in
     };
 
     "org/gnome/desktop/interface" = { color-scheme = "prefer-dark"; };
+
+    # Disable Super key opening Activities (so Super+Space works for ulauncher)
+    "org/gnome/mutter" = { overlay-key = ""; };
 
     "org/gnome/desktop/background" = {
       picture-uri = "file://${pkgs.nixos-artwork.wallpapers.binary-black.src}";
@@ -34,6 +39,24 @@ in
       repeat = true;
       delay = lib.hm.gvariant.mkUint32 200;
       repeat-interval = lib.hm.gvariant.mkUint32 20;
+    };
+
+    # Free up Super+Space for ulauncher (keep XF86Keyboard for input switching)
+    "org/gnome/desktop/wm/keybindings" = {
+      switch-input-source = [ "XF86Keyboard" ];
+      switch-input-source-backward = [ "<Shift>XF86Keyboard" ];
+    };
+
+    # Custom keybindings
+    "org/gnome/settings-daemon/plugins/media-keys" = {
+      custom-keybindings = [
+        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+      ];
+    };
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+      name = "App Launcher (Ulauncher)";
+      command = "ulauncher-toggle";
+      binding = "<Super>space";
     };
   };
 
