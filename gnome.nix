@@ -81,52 +81,52 @@ in
           application.not = excludedApps;
           remap = {
             # Copy/Paste/Cut
-            Super_L-c = "C-c";
-            Super_L-v = "C-v";
-            Super_L-x = "C-x";
+            Super-c = "C-c";
+            Super-v = "C-v";
+            Super-x = "C-x";
             # Common editing
-            Super_L-a = "C-a";        # Select all
-            Super_L-z = "C-z";        # Undo
-            Super_L-Shift-z = "C-y";  # Redo
-            Super_L-y = "C-y";        # Redo alternative
-            Super_L-s = "C-s";        # Save
-            Super_L-Shift-s = "C-Shift-s";  # Save as
+            Super-a = "C-a";        # Select all
+            Super-z = "C-z";        # Undo
+            Super-Shift-z = "C-y";  # Redo
+            Super-y = "C-y";        # Redo alternative
+            Super-s = "C-s";        # Save
+            Super-Shift-s = "C-Shift-s";  # Save as
             # Find/Replace
-            Super_L-f = "C-f";        # Find
-            Super_L-g = "C-g";        # Find next
-            Super_L-Shift-g = "C-Shift-g";  # Find previous
-            Super_L-h = "C-h";        # Replace
+            Super-f = "C-f";        # Find
+            Super-g = "C-g";        # Find next
+            Super-Shift-g = "C-Shift-g";  # Find previous
+            Super-h = "C-h";        # Replace
             # Tab/Window management
-            Super_L-t = "C-t";        # New tab
-            Super_L-w = "C-w";        # Close tab
-            Super_L-Shift-t = "C-Shift-t";  # Reopen closed tab
-            Super_L-n = "C-n";        # New window
-            Super_L-Shift-n = "C-Shift-n";  # New incognito/private window
+            Super-t = "C-t";        # New tab
+            Super-w = "C-w";        # Close tab
+            Super-Shift-t = "C-Shift-t";  # Reopen closed tab
+            Super-n = "C-n";        # New window
+            Super-Shift-n = "C-Shift-n";  # New incognito/private window
             # Navigation
-            Super_L-l = "C-l";        # Focus address bar
-            Super_L-r = "C-r";        # Reload
-            Super_L-Shift-r = "C-Shift-r";  # Hard reload
+            Super-l = "C-l";        # Focus address bar
+            Super-r = "C-r";        # Reload
+            Super-Shift-r = "C-Shift-r";  # Hard reload
             # Text navigation (macOS-style)
-            Super_L-Left = "Home";
-            Super_L-Right = "End";
-            Super_L-Up = "C-Home";
-            Super_L-Down = "C-End";
-            Super_L-Backspace = "C-Shift-Backspace";
+            Super-Left = "Home";
+            Super-Right = "End";
+            Super-Up = "C-Home";
+            Super-Down = "C-End";
+            Super-Backspace = "C-Shift-Backspace";
             # Selection with navigation
-            Super_L-Shift-Left = "Shift-Home";
-            Super_L-Shift-Right = "Shift-End";
-            Super_L-Shift-Up = "C-Shift-Home";
-            Super_L-Shift-Down = "C-Shift-End";
+            Super-Shift-Left = "Shift-Home";
+            Super-Shift-Right = "Shift-End";
+            Super-Shift-Up = "C-Shift-Home";
+            Super-Shift-Down = "C-Shift-End";
             # Other
-            Super_L-p = "C-p";        # Print
-            Super_L-o = "C-o";        # Open
-            Super_L-b = "C-b";        # Bold
-            Super_L-i = "C-i";        # Italic
-            Super_L-u = "C-u";        # Underline
+            Super-p = "C-p";        # Print
+            Super-o = "C-o";        # Open
+            Super-b = "C-b";        # Bold
+            Super-i = "C-i";        # Italic
+            Super-u = "C-u";        # Underline
             # Zoom
-            Super_L-equal = "C-equal";
-            Super_L-minus = "C-minus";
-            Super_L-0 = "C-0";
+            Super-equal = "C-equal";
+            Super-minus = "C-minus";
+            Super-0 = "C-0";
           };
         }
 
@@ -135,16 +135,16 @@ in
           name = "Terminal shortcuts";
           application.only = terminalApps;
           remap = {
-            Super_L-c = "C-Shift-c";
-            Super_L-v = "C-Shift-v";
-            Super_L-t = "C-Shift-t";
-            Super_L-n = "C-Shift-n";
-            Super_L-w = "C-Shift-w";
-            Super_L-f = "C-Shift-f";
-            Super_L-k = "C-l";        # Clear terminal
-            Super_L-equal = "C-Shift-equal";
-            Super_L-minus = "C-Shift-minus";
-            Super_L-0 = "C-Shift-0";
+            Super-c = "C-Shift-c";
+            Super-v = "C-Shift-v";
+            Super-t = "C-Shift-t";
+            Super-n = "C-Shift-n";
+            Super-w = "C-Shift-w";
+            Super-f = "C-Shift-f";
+            Super-k = "C-l";        # Clear terminal
+            Super-equal = "C-Shift-equal";
+            Super-minus = "C-Shift-minus";
+            Super-0 = "C-Shift-0";
           };
         }
 
@@ -152,12 +152,12 @@ in
         {
           name = "Word navigation with Alt";
           remap = {
-            Alt_L-Left = "C-Left";
-            Alt_L-Right = "C-Right";
-            Alt_L-Backspace = "C-Backspace";
-            Alt_L-Delete = "C-Delete";
-            Alt_L-Shift-Left = "C-Shift-Left";
-            Alt_L-Shift-Right = "C-Shift-Right";
+            Alt-Left = "C-Left";
+            Alt-Right = "C-Right";
+            Alt-Backspace = "C-Backspace";
+            Alt-Delete = "C-Delete";
+            Alt-Shift-Left = "C-Shift-Left";
+            Alt-Shift-Right = "C-Shift-Right";
           };
         }
       ];
