@@ -19,6 +19,17 @@ in
     pkgs.ulauncher                      # App launcher
   ];
 
+  # Start ulauncher at login (required for ulauncher-toggle to work)
+  xdg.configFile."autostart/ulauncher.desktop".text = ''
+    [Desktop Entry]
+    Name=Ulauncher
+    Comment=Application launcher
+    Exec=ulauncher --hide-window
+    Icon=ulauncher
+    Type=Application
+    Categories=Utility;
+  '';
+
   dconf.settings = {
     "org/gnome/shell" = {
       disable-user-extensions = false;
