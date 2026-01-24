@@ -24,6 +24,12 @@ in
 
     "org/gnome/desktop/interface" = { color-scheme = "prefer-dark"; };
 
+    "org/gnome/desktop/background" = {
+      picture-uri = "file://${pkgs.nixos-artwork.wallpapers.binary-black.src}";
+      picture-uri-dark = "file://${pkgs.nixos-artwork.wallpapers.binary-black.src}";
+      picture-options = "zoom";
+    };
+
     "org/gnome/desktop/peripherals/keyboard" = {
       repeat = true;
       delay = lib.hm.gvariant.mkUint32 200;
