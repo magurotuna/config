@@ -6,7 +6,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   if vim.v.shell_error ~= 0 then
     vim.api.nvim_echo({
       { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out, "WarningMsg" },
+      { out,                            "WarningMsg" },
       { "\nPress any key to exit..." },
     }, true, {})
     vim.fn.getchar()
@@ -77,7 +77,10 @@ vim.keymap.set('n', '[Q', ':cfirst<CR>zz', { desc = 'First quickfix' })
 vim.keymap.set('n', '<leader>q', function()
   local qf_exists = false
   for _, win in pairs(vim.fn.getwininfo()) do
-    if win.quickfix == 1 then qf_exists = true break end
+    if win.quickfix == 1 then
+      qf_exists = true
+      break
+    end
   end
   if qf_exists then vim.cmd('cclose') else vim.cmd('copen') end
 end, { desc = 'Toggle quickfix' })
@@ -151,7 +154,6 @@ else
   vim.keymap.set('n', '<leader>e', function()
     vim.diagnostic.open_float({ border = 'rounded' })
   end, { desc = 'Show diagnostics' })
-
 end
 
 -- Setup lazy.nvim
@@ -293,7 +295,7 @@ require('lazy').setup({
       cmd = 'Copilot',
       event = 'InsertEnter',
       opts = {
-        suggestion = { enabled = false },  -- disable inline suggestions, use cmp instead
+        suggestion = { enabled = false }, -- disable inline suggestions, use cmp instead
         panel = { enabled = false },
       },
     },
@@ -327,7 +329,7 @@ require('lazy').setup({
             ['<S-Tab>'] = cmp.mapping.select_prev_item(),
           }),
           sources = cmp.config.sources({
-            { name = 'copilot', group_index = 1 },
+            { name = 'copilot',  group_index = 1 },
             { name = 'nvim_lsp', group_index = 1 },
           }, {
             { name = 'buffer' },
@@ -363,10 +365,10 @@ require('lazy').setup({
         local actions = require('telescope.actions')
         require('telescope').setup({
           defaults = {
-            layout_strategy = 'flex',  -- auto-switch between horizontal/vertical
+            layout_strategy = 'flex', -- auto-switch between horizontal/vertical
             layout_config = {
               flex = {
-                flip_columns = 120,  -- use vertical layout when width < 120
+                flip_columns = 120, -- use vertical layout when width < 120
               },
               vertical = {
                 preview_height = 0.4,
@@ -492,11 +494,10 @@ require('lazy').setup({
       cond = not vim.g.vscode,
       event = "VeryLazy",
       opts = {
-        delay = 500,  -- ms before popup shows (default uses timeoutlen)
+        delay = 500, -- ms before popup shows (default uses timeoutlen)
       },
     },
   },
   install = { colorscheme = { 'rose-pine' } },
   checker = { enabled = true },
 })
-
