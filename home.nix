@@ -238,6 +238,7 @@ in
     };
 
     settings = {
+      init.defaultBranch = "main";
       user = {
         name = "Yusuke Tanaka";
         email = "wing0920@gmail.com";
