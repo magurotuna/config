@@ -17,19 +17,7 @@ in
     pkgs.gnomeExtensions.xremap         # For xremap app detection on Wayland
     pkgs.gnomeExtensions.quake-terminal # Dropdown terminal toggle
     pkgs.gnomeExtensions.kimpanel       # Input method panel integration
-    pkgs.ulauncher                      # App launcher
   ];
-
-  # Start ulauncher at login (required for ulauncher-toggle to work)
-  xdg.configFile."autostart/ulauncher.desktop".text = ''
-    [Desktop Entry]
-    Name=Ulauncher
-    Comment=Application launcher
-    Exec=ulauncher --hide-window
-    Icon=ulauncher
-    Type=Application
-    Categories=Utility;
-  '';
 
   dconf.settings = {
     "org/gnome/shell" = {
@@ -43,8 +31,9 @@ in
 
     "org/gnome/desktop/interface" = { color-scheme = "prefer-dark"; };
 
-    # Disable Super key opening Activities (so Super+Space works for ulauncher)
+    # Use Super+Space for Activities instead of just Super
     "org/gnome/mutter" = { overlay-key = ""; };
+    "org/gnome/shell/keybindings" = { toggle-overview = [ "<Super>space" ]; };
 
     "org/gnome/desktop/background" = {
       picture-uri = "file://${pkgs.nixos-artwork.wallpapers.binary-black.src}";
@@ -58,22 +47,10 @@ in
       repeat-interval = lib.hm.gvariant.mkUint32 20;
     };
 
-    # Free up Super+Space for ulauncher (keep XF86Keyboard for input switching)
+    # Keep XF86Keyboard for input switching (Super+Space is used by Activities)
     "org/gnome/desktop/wm/keybindings" = {
       switch-input-source = [ "XF86Keyboard" ];
       switch-input-source-backward = [ "<Shift>XF86Keyboard" ];
-    };
-
-    # Custom keybindings
-    "org/gnome/settings-daemon/plugins/media-keys" = {
-      custom-keybindings = [
-        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
-      ];
-    };
-    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
-      name = "App Launcher (Ulauncher)";
-      command = "ulauncher-toggle";
-      binding = "<Super>space";
     };
 
     # Quake-terminal extension settings
