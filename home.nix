@@ -123,6 +123,10 @@ in
     # Browser
     google-chrome
 
+    # Communication
+    discord
+    slack
+
     # Kubernetes
     k9s
     stern
