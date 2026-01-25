@@ -56,7 +56,7 @@ in
       switch-applications-backward = [ "<Super><Shift>Tab" ];
     };
 
-    # ── Flameshot screenshot shortcuts (macOS-like) ──
+    # ── Gradia screenshot shortcuts (macOS-like) ──
     "org/gnome/settings-daemon/plugins/media-keys" = {
       custom-keybindings = [
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
@@ -65,13 +65,13 @@ in
     };
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
       binding = "<Super><Shift>4";
-      command = "flameshot gui";
-      name = "Flameshot Selection";
+      command = "gradia --screenshot=INTERACTIVE";
+      name = "Gradia Selection";
     };
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
       binding = "<Super><Shift>3";
-      command = "flameshot full";
-      name = "Flameshot Full Screen";
+      command = "gradia --screenshot=FULL";
+      name = "Gradia Full Screen";
     };
 
     # Quake-terminal extension settings

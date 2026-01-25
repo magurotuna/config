@@ -193,7 +193,7 @@ in
     claude-code
 
     # Screenshot
-    flameshot
+    gradia
   ] ++ [
     gwq  # custom package (not in nixpkgs)
   ];
