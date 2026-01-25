@@ -1,7 +1,7 @@
 # config
 
-Nix flake-based dotfiles managed with
-[home-manager](https://github.com/nix-community/home-manager).
+Nix flake-based dotfiles and system configuration managed with
+[home-manager](https://github.com/nix-community/home-manager) and NixOS.
 
 ## Structure
 
@@ -10,16 +10,25 @@ Nix flake-based dotfiles managed with
 ├── flake.nix       # Flake definition with multi-machine support
 ├── flake.lock      # Pinned dependency versions
 ├── home.nix        # Main home-manager configuration
-└── nvim/
-    └── init.lua    # Neovim config (uses lazy.nvim for plugins)
+├── linux.nix       # Linux-specific settings (XDG mime, wl-clipboard)
+├── gnome.nix       # GNOME desktop config (xremap, extensions, dconf)
+├── nvim/
+│   └── init.lua    # Neovim config (uses lazy.nvim for plugins)
+└── nixos/
+    ├── common.nix  # Shared NixOS config for all machines
+    └── hosts/
+        └── nixos-mini/
+            ├── default.nix               # Machine-specific config
+            └── hardware-configuration.nix
 ```
 
 ## Machines
 
-| Name             | System         | Description       |
-| ---------------- | -------------- | ----------------- |
-| `yusuke@wsl`     | x86_64-linux   | WSL2 on Windows   |
-| `yusuke@macbook` | aarch64-darwin | Apple Silicon Mac |
+| Name               | System         | Description                |
+| ------------------ | -------------- | -------------------------- |
+| `yusuke@wsl`       | x86_64-linux   | WSL2 on Windows            |
+| `yusuke@nixos-mini`| x86_64-linux   | NixOS with GNOME (desktop) |
+| `yusuke@macbook`   | aarch64-darwin | Apple Silicon Mac          |
 
 ## Prerequisites
 
@@ -47,9 +56,17 @@ nix run home-manager -- switch --flake ~/Repo/github.com/magurotuna/config#yusuk
 
 ## Usage
 
-### Apply changes
+### Apply changes (NixOS system)
 
-After editing `home.nix` or other config files:
+After editing files in `nixos/`:
+
+```bash
+sudo nixos-rebuild switch --flake .#nixos-mini
+```
+
+### Apply changes (home-manager)
+
+After editing `home.nix` or other user config files:
 
 ```bash
 home-manager switch --flake .#yusuke@wsl
@@ -83,7 +100,8 @@ See `home.packages` in `home.nix`. Includes:
 
 - **Core CLI**: ripgrep, fd, eza, bat, fzf, jq, tree, dust, tokei, neofetch
 - **Git tools**: gh, ghq, git-lfs, delta, gnupg
-- **Shell/terminal**: zellij
+- **Shell/terminal**: ghostty
+- **Clipboard**: xsel (X11), wl-clipboard (Wayland)
 - **Network**: oha, websocat
 - **Kubernetes**: k9s, stern, kubectl, helm, minikube, talosctl
 - **Cloud**: awscli2, terraform, google-cloud-sql-proxy, minio, minio-client
@@ -101,7 +119,9 @@ See `home.packages` in `home.nix`. Includes:
 | `programs.git`      | Git config, GPG signing, credential helpers for GitHub |
 | `programs.zsh`      | Shell with aliases, env vars, history settings         |
 | `programs.starship` | Prompt with k8s context display                        |
-| `programs.tmux`     | Terminal multiplexer with vim keybindings              |
+| `programs.tmux`     | Terminal multiplexer with vim keybindings, OSC 52      |
+| `programs.ghostty`  | GPU-accelerated terminal with OSC 52 clipboard         |
+| `programs.gpg`      | GPG agent with pinentry (curses or gnome3)             |
 | `programs.direnv`   | Per-directory environments with nix-direnv             |
 | `programs.atuin`    | Shell history sync                                     |
 
@@ -110,6 +130,33 @@ See `home.packages` in `home.nix`. Includes:
 | File                      | Source            |
 | ------------------------- | ----------------- |
 | `~/.config/nvim/init.lua` | `./nvim/init.lua` |
+
+### GNOME desktop (nixos-mini only)
+
+The `gnome.nix` module configures the GNOME desktop environment:
+
+- **xremap**: macOS-like keybindings (Super for app shortcuts, Ctrl for Emacs
+  movement, Alt for word navigation), CapsLock remapped to Ctrl
+- **GNOME extensions**:
+  - quake-terminal: Dropdown terminal toggle (`Ctrl+.`)
+  - kimpanel: Input method panel integration
+  - xremap: Enables app detection for per-app keybindings
+- **dconf settings**: Dark theme, wallpaper, keyboard repeat rate, Activities
+  toggle (`Super+Space`)
+
+### NixOS system (nixos-mini only)
+
+The `nixos/` directory contains system-level NixOS configuration:
+
+- **common.nix**: Shared config (bootloader, locale, GNOME, PipeWire, fonts, user account)
+- **hosts/nixos-mini/**: Machine-specific config and hardware configuration
+
+#### Adding a new NixOS machine
+
+1. Create `nixos/hosts/<hostname>/`
+2. Copy `hardware-configuration.nix` from `/etc/nixos/` on the new machine
+3. Create `default.nix` importing `../../common.nix` with machine-specific settings
+4. Add entry to `nixosConfigurations` in `flake.nix`
 
 ## Secrets
 

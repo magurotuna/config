@@ -112,12 +112,16 @@ in
     delta
     gnupg
 
-    # Shell / terminal
-    zellij
+    # Clipboard
+    xsel          # X11
+    wl-clipboard  # Wayland
 
     # Network / HTTP
     oha
     websocat
+
+    # Browser
+    google-chrome
 
     # Kubernetes
     k9s
@@ -193,11 +197,6 @@ in
   programs.git = {
     enable = true;
 
-    signing = {
-      key = "5D866BB12F68CA51";
-      signByDefault = true;
-    };
-
     # Global gitignore patterns
     ignores = [
       # Personal
@@ -231,6 +230,12 @@ in
       ".env.local"
       ".env.*.local"
     ];
+
+    signing = {
+      # Don't specify the signing key so that git will look up a key maching the email
+      # key = "do-not-comment-out";
+      signByDefault = true;
+    };
 
     settings = {
       user = {
@@ -366,9 +371,6 @@ in
       # Deno (same as `deno x --install-alias`, but in a nix friendly way)
       dx = "deno x";
 
-      # Clipboard (Linux)
-      pbcopy = "xsel --clipboard --input";
-      pbpaste = "xsel --clipboard --output | tr -d \"\\r\"";
 
       # Deno Deploy environments
       local_deployctl = "DENO_TLS_CA_STORE=system DEPLOY_API_ENDPOINT=\"https://deno-local.com\" deployctl";
@@ -396,6 +398,18 @@ in
 
       # GPG
       export GPG_TTY=$(tty)
+
+      # Clipboard (auto-detect X11 vs Wayland)
+      if [[ -n "$WAYLAND_DISPLAY" ]]; then
+        pbcopy() { printf '\e]52;c;'; base64 -w0; printf '\a'; }
+        # Avoid wl-copy because it causes a terminal window opened by quake-terminal (GNOME extension) to disappear
+        alias pbpaste='xsel --clipboard --output | tr -d "\r"'
+        alias pbcopy-wl='wl-copy'
+        alias pbpaste-wl='wl-paste'
+      else
+        alias pbcopy='xsel --clipboard --input'
+        alias pbpaste='xsel --clipboard --output | tr -d "\r"'
+      fi
 
       # Library path for native npm modules (e.g., @parcel/watcher) - Linux only
       if [[ "$(uname)" == "Linux" ]]; then
@@ -468,6 +482,16 @@ in
   };
 
   # ──────────────────────────────────────────────────────────────
+  # GPG
+  # ──────────────────────────────────────────────────────────────
+  programs.gpg.enable = true;
+  services.gpg-agent = {
+    enable = true;
+    # Set a default pinentry here. Use pinentry-curses unless another module overrides it.
+    pinentry.package = lib.mkDefault pkgs.pinentry-curses;
+  };
+
+  # ──────────────────────────────────────────────────────────────
   # Starship prompt
   # ──────────────────────────────────────────────────────────────
   programs.starship = {
@@ -502,6 +526,33 @@ in
   programs.atuin = {
     enable = true;
     enableZshIntegration = true;
+    settings = {
+      enter_accept = false;
+      invert = true;
+    };
+  };
+
+  # ──────────────────────────────────────────────────────────────
+  # Ghostty
+  # ──────────────────────────────────────────────────────────────
+  programs.ghostty = {
+    enable = true;
+    settings = {
+      font-family = [
+        "JetBrainsMono Nerd Font"
+        "Adwaita Mono"
+      ];
+      font-size = 11;
+      theme = "Hardcore";
+      background-opacity = 0.85;
+      window-padding-x = 8;
+      gtk-tabs-location = "hidden";
+      keybind = "ctrl+enter=unbind";
+      # Allow interacting with clipboard through OSC 52
+      clipboard-read = "allow";
+      clipboard-write = "allow";
+      app-notifications = "no-clipboard-copy";
+    };
   };
 
   # ──────────────────────────────────────────────────────────────
@@ -520,6 +571,8 @@ in
     extraConfig = ''
       # enable true color
       set -ga terminal-overrides ",xterm-256color:Tc"
+      # OSC52 clipboard for screen-256color (tmux default TERM)
+      set -ga terminal-overrides ",screen-256color:Ms=\E]52;c;%p1%s\007"
 
       # pane base index
       set-option -g pane-base-index 1
@@ -541,11 +594,14 @@ in
       # reload config
       bind r source-file ~/.config/tmux/tmux.conf \; display "Reloaded!"
 
+      # OSC52 clipboard
+      set-option -s set-clipboard on
+
       # vi copy mode
       bind-key -T copy-mode-vi v send -X begin-selection
-      bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
-      bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "pbcopy"
-      bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "pbcopy"
+      bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+      bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-selection-and-cancel
+      bind-key -T copy-mode-vi Enter send-keys -X copy-selection-and-cancel
 
       ##################
       #   Appearance   #
