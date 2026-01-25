@@ -548,7 +548,7 @@ in
         "Adwaita Mono"
       ];
       font-size = 11;
-      theme = "Hardcore";
+      theme = "Dracula";
       background-opacity = 0.85;
       window-padding-x = 8;
       gtk-tabs-location = "hidden";
