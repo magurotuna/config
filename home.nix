@@ -544,6 +544,7 @@ in
       # Allow interacting with clipboard through OSC 52
       clipboard-read = "allow";
       clipboard-write = "allow";
+      app-notifications = "no-clipboard-copy";
     };
   };
 
@@ -563,6 +564,8 @@ in
     extraConfig = ''
       # enable true color
       set -ga terminal-overrides ",xterm-256color:Tc"
+      # OSC52 clipboard for screen-256color (tmux default TERM)
+      set -ga terminal-overrides ",screen-256color:Ms=\E]52;c;%p1%s\007"
 
       # pane base index
       set-option -g pane-base-index 1
@@ -584,14 +587,14 @@ in
       # reload config
       bind r source-file ~/.config/tmux/tmux.conf \; display "Reloaded!"
 
-      # Pass through OSC 52
+      # OSC52 clipboard
       set-option -s set-clipboard on
 
       # vi copy mode
       bind-key -T copy-mode-vi v send -X begin-selection
-      bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "sh -c 'if [ -n \"$WAYLAND_DISPLAY\" ]; then wl-copy; else xsel --clipboard --input; fi'"
-      bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "sh -c 'if [ -n \"$WAYLAND_DISPLAY\" ]; then wl-copy; else xsel --clipboard --input; fi'"
-      bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "sh -c 'if [ -n \"$WAYLAND_DISPLAY\" ]; then wl-copy; else xsel --clipboard --input; fi'"
+      bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+      bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-selection-and-cancel
+      bind-key -T copy-mode-vi Enter send-keys -X copy-selection-and-cancel
 
       ##################
       #   Appearance   #

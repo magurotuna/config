@@ -28,6 +28,23 @@ vim.opt.signcolumn = 'yes'
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
+-- Use OSC52 for clipboard
+do
+  local ok, osc52 = pcall(require, 'vim.ui.clipboard.osc52')
+  if ok then
+    vim.g.clipboard = {
+      name = 'osc52',
+      copy = {
+        ['+'] = osc52.copy('+'),
+        ['*'] = osc52.copy('*'),
+      },
+      paste = {
+        ['+'] = osc52.paste('+'),
+        ['*'] = osc52.paste('*'),
+      },
+    }
+  end
+end
 vim.opt.clipboard = 'unnamedplus'
 vim.opt.termguicolors = true
 vim.opt.autoread = true
