@@ -10,16 +10,19 @@ Nix flake-based dotfiles managed with
 ├── flake.nix       # Flake definition with multi-machine support
 ├── flake.lock      # Pinned dependency versions
 ├── home.nix        # Main home-manager configuration
+├── linux.nix       # Linux-specific settings (XDG mime, wl-clipboard)
+├── gnome.nix       # GNOME desktop config (xremap, extensions, dconf)
 └── nvim/
     └── init.lua    # Neovim config (uses lazy.nvim for plugins)
 ```
 
 ## Machines
 
-| Name             | System         | Description       |
-| ---------------- | -------------- | ----------------- |
-| `yusuke@wsl`     | x86_64-linux   | WSL2 on Windows   |
-| `yusuke@macbook` | aarch64-darwin | Apple Silicon Mac |
+| Name               | System         | Description                |
+| ------------------ | -------------- | -------------------------- |
+| `yusuke@wsl`       | x86_64-linux   | WSL2 on Windows            |
+| `yusuke@nixos-mini`| x86_64-linux   | NixOS with GNOME (desktop) |
+| `yusuke@macbook`   | aarch64-darwin | Apple Silicon Mac          |
 
 ## Prerequisites
 
@@ -83,7 +86,8 @@ See `home.packages` in `home.nix`. Includes:
 
 - **Core CLI**: ripgrep, fd, eza, bat, fzf, jq, tree, dust, tokei, neofetch
 - **Git tools**: gh, ghq, git-lfs, delta, gnupg
-- **Shell/terminal**: zellij
+- **Shell/terminal**: zellij, ghostty
+- **Clipboard**: xsel (X11), wl-clipboard (Wayland)
 - **Network**: oha, websocat
 - **Kubernetes**: k9s, stern, kubectl, helm, minikube, talosctl
 - **Cloud**: awscli2, terraform, google-cloud-sql-proxy, minio, minio-client
@@ -101,7 +105,9 @@ See `home.packages` in `home.nix`. Includes:
 | `programs.git`      | Git config, GPG signing, credential helpers for GitHub |
 | `programs.zsh`      | Shell with aliases, env vars, history settings         |
 | `programs.starship` | Prompt with k8s context display                        |
-| `programs.tmux`     | Terminal multiplexer with vim keybindings              |
+| `programs.tmux`     | Terminal multiplexer with vim keybindings, OSC 52      |
+| `programs.ghostty`  | GPU-accelerated terminal with OSC 52 clipboard         |
+| `programs.gpg`      | GPG agent with pinentry (curses or gnome3)             |
 | `programs.direnv`   | Per-directory environments with nix-direnv             |
 | `programs.atuin`    | Shell history sync                                     |
 
@@ -110,6 +116,19 @@ See `home.packages` in `home.nix`. Includes:
 | File                      | Source            |
 | ------------------------- | ----------------- |
 | `~/.config/nvim/init.lua` | `./nvim/init.lua` |
+
+### GNOME desktop (nixos-mini only)
+
+The `gnome.nix` module configures the GNOME desktop environment:
+
+- **xremap**: macOS-like keybindings (Super for app shortcuts, Ctrl for Emacs
+  movement, Alt for word navigation), CapsLock remapped to Ctrl
+- **GNOME extensions**:
+  - quake-terminal: Dropdown terminal toggle (`Ctrl+.`)
+  - kimpanel: Input method panel integration
+  - xremap: Enables app detection for per-app keybindings
+- **ulauncher**: App launcher (`Super+Space`)
+- **dconf settings**: Dark theme, wallpaper, keyboard repeat rate
 
 ## Secrets
 
