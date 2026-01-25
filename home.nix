@@ -401,8 +401,11 @@ in
 
       # Clipboard (auto-detect X11 vs Wayland)
       if [[ -n "$WAYLAND_DISPLAY" ]]; then
-        alias pbcopy='wl-copy'
-        alias pbpaste='wl-paste'
+        pbcopy() { printf '\e]52;c;'; base64 -w0; printf '\a'; }
+        # Avoid wl-copy because it causes a terminal window opened by quake-terminal (GNOME extension) to disappear
+        alias pbpaste='xsel --clipboard --output | tr -d "\r"'
+        alias pbcopy-wl='wl-copy'
+        alias pbpaste-wl='wl-paste'
       else
         alias pbcopy='xsel --clipboard --input'
         alias pbpaste='xsel --clipboard --output | tr -d "\r"'
