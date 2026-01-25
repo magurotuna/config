@@ -16,6 +16,7 @@ in
   home.packages = [
     pkgs.gnomeExtensions.xremap         # For xremap app detection on Wayland
     pkgs.gnomeExtensions.quake-terminal # Dropdown terminal toggle
+    pkgs.gnomeExtensions.kimpanel       # Input method panel integration
     pkgs.ulauncher                      # App launcher
   ];
 
@@ -36,6 +37,7 @@ in
       enabled-extensions = [
         pkgs.gnomeExtensions.xremap.extensionUuid
         pkgs.gnomeExtensions.quake-terminal.extensionUuid
+        pkgs.gnomeExtensions.kimpanel.extensionUuid
       ];
     };
 
