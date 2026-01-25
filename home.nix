@@ -191,6 +191,9 @@ in
     codex
     gemini-cli
     claude-code
+
+    # Screenshot
+    flameshot
   ] ++ [
     gwq  # custom package (not in nixpkgs)
   ];

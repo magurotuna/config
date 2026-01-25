@@ -68,6 +68,24 @@ in
       switch-input-source-backward = [ "<Shift>XF86Keyboard" ];
     };
 
+    # ── Flameshot screenshot shortcuts (macOS-like) ──
+    "org/gnome/settings-daemon/plugins/media-keys" = {
+      custom-keybindings = [
+        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
+      ];
+    };
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+      binding = "<Super><Shift>4";
+      command = "flameshot gui";
+      name = "Flameshot Selection";
+    };
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
+      binding = "<Super><Shift>3";
+      command = "flameshot full";
+      name = "Flameshot Full Screen";
+    };
+
     # Quake-terminal extension settings
     "org/gnome/shell/extensions/quake-terminal" = {
       terminal-id = "com.mitchellh.ghostty.desktop";
