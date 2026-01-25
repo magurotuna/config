@@ -51,6 +51,9 @@ in
     "org/gnome/desktop/wm/keybindings" = {
       switch-input-source = [ "XF86Keyboard" ];
       switch-input-source-backward = [ "<Shift>XF86Keyboard" ];
+      # macOS-like app switching with Super+Tab
+      switch-applications = [ "<Super>Tab" ];
+      switch-applications-backward = [ "<Super><Shift>Tab" ];
     };
 
     # ── Flameshot screenshot shortcuts (macOS-like) ──
