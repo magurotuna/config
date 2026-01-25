@@ -86,7 +86,7 @@ See `home.packages` in `home.nix`. Includes:
 
 - **Core CLI**: ripgrep, fd, eza, bat, fzf, jq, tree, dust, tokei, neofetch
 - **Git tools**: gh, ghq, git-lfs, delta, gnupg
-- **Shell/terminal**: zellij, ghostty
+- **Shell/terminal**: ghostty
 - **Clipboard**: xsel (X11), wl-clipboard (Wayland)
 - **Network**: oha, websocat
 - **Kubernetes**: k9s, stern, kubectl, helm, minikube, talosctl

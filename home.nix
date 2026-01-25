@@ -112,9 +112,6 @@ in
     delta
     gnupg
 
-    # Shell / terminal
-    zellij
-
     # Clipboard
     xsel          # X11
     wl-clipboard  # Wayland
