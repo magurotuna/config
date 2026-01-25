@@ -541,6 +541,9 @@ in
       window-padding-x = 8;
       gtk-tabs-location = "hidden";
       keybind = "ctrl+enter=unbind";
+      # Allow interacting with clipboard through OSC 52
+      clipboard-read = "allow";
+      clipboard-write = "allow";
     };
   };
 
@@ -580,6 +583,9 @@ in
 
       # reload config
       bind r source-file ~/.config/tmux/tmux.conf \; display "Reloaded!"
+
+      # Pass through OSC 52
+      set-option -s set-clipboard on
 
       # vi copy mode
       bind-key -T copy-mode-vi v send -X begin-selection
