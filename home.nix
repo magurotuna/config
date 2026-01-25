@@ -120,6 +120,9 @@ in
     oha
     websocat
 
+    # Browser
+    google-chrome
+
     # Kubernetes
     k9s
     stern
