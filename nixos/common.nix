@@ -66,6 +66,12 @@
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
 
+  # Portal for screen capture, file picker, etc. (needed for Flameshot on Wayland)
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
+  };
+
   # Touchpad support
   services.libinput.enable = true;
 
