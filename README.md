@@ -1,7 +1,7 @@
 # config
 
-Nix flake-based dotfiles managed with
-[home-manager](https://github.com/nix-community/home-manager).
+Nix flake-based dotfiles and system configuration managed with
+[home-manager](https://github.com/nix-community/home-manager) and NixOS.
 
 ## Structure
 
@@ -12,8 +12,14 @@ Nix flake-based dotfiles managed with
 ├── home.nix        # Main home-manager configuration
 ├── linux.nix       # Linux-specific settings (XDG mime, wl-clipboard)
 ├── gnome.nix       # GNOME desktop config (xremap, extensions, dconf)
-└── nvim/
-    └── init.lua    # Neovim config (uses lazy.nvim for plugins)
+├── nvim/
+│   └── init.lua    # Neovim config (uses lazy.nvim for plugins)
+└── nixos/
+    ├── common.nix  # Shared NixOS config for all machines
+    └── hosts/
+        └── nixos-mini/
+            ├── default.nix               # Machine-specific config
+            └── hardware-configuration.nix
 ```
 
 ## Machines
@@ -50,9 +56,17 @@ nix run home-manager -- switch --flake ~/Repo/github.com/magurotuna/config#yusuk
 
 ## Usage
 
-### Apply changes
+### Apply changes (NixOS system)
 
-After editing `home.nix` or other config files:
+After editing files in `nixos/`:
+
+```bash
+sudo nixos-rebuild switch --flake .#nixos-mini
+```
+
+### Apply changes (home-manager)
+
+After editing `home.nix` or other user config files:
 
 ```bash
 home-manager switch --flake .#yusuke@wsl
@@ -127,8 +141,22 @@ The `gnome.nix` module configures the GNOME desktop environment:
   - quake-terminal: Dropdown terminal toggle (`Ctrl+.`)
   - kimpanel: Input method panel integration
   - xremap: Enables app detection for per-app keybindings
-- **ulauncher**: App launcher (`Super+Space`)
-- **dconf settings**: Dark theme, wallpaper, keyboard repeat rate
+- **dconf settings**: Dark theme, wallpaper, keyboard repeat rate, Activities
+  toggle (`Super+Space`)
+
+### NixOS system (nixos-mini only)
+
+The `nixos/` directory contains system-level NixOS configuration:
+
+- **common.nix**: Shared config (bootloader, locale, GNOME, PipeWire, fonts, user account)
+- **hosts/nixos-mini/**: Machine-specific config and hardware configuration
+
+#### Adding a new NixOS machine
+
+1. Create `nixos/hosts/<hostname>/`
+2. Copy `hardware-configuration.nix` from `/etc/nixos/` on the new machine
+3. Create `default.nix` importing `../../common.nix` with machine-specific settings
+4. Add entry to `nixosConfigurations` in `flake.nix`
 
 ## Secrets
 

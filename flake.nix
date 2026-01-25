@@ -21,6 +21,15 @@
       };
     in
     {
+      # NixOS system configurations
+      nixosConfigurations = {
+        nixos-mini = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [ ./nixos/hosts/nixos-mini ];
+        };
+      };
+
+      # Standalone home-manager configurations (separate from NixOS)
       homeConfigurations = {
         "yusuke@wsl" = home-manager.lib.homeManagerConfiguration {
           pkgs = mkPkgs "x86_64-linux";
