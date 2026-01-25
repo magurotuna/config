@@ -13,6 +13,21 @@ let
   excludedApps = terminalApps ++ [ "Emacs" "emacs" ];
 in
 {
+  gtk = {
+    enable = true;
+    theme = {
+      name = "catppuccin-mocha-blue-standard";
+      package = pkgs.catppuccin-gtk.override {
+        variant = "mocha";
+        accents = [ "blue" ];
+      };
+    };
+    iconTheme = {
+      name = "Papirus-Dark";
+      package = pkgs.papirus-icon-theme;
+    };
+  };
+
   home.packages = [
     pkgs.gnomeExtensions.xremap         # For xremap app detection on Wayland
     pkgs.gnomeExtensions.quake-terminal # Dropdown terminal toggle
