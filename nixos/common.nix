@@ -91,11 +91,14 @@
     KERNEL=="event*", SUBSYSTEM=="input", GROUP="input", MODE="0660"
   '';
 
+  # Docker
+  virtualisation.docker.enable = true;
+
   # User account
   users.users.yusuke = {
     isNormalUser = true;
     description = "Yusuke Tanaka";
-    extraGroups = [ "networkmanager" "wheel" "input" "uinput" ];
+    extraGroups = [ "networkmanager" "wheel" "input" "uinput" "docker" ];
     shell = pkgs.zsh;
   };
 
