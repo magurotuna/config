@@ -120,6 +120,7 @@
     neovim
     wget
     git
+    lsof
   ];
 
   # Fonts
