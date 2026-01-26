@@ -401,6 +401,9 @@ require('lazy').setup({
             },
           },
           pickers = {
+            find_files = {
+              hidden = true,
+            },
             buffers = {
               mappings = {
                 n = {
