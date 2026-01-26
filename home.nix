@@ -111,6 +111,7 @@ in
     git-lfs
     delta
     gnupg
+    lazygit
 
     # Clipboard
     xsel          # X11
