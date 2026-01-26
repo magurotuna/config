@@ -94,6 +94,9 @@
   # Docker
   virtualisation.docker.enable = true;
 
+  # Tailscale
+  services.tailscale.enable = true;
+
   # User account
   users.users.yusuke = {
     isNormalUser = true;
