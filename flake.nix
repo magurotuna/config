@@ -11,13 +11,18 @@
       url = "github:xremap/nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    claude-code-overlay = {
+      url = "github:ryoppippi/claude-code-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, home-manager, xremap, ... }:
+  outputs = { nixpkgs, home-manager, xremap, claude-code-overlay, ... }:
     let
       mkPkgs = system: import nixpkgs {
         inherit system;
         config.allowUnfree = true;
+        overlays = [ claude-code-overlay.overlays.default ];
       };
     in
     {
