@@ -233,6 +233,10 @@
 
     settings = {
       init.defaultBranch = "main";
+      wt = {
+        copyignored = true;
+        copyuntracked = true;
+      };
       user = {
         name = "Yusuke Tanaka";
         email = "wing0920@gmail.com";
