@@ -1,19 +1,5 @@
 { pkgs, lib, homeDirectory, ... }:
 
-let
-  gwq = pkgs.buildGoModule rec {
-    pname = "gwq";
-    version = "0.0.11";
-    src = pkgs.fetchFromGitHub {
-      owner = "d-kuro";
-      repo = "gwq";
-      rev = "v${version}";
-      hash = "sha256-T9G/sbI7P2I2yXNdX95SIr7Mzx87Z5oaqZmb6Y3Fooc=";
-    };
-    vendorHash = "sha256-c1vq9yETUYfY2BoXSEmRZj/Ceetu0NkIoVCM3wYy5iY=";
-    doCheck = false;  # tests require real home directory
-  };
-in
 {
   # Home Manager needs these to know where to install things
   home.username = "yusuke";
@@ -194,8 +180,9 @@ in
 
     # Screenshot
     gradia
-  ] ++ [
-    gwq  # custom package (not in nixpkgs)
+
+    # Git worktree
+    git-wt
   ];
 
   # ──────────────────────────────────────────────────────────────
