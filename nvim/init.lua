@@ -385,12 +385,18 @@ require('lazy').setup({
         local actions = require('telescope.actions')
         require('telescope').setup({
           defaults = {
+            sorting_strategy = 'ascending', -- input at top, results below
             layout_strategy = 'flex', -- auto-switch between horizontal/vertical
             layout_config = {
+              prompt_position = 'top',
               flex = {
                 flip_columns = 120, -- use vertical layout when width < 120
               },
+              horizontal = {
+                prompt_position = 'top',
+              },
               vertical = {
+                prompt_position = 'top',
                 preview_height = 0.4,
               },
             },
