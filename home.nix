@@ -1,5 +1,23 @@
 { pkgs, lib, homeDirectory, ... }:
 
+let
+  tree-sitter-cli = pkgs.rustPlatform.buildRustPackage rec {
+    pname = "tree-sitter";
+    version = "0.26.3";
+    src = pkgs.fetchFromGitHub {
+      owner = "tree-sitter";
+      repo = "tree-sitter";
+      rev = "v${version}";
+      hash = "sha256-G1C5IhRIVcWUwEI45ELxCKfbZnsJoqan7foSzPP3mMg=";
+    };
+    cargoHash = "sha256-kHYLaiCHyKG+DL+T2s8yumNHFfndrB5aWs7ept0X4CM=";
+    nativeBuildInputs = [ pkgs.libclang pkgs.pkg-config pkgs.clang ];
+    buildInputs = [ pkgs.openssl ];
+    LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
+    BINDGEN_EXTRA_CLANG_ARGS = "-isystem ${pkgs.stdenv.cc.libc.dev}/include";
+    doCheck = false;  # tests require grammar fixtures
+  };
+in
 {
   # Home Manager needs these to know where to install things
   home.username = "yusuke";
@@ -89,7 +107,6 @@
     tokei
     neovim
     neofetch
-    tree-sitter
 
     # Git tools
     ghq
@@ -183,6 +200,8 @@
 
     # Git worktree
     git-wt
+  ] ++ [
+    tree-sitter-cli  # custom build (0.26.x for nvim-treesitter)
   ];
 
   # ──────────────────────────────────────────────────────────────
