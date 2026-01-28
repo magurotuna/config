@@ -29,8 +29,10 @@
       # NixOS system configurations
       nixosConfigurations = {
         nixos-mini = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [ ./nixos/hosts/nixos-mini ];
+          modules = [
+            { nixpkgs.hostPlatform = "x86_64-linux"; }
+            ./nixos/hosts/nixos-mini
+          ];
         };
       };
 
