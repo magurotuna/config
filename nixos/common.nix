@@ -94,6 +94,10 @@
   # Docker
   virtualisation.docker.enable = true;
 
+  # KVM/QEMU virtualization
+  virtualisation.libvirtd.enable = true;
+  programs.virt-manager.enable = true;
+
   # Tailscale
   services.tailscale.enable = true;
 
@@ -107,7 +111,7 @@
   users.users.yusuke = {
     isNormalUser = true;
     description = "Yusuke Tanaka";
-    extraGroups = [ "networkmanager" "wheel" "input" "uinput" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "input" "uinput" "docker" "libvirtd" ];
     shell = pkgs.zsh;
   };
 
