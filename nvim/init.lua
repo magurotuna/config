@@ -28,6 +28,8 @@ vim.opt.signcolumn = 'yes'
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
+vim.opt.scrolloff = 10  -- keep 10 lines above/below cursor
+
 -- Use OSC52 for clipboard
 do
   local ok, osc52 = pcall(require, 'vim.ui.clipboard.osc52')
@@ -218,11 +220,36 @@ require('lazy').setup({
     },
 
     -- Treesitter (skip in VSCode)
-    -- Note: Run :TSInstall <lang> manually to install parsers
     {
       'nvim-treesitter/nvim-treesitter',
       cond = not vim.g.vscode,
       build = ':TSUpdate',
+      config = function()
+        -- Enable treesitter highlighting for all filetypes with a parser
+        vim.api.nvim_create_autocmd('FileType', {
+          callback = function()
+            if pcall(vim.treesitter.start) then
+              -- Successfully started treesitter
+            end
+          end,
+        })
+      end,
+    },
+
+    -- Sticky context (shows function/class name at top)
+    {
+      'nvim-treesitter/nvim-treesitter-context',
+      cond = not vim.g.vscode,
+      config = function()
+        require('treesitter-context').setup({
+          enable = true,
+          max_lines = 3,
+          mode = 'topline',  -- context based on top visible line, not cursor
+          separator = '─',
+        })
+        -- Style the separator
+        vim.api.nvim_set_hl(0, 'TreesitterContextSeparator', { fg = '#666666' })
+      end,
     },
 
     -- Indent guides (skip in VSCode)
