@@ -252,6 +252,13 @@ require('lazy').setup({
       end,
     },
 
+    -- Breadcrumb navigation in winbar (skip in VSCode)
+    {
+      'Bekaboo/dropbar.nvim',
+      cond = not vim.g.vscode,
+      opts = {},
+    },
+
     -- Indent guides (skip in VSCode)
     {
       'lukas-reineke/indent-blankline.nvim',
