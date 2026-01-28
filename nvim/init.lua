@@ -259,6 +259,26 @@ require('lazy').setup({
       opts = {},
     },
 
+    -- Scrollbar (skip in VSCode)
+    {
+      'petertriho/nvim-scrollbar',
+      cond = not vim.g.vscode,
+      opts = {
+        handle = {
+          color = '#5c6370',
+        },
+        marks = {
+          Cursor = { text = '─', color = '#61afef' },
+          Search = { text = { '▬', '▬' }, color = '#e5c07b' },
+          Error = { text = { '▬', '▬' }, color = '#e06c75' },
+          Warn = { text = { '▬', '▬' }, color = '#e5c07b' },
+          Info = { text = { '▬', '▬' }, color = '#61afef' },
+          Hint = { text = { '▬', '▬' }, color = '#98c379' },
+          Misc = { text = { '▬', '▬' }, color = '#c678dd' },
+        },
+      },
+    },
+
     -- Indent guides (skip in VSCode)
     {
       'lukas-reineke/indent-blankline.nvim',
