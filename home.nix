@@ -465,21 +465,17 @@ in
       autoload -Uz _zinit
       (( ''${+_comps} )) && _comps[zinit]=_zinit
 
-      # Zinit annexes
-      zinit light-mode for \
-        zdharma-continuum/z-a-rust \
-        zdharma-continuum/z-a-as-monitor \
-        zdharma-continuum/z-a-patch-dl \
-        zdharma-continuum/z-a-bin-gem-node
-
       # Completions
       zinit ice blockf atpull'zinit creinstall -q .'
       zinit light zsh-users/zsh-completions
       autoload compinit
       compinit
 
+      # fzf-tab (must be loaded after compinit, before autosuggestions/syntax-highlighting)
+      zinit light Aloxaf/fzf-tab
+
       # Syntax highlighting and autosuggestions
-      zinit light zdharma/fast-syntax-highlighting
+      zinit light zdharma-continuum/fast-syntax-highlighting
       zinit light zsh-users/zsh-autosuggestions
 
       # fzf integration
