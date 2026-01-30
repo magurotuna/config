@@ -570,7 +570,7 @@ in
       window-padding-x = 8;
       gtk-tabs-location = "hidden";
       keybind = [
-        "ctrl+enter=unbind"
+        "ctrl+enter=text:\\n"
         "shift+enter=text:\\n"
       ];
       # Allow interacting with clipboard through OSC 52
