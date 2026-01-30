@@ -352,6 +352,31 @@ require('lazy').setup({
           },
         })
 
+        -- Handle deno: virtual document URIs (e.g. deno:/asset/lib.dom.d.ts)
+        vim.api.nvim_create_autocmd('BufReadCmd', {
+          pattern = 'deno:/*',
+          callback = function(ev)
+            local clients = vim.lsp.get_clients({ name = 'denols' })
+            if #clients == 0 then return end
+            local result = clients[1]:request_sync('deno/virtualTextDocument', {
+              textDocument = { uri = ev.match },
+            }, 5000)
+            if result and result.result then
+              local lines = vim.split(result.result, '\n')
+              vim.api.nvim_buf_set_lines(ev.buf, 0, -1, false, lines)
+              vim.bo[ev.buf].readonly = true
+              vim.bo[ev.buf].modified = false
+              vim.bo[ev.buf].modifiable = false
+              vim.bo[ev.buf].buftype = 'nofile'
+              if ev.match:match('%.ts$') then
+                vim.bo[ev.buf].filetype = 'typescript'
+              elseif ev.match:match('%.js$') then
+                vim.bo[ev.buf].filetype = 'javascript'
+              end
+            end
+          end,
+        })
+
         vim.lsp.config('rust_analyzer', { capabilities = capabilities })
         vim.lsp.config('gopls', { capabilities = capabilities })
         vim.lsp.config('pyright', { capabilities = capabilities })
