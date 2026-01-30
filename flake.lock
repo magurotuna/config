@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769583948,
-        "narHash": "sha256-xLTmCBT/EMpCBNRcWJC6q0llVLioPDqKbuUWf8mAOTM=",
+        "lastModified": 1769724178,
+        "narHash": "sha256-A5sXISWz+tPKHquSQGZlsiX5cz3sPI3627apFHwz/o8=",
         "owner": "ryoppippi",
         "repo": "claude-code-overlay",
-        "rev": "5bb66a188a635258ba66123f1ca2a706f2f15322",
+        "rev": "e7a489f9bebfbe704c87253baa7b2204f814588d",
         "type": "github"
       },
       "original": {
@@ -60,11 +60,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769579508,
-        "narHash": "sha256-EE2bs7xFrC64qrj0N2zP6E6e/nmhcdw6v/grdYi+BiY=",
+        "lastModified": 1769723138,
+        "narHash": "sha256-kgkwjs33YfJasADIrHjHcTIDs3wNX0xzJhnUP+oldEw=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "eec72f127831326b042d1f35003767a4ab6a9516",
+        "rev": "175532b6275b34598a0ceb1aef4b9b4006dd4073",
         "type": "github"
       },
       "original": {
@@ -122,11 +122,11 @@
         "xremap": "xremap_2"
       },
       "locked": {
-        "lastModified": 1767318478,
-        "narHash": "sha256-h3oE50RedA8DRGrFU+Hv2kirt4rmzdaC9oSD+MSg9Ms=",
+        "lastModified": 1769636170,
+        "narHash": "sha256-X000Dgg053Dv9NIzm1b9QYSAHYtW2jHMVALQezui7L0=",
         "owner": "xremap",
         "repo": "nix-flake",
-        "rev": "9a2224aa01a3c86e94b398c33329c8ff6496dc5d",
+        "rev": "00bc6dd4275d4b003a17ef7f5f271ba87f73d698",
         "type": "github"
       },
       "original": {
@@ -138,16 +138,16 @@
     "xremap_2": {
       "flake": false,
       "locked": {
-        "lastModified": 1766606475,
-        "narHash": "sha256-FPZ4iQA/vVZGzbO8i8lTK8i9A3zs9BLqMvTMeAVv9rQ=",
+        "lastModified": 1769021727,
+        "narHash": "sha256-2wylBk3+Zu1pHa41dhKwvUtxOVyHSMRDfOD9fIp8x2I=",
         "owner": "k0kubun",
         "repo": "xremap",
-        "rev": "cdc744d873c19899ef21f329c4305b4b5e53d459",
+        "rev": "890e0a6ca92e90f3bcbd1e235abcf2192e233a46",
         "type": "github"
       },
       "original": {
         "owner": "k0kubun",
-        "ref": "v0.14.8",
+        "ref": "v0.14.10",
         "repo": "xremap",
         "type": "github"
       }
