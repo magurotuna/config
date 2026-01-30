@@ -101,6 +101,9 @@
   # Tailscale
   services.tailscale.enable = true;
 
+  # SSH
+  services.openssh.enable = true;
+
   # Disable suspend/sleep
   systemd.targets.sleep.enable = false;
   systemd.targets.suspend.enable = false;
@@ -113,6 +116,10 @@
     description = "Yusuke Tanaka";
     extraGroups = [ "networkmanager" "wheel" "input" "uinput" "docker" "libvirtd" ];
     shell = pkgs.zsh;
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICvQDA+7nwBLvGR2chGwQy+T4YawJTVe8IJYJvoURLdi yusuke@Yusukes-MacBook-Pro.local"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKI5RlnfeT4E76A2nKNxSDyR47ceT6X5fPvhBwwxhaG8 yusuktan@maguro.dev"
+    ];
   };
 
   # Programs
