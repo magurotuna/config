@@ -569,7 +569,10 @@ in
       background-opacity = 0.85;
       window-padding-x = 8;
       gtk-tabs-location = "hidden";
-      keybind = "ctrl+enter=unbind";
+      keybind = [
+        "ctrl+enter=unbind"
+        "shift+enter=text:\\n"
+      ];
       # Allow interacting with clipboard through OSC 52
       clipboard-read = "allow";
       clipboard-write = "allow";
