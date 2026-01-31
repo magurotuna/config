@@ -195,6 +195,9 @@ in
     gemini-cli
     claude-code
 
+    # Editor
+    zed-editor
+
     # Screenshot
     gradia
 
