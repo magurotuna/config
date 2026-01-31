@@ -41,6 +41,12 @@ in
       picture-options = "zoom";
     };
 
+    # Disable automatic suspend on idle
+    "org/gnome/settings-daemon/plugins/power" = {
+      sleep-inactive-ac-type = "nothing";
+      sleep-inactive-battery-type = "nothing";
+    };
+
     "org/gnome/desktop/peripherals/keyboard" = {
       repeat = true;
       delay = lib.hm.gvariant.mkUint32 200;
