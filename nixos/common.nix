@@ -122,6 +122,9 @@
     ];
   };
 
+  # nix-ld: run unpatched dynamic binaries
+  programs.nix-ld.enable = true;
+
   # Programs
   programs.firefox.enable = true;
   programs.zsh.enable = true;
