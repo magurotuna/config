@@ -120,6 +120,7 @@ in
     wl-clipboard  # Wayland
 
     # Network / HTTP
+    dnsutils
     oha
     websocat
 
