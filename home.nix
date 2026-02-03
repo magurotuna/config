@@ -197,6 +197,7 @@ in
     claude-code
 
     # Editor
+    vscode
     zed-editor
 
     # Screenshot
