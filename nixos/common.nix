@@ -99,7 +99,10 @@
   programs.virt-manager.enable = true;
 
   # Tailscale
-  services.tailscale.enable = true;
+  services.tailscale = {
+    enable = true;
+    extraSetFlags = [ "--ssh" ];
+  };
 
   # SSH
   services.openssh.enable = true;
