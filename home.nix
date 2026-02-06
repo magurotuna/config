@@ -106,7 +106,7 @@ in
     dust
     tokei
     neovim
-    neofetch
+    fastfetch
     htop
 
     # Git tools
