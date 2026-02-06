@@ -107,6 +107,7 @@ in
     tokei
     neovim
     neofetch
+    htop
 
     # Git tools
     ghq
