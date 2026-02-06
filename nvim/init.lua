@@ -460,6 +460,13 @@ require('lazy').setup({
       cond = not vim.g.vscode,
       tag = 'v0.2.1',
       dependencies = { 'nvim-lua/plenary.nvim' },
+      keys = {
+        { '<leader>ff', function() require('telescope.builtin').find_files() end, desc = 'Find files' },
+        { '<leader>fg', function() require('telescope.builtin').live_grep() end, desc = 'Live grep' },
+        { '<leader>fb', function() require('telescope.builtin').buffers() end, desc = 'Buffers' },
+        { '<leader>fh', function() require('telescope.builtin').help_tags() end, desc = 'Help tags' },
+        { '<C-p>', function() require('telescope.builtin').find_files() end, desc = 'Find files' },
+      },
       config = function()
         local actions = require('telescope.actions')
         require('telescope').setup({
@@ -498,14 +505,8 @@ require('lazy').setup({
             },
           },
         })
-        local builtin = require('telescope.builtin')
-        -- File/search keymaps
-        vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Find files' })
-        vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = 'Live grep' })
-        vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = 'Buffers' })
-        vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Help tags' })
-        vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = 'Find files' })
         -- LSP keymaps via Telescope
+        local builtin = require('telescope.builtin')
         vim.keymap.set('n', 'gd', builtin.lsp_definitions, { desc = 'Go to definition' })
         vim.keymap.set('n', 'gi', builtin.lsp_implementations, { desc = 'Go to implementation' })
         vim.keymap.set('n', 'gy', builtin.lsp_type_definitions, { desc = 'Go to type definition' })
