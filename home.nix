@@ -1,4 +1,4 @@
-{ pkgs, lib, homeDirectory, ... }:
+{ pkgs, lib, homeDirectory, codexPkg, ... }:
 
 let
   tree-sitter-cli = pkgs.rustPlatform.buildRustPackage rec {
@@ -194,7 +194,7 @@ in
     codecrafters-cli
 
     # AI
-    codex
+    codexPkg # from codex-cli-nix flake, not nixpkgs
     gemini-cli
     claude-code
 

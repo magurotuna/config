@@ -15,9 +15,13 @@
       url = "github:ryoppippi/claude-code-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    codex-cli-nix = {
+      url = "github:sadjow/codex-cli-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, home-manager, xremap, claude-code-overlay, ... }:
+  outputs = { nixpkgs, home-manager, xremap, claude-code-overlay, codex-cli-nix, ... }:
     let
       mkPkgs = system: import nixpkgs {
         inherit system;
@@ -42,6 +46,7 @@
           pkgs = mkPkgs "x86_64-linux";
           extraSpecialArgs = {
             homeDirectory = "/home/yusuke";
+            codexPkg = codex-cli-nix.packages.x86_64-linux.default;
           };
           modules = [ ./home.nix ];
         };
@@ -50,6 +55,7 @@
           pkgs = mkPkgs "x86_64-linux";
           extraSpecialArgs = {
             homeDirectory = "/home/yusuke";
+            codexPkg = codex-cli-nix.packages.x86_64-linux.default;
           };
           modules = [
             ./home.nix
@@ -63,6 +69,7 @@
           pkgs = mkPkgs "aarch64-darwin";
           extraSpecialArgs = {
             homeDirectory = "/Users/yusuke";
+            codexPkg = codex-cli-nix.packages.aarch64-darwin.default;
           };
           modules = [ ./home.nix ];
         };
