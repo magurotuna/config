@@ -139,7 +139,6 @@ in
     dnsutils
     oha
     websocat
-    wireshark
 
     # Browser
     google-chrome

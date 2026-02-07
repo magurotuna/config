@@ -104,6 +104,12 @@
     extraSetFlags = [ "--ssh" ];
   };
 
+  # Wireshark (allow non-root packet capture)
+  programs.wireshark = {
+    enable = true;
+    package = pkgs.wireshark; # use the GUI version from home.nix
+  };
+
   # SSH
   services.openssh.enable = true;
 
@@ -117,7 +123,7 @@
   users.users.yusuke = {
     isNormalUser = true;
     description = "Yusuke Tanaka";
-    extraGroups = [ "networkmanager" "wheel" "input" "uinput" "docker" "libvirtd" ];
+    extraGroups = [ "networkmanager" "wheel" "input" "uinput" "docker" "libvirtd" "wireshark" ];
     shell = pkgs.zsh;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICvQDA+7nwBLvGR2chGwQy+T4YawJTVe8IJYJvoURLdi yusuke@Yusukes-MacBook-Pro.local"
