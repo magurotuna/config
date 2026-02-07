@@ -51,9 +51,24 @@ in
         "typescript-lsp@claude-plugins-official": true
       },
       "alwaysThinkingEnabled": true,
-      "plansDirectory": "./plans"
+      "plansDirectory": "./plans",
+      "hooks": {
+        "Stop": [
+          {
+            "hooks": [
+              {
+                "type": "command",
+                "command": "pw-play ${homeDirectory}/.local/share/sounds/claude-done.oga 2>/dev/null || afplay /System/Library/Sounds/Glass.aiff 2>/dev/null || true"
+              }
+            ]
+          }
+        ]
+      }
     }
   '';
+  # Sound file for the Claude Code "Stop" hook (Linux only; macOS uses built-in Glass.aiff).
+  home.file.".local/share/sounds/claude-done.oga".source =
+    "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/dialog-information.oga";
 
   home.file.".claude/statusline-command.sh" = {
     executable = true;
