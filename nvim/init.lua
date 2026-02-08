@@ -426,6 +426,8 @@ require('lazy').setup({
             ['<CR>'] = cmp.mapping.confirm({ select = false }),
             ['<Tab>'] = cmp.mapping.select_next_item(),
             ['<S-Tab>'] = cmp.mapping.select_prev_item(),
+            ['<C-n>'] = cmp.mapping.select_next_item(),
+            ['<C-p>'] = cmp.mapping.select_prev_item(),
           }),
           sources = cmp.config.sources({
             { name = 'copilot',  group_index = 1 },
