@@ -68,7 +68,7 @@ in
   '';
   # Sound file for the Claude Code "Stop" hook (Linux only; macOS uses built-in Glass.aiff).
   home.file.".local/share/sounds/claude-done.oga".source =
-    "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/dialog-information.oga";
+    "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/service-login.oga";
 
   home.file.".claude/statusline-command.sh" = {
     executable = true;
