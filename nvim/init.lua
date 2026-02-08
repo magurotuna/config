@@ -68,7 +68,7 @@ vim.opt.relativenumber = true
 vim.opt.mouse = 'a'
 vim.opt.undofile = true
 vim.opt.updatetime = 300
-vim.opt.pumblend = 15
+vim.opt.pumblend = 0
 vim.opt.numberwidth = 5
 vim.opt.colorcolumn = '80'
 vim.opt.cursorline = true
@@ -418,6 +418,18 @@ require('lazy').setup({
       config = function()
         local cmp = require('cmp')
         cmp.setup({
+          window = {
+            completion = {
+              border = 'rounded',
+              winhighlight = 'Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None',
+              side_padding = 1,
+            },
+            documentation = {
+              border = 'rounded',
+              winhighlight = 'Normal:NormalFloat,FloatBorder:FloatBorder',
+              side_padding = 1,
+            },
+          },
           mapping = cmp.mapping.preset.insert({
             ['<C-b>'] = cmp.mapping.scroll_docs(-4),
             ['<C-f>'] = cmp.mapping.scroll_docs(4),
