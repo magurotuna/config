@@ -62,13 +62,25 @@ in
               }
             ]
           }
+        ],
+        "Notification": [
+          {
+            "hooks": [
+              {
+                "type": "command",
+                "command": "pw-play ${homeDirectory}/.local/share/sounds/claude-notification.oga 2>/dev/null || afplay /System/Library/Sounds/Ping.aiff 2>/dev/null || true"
+              }
+            ]
+          }
         ]
       }
     }
   '';
-  # Sound file for the Claude Code "Stop" hook (Linux only; macOS uses built-in Glass.aiff).
+  # Sound files for Claude Code hooks (Linux only; macOS uses built-in sounds).
   home.file.".local/share/sounds/claude-done.oga".source =
     "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/service-login.oga";
+  home.file.".local/share/sounds/claude-notification.oga".source =
+    "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/complete.oga";
 
   home.file.".claude/statusline-command.sh" = {
     executable = true;
