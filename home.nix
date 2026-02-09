@@ -137,6 +137,7 @@ in
 
     # Network / HTTP
     dnsutils
+    nghttp2
     oha
     websocat
 
