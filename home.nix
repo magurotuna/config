@@ -168,6 +168,7 @@ in
     redis
 
     # Languages / Build tools
+    gcc
     protobuf
     typst
     ast-grep
