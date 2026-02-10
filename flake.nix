@@ -19,14 +19,27 @@
       url = "github:sadjow/codex-cli-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    octorus-src = {
+      url = "github:ushironoko/octorus/v0.3.1";
+      flake = false;
+    };
   };
 
-  outputs = { nixpkgs, home-manager, xremap, claude-code-overlay, codex-cli-nix, ... }:
+  outputs = { nixpkgs, home-manager, xremap, claude-code-overlay, codex-cli-nix, octorus-src, ... }:
     let
       mkPkgs = system: import nixpkgs {
         inherit system;
         config.allowUnfree = true;
         overlays = [ claude-code-overlay.overlays.default ];
+      };
+      mkOctorus = pkgs: pkgs.rustPlatform.buildRustPackage {
+        pname = "octorus";
+        version = "0.3.1";
+        src = octorus-src;
+        cargoLock.lockFile = "${octorus-src}/Cargo.lock";
+        nativeBuildInputs = [ pkgs.pkg-config ];
+        buildInputs = [ pkgs.openssl ];
+        doCheck = false;
       };
     in
     {
@@ -47,6 +60,7 @@
           extraSpecialArgs = {
             homeDirectory = "/home/yusuke";
             codexPkg = codex-cli-nix.packages.x86_64-linux.default;
+            octorusPkg = mkOctorus (mkPkgs "x86_64-linux");
           };
           modules = [ ./home.nix ];
         };
@@ -56,6 +70,7 @@
           extraSpecialArgs = {
             homeDirectory = "/home/yusuke";
             codexPkg = codex-cli-nix.packages.x86_64-linux.default;
+            octorusPkg = mkOctorus (mkPkgs "x86_64-linux");
           };
           modules = [
             ./home.nix
@@ -70,6 +85,7 @@
           extraSpecialArgs = {
             homeDirectory = "/Users/yusuke";
             codexPkg = codex-cli-nix.packages.aarch64-darwin.default;
+            octorusPkg = mkOctorus (mkPkgs "aarch64-darwin");
           };
           modules = [ ./home.nix ];
         };

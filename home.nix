@@ -1,4 +1,4 @@
-{ pkgs, lib, homeDirectory, codexPkg, ... }:
+{ pkgs, lib, homeDirectory, codexPkg, octorusPkg, ... }:
 
 let
   tree-sitter-cli = pkgs.rustPlatform.buildRustPackage rec {
@@ -237,6 +237,7 @@ in
     git-wt
   ] ++ [
     tree-sitter-cli  # custom build (0.26.x for nvim-treesitter)
+    octorusPkg       # TUI PR review tool (github:ushironoko/octorus)
   ];
 
   # ──────────────────────────────────────────────────────────────
