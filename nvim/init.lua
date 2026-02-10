@@ -291,7 +291,12 @@ require('lazy').setup({
     {
       'lewis6991/gitsigns.nvim',
       cond = not vim.g.vscode,
-      opts = {},
+      opts = {
+        current_line_blame = true,
+        current_line_blame_opts = {
+          delay = 300,
+        },
+      },
     },
 
     -- LSP progress indicator (skip in VSCode)
