@@ -392,6 +392,21 @@ require('lazy').setup({
       end,
     },
 
+    -- LSP signature help (auto-show on '(' and ',')
+    {
+      'ray-x/lsp_signature.nvim',
+      cond = not vim.g.vscode,
+      event = 'LspAttach',
+      opts = {
+        bind = true,
+        floating_window = true,
+        hint_enable = false, -- disable virtual text hints to avoid clutter
+        handler_opts = {
+          border = 'rounded',
+        },
+      },
+    },
+
     -- Copilot (skip in VSCode)
     {
       'zbirenbaum/copilot.lua',
@@ -438,7 +453,7 @@ require('lazy').setup({
           mapping = cmp.mapping.preset.insert({
             ['<C-b>'] = cmp.mapping.scroll_docs(-4),
             ['<C-f>'] = cmp.mapping.scroll_docs(4),
-            ['<C-Space>'] = cmp.mapping.complete(),
+            ['<C-l>'] = cmp.mapping.complete(),
             ['<C-e>'] = cmp.mapping.abort(),
             ['<CR>'] = cmp.mapping.confirm({ select = false }),
             ['<Tab>'] = cmp.mapping.select_next_item(),
