@@ -202,7 +202,8 @@ in
     rust-analyzer
     gopls
     pyright
-    zls
+    # it's somehow broken now on Feb 11 2026
+    # zls
 
     # File watching
     watchman
