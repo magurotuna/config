@@ -231,8 +231,9 @@ in
     vscode
     zed-editor
 
-    # Screenshot
+    # Screenshot / Recording
     gradia
+    obs-studio
 
     # Git worktree
     git-wt
