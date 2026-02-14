@@ -135,6 +135,7 @@ in
     neovim
     fastfetch
     htop
+    openssl
 
     # Git tools
     ghq
