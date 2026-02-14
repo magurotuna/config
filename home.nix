@@ -172,6 +172,7 @@ in
     # Cloud / Infrastructure
     awscli2
     terraform
+    google-cloud-sdk
     google-cloud-sql-proxy
     minio
     minio-client
