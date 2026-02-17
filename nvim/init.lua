@@ -348,6 +348,30 @@ require('lazy').setup({
         vim.lsp.config('denols', {
           capabilities = capabilities,
           root_markers = { 'deno.json', 'deno.jsonc' },
+          root_dir = function(bufnr, on_dir)
+            -- Work around nvim-lspconfig denols.lua bug: on Neovim 0.11.3+,
+            -- vim.fs.root with a flat table { "deno.json", "deno.jsonc" } treats
+            -- markers as ordered by priority, so "deno.json" at a distant ancestor
+            -- beats a closer "deno.jsonc" (e.g. in a Deno workspace member).
+            -- This causes the root_dir function to incorrectly reject the project.
+            -- Fix: find the outermost deno.json/deno.jsonc within the git repo,
+            -- which is the workspace root for Deno workspace projects.
+            local fname = vim.api.nvim_buf_get_name(bufnr)
+            local found = vim.fs.find(
+              { 'deno.json', 'deno.jsonc' },
+              { upward = true, path = vim.fn.fnamemodify(fname, ':p:h'), limit = math.huge }
+            )
+            if #found == 0 then return end
+            -- Use the outermost match (workspace root), bounded by git repo
+            local git_root = vim.fs.root(bufnr, '.git')
+            for i = #found, 1, -1 do
+              local dir = vim.fn.fnamemodify(found[i], ':h')
+              if not git_root or dir:find(git_root, 1, true) == 1 then
+                on_dir(dir)
+                return
+              end
+            end
+          end,
           settings = {
             deno = {
               enable = true,
