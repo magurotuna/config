@@ -293,6 +293,7 @@ in
     settings = {
       init.defaultBranch = "main";
       wt = {
+        basedir = "../{gitroot}-wt";
         copyignored = true;
         copyuntracked = true;
       };
