@@ -20,7 +20,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     octorus-src = {
-      url = "github:ushironoko/octorus/v0.3.1";
+      url = "github:ushironoko/octorus/v0.4.1";
       flake = false;
     };
   };
@@ -34,7 +34,7 @@
       };
       mkOctorus = pkgs: pkgs.rustPlatform.buildRustPackage {
         pname = "octorus";
-        version = "0.3.1";
+        version = "0.4.1";
         src = octorus-src;
         cargoLock.lockFile = "${octorus-src}/Cargo.lock";
         nativeBuildInputs = [ pkgs.pkg-config ];

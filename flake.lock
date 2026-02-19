@@ -99,11 +99,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1771471179,
-        "narHash": "sha256-XuP8HPzvt4+m9aKVeL9GdGNlTeyeDn3zEeUuorvrw88=",
+        "lastModified": 1771505064,
+        "narHash": "sha256-lh9rF+C/nKFyWAqbHIa6tK9L/6N0UaQg7zw15aP4jBM=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "2dedeb55b2c140d9a123ae931588e8903fe202ef",
+        "rev": "a0a01d8811fd5e99e003078ed64a0e7b531545dd",
         "type": "github"
       },
       "original": {
@@ -146,16 +146,16 @@
     "octorus-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1770617542,
-        "narHash": "sha256-20HVES8XgZEgKIijTzo9rV5IRfhyZlY1noX6yHSUf8g=",
+        "lastModified": 1771488735,
+        "narHash": "sha256-yIwnD5ef9Tb94wmrwnnbzkwOYKrwiphilXsHr/8JgJs=",
         "owner": "ushironoko",
         "repo": "octorus",
-        "rev": "b7ab6b39831c2632375f0e605b6647fe5de2e165",
+        "rev": "58bdf13c58dee2171a1fe32813d310249a962f80",
         "type": "github"
       },
       "original": {
         "owner": "ushironoko",
-        "ref": "v0.3.1",
+        "ref": "v0.4.1",
         "repo": "octorus",
         "type": "github"
       }
