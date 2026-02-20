@@ -313,6 +313,7 @@ in
         clean = "git-lfs clean -- %f";
         smudge = "git-lfs smudge -- %f";
       };
+      url."https://github.com/".insteadOf = "git@github.com:";
       credential = {
         "https://github.com" = {
           helper = [
