@@ -268,6 +268,10 @@ in
 
       # Editors
       "*~"
+      # Some frameworks use a literal "~" directory in route paths.
+      # Keep backup-file ignores, but unignore "~" directories and their contents.
+      "!**/~/"
+      "!**/~/**"
       "*.swp"
       "*.swo"
       ".idea/"
