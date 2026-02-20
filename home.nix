@@ -197,6 +197,7 @@ in
     cargo-edit
     cargo-expand
     bun
+    go
 
     # Language servers
     lua-language-server
