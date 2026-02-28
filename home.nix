@@ -136,6 +136,7 @@ in
     fastfetch
     htop
     openssl
+    unzip
 
     # Git tools
     ghq
