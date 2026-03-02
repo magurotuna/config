@@ -180,6 +180,7 @@ in
 
     # Databases
     duckdb
+    postgresql
     redis
 
     # Languages / Build tools
