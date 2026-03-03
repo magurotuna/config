@@ -29,6 +29,18 @@ in
     };
   };
 
+  # fcitx5 as KDE Wayland virtual keyboard (required for IME on Wayland)
+  programs.plasma.configFile."kwinrc"."Wayland"."InputMethod" = {
+    value = "/run/current-system/sw/share/applications/fcitx5-wayland-launcher.desktop";
+    immutable = true;
+  };
+
+  # Dark theme
+  programs.plasma.workspace = {
+    lookAndFeel = "org.kde.breezedark.desktop";
+    colorScheme = "BreezeDark";
+  };
+
   # Display output configuration (DP-1: Dell 4K @ 60Hz, 110% scale)
   # plasma-manager only handles INI-style .rc files, so JSON configs use xdg.configFile
   xdg.configFile."kwinoutputconfig.json".text = builtins.toJSON [
@@ -73,8 +85,18 @@ in
     ];
     quick-terminal-position = "center";
     quick-terminal-screen = "main";
+    quick-terminal-size = "100%,70%";
     quick-terminal-animation-duration = 0.01;
   };
+
+  # Autostart Ghostty so the quick terminal global keybind works
+  xdg.configFile."autostart/com.mitchellh.ghostty.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Ghostty
+    Exec=ghostty
+    X-KDE-autostart-phase=2
+  '';
 
   # Overrides pinentryPackage specified in home.nix
   services.gpg-agent.pinentry.package = pkgs.pinentry-qt;
