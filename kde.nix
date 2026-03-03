@@ -41,6 +41,10 @@ in
 
     # Launch fuzzel with Meta+Space
     "services/fuzzel.desktop"."_launch" = "Meta+Space";
+
+    # macOS-like screenshot shortcuts (Spectacle)
+    "org.kde.spectacle.desktop"."RectangularRegionScreenShot" = "Meta+Shift+4";
+    "org.kde.spectacle.desktop"."FullScreenScreenShot" = "Meta+Shift+3";
   };
 
   # Desktop file for fuzzel (needed for KDE global shortcut)
