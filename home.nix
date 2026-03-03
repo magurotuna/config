@@ -628,6 +628,7 @@ in
       ];
       font-size = 11;
       theme = "Dracula";
+      cursor-style = "bar";
       background-opacity = 0.85;
       window-padding-x = 8;
       gtk-tabs-location = "hidden";

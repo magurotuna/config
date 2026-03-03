@@ -3,7 +3,7 @@
 let
   # Terminal apps that need special handling (Ctrl+C = SIGINT, etc.)
   terminalApps = [
-    "com.mitchellh.ghostty"
+    "ghostty"
   ];
 
   # Apps excluded from Emacs/macOS keybindings
@@ -14,6 +14,31 @@ in
   # plasma-manager: declarative KDE Plasma configuration
   # ──────────────────────────────────────────────────────────────
   programs.plasma.enable = true;
+
+  # Panel at the top with centered app icons
+  programs.plasma.panels = [
+    {
+      location = "top";
+      height = 44;
+      widgets = [
+        "org.kde.plasma.kickoff"
+        { name = "org.kde.plasma.panelspacer"; }
+        {
+          name = "org.kde.plasma.icontasks";
+          config.General.fill = "true";
+        }
+        { name = "org.kde.plasma.panelspacer"; }
+        "org.kde.plasma.systemtray"
+        "org.kde.plasma.digitalclock"
+      ];
+    }
+  ];
+
+  # Launch KRunner with Super+Space
+  programs.plasma.configFile."kglobalshortcutsrc"."org.kde.krunner.desktop"."_launch" = {
+    value = "Meta+Space,Meta+Space,KRunner";
+    immutable = true;
+  };
 
   # Keyboard repeat rate for KDE Wayland
   # (services.xserver.autoRepeatDelay/Interval only apply to X11)
@@ -86,7 +111,8 @@ in
     quick-terminal-position = "center";
     quick-terminal-screen = "main";
     quick-terminal-size = "70%,100%";
-    quick-terminal-animation-duration = 0.01;
+    quick-terminal-animation-duration = 0;
+    quick-terminal-autohide = true;
   };
 
   # Autostart Ghostty so the quick terminal global keybind works
@@ -99,7 +125,8 @@ in
   '';
 
   # Overrides pinentryPackage specified in home.nix
-  services.gpg-agent.pinentry.package = pkgs.pinentry-qt;
+  # Use curses so the prompt appears inline in the terminal (avoids popup hiding behind quick terminal)
+  services.gpg-agent.pinentry.package = pkgs.pinentry-curses;
 
   # ──────────────────────────────────────────────────────────────
   # xremap: macOS-like keybindings
