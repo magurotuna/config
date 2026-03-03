@@ -626,7 +626,7 @@ in
         "JetBrainsMono Nerd Font"
         "Adwaita Mono"
       ];
-      font-size = 11;
+      font-size = 10;
       theme = "Dracula";
       cursor-style = "block";
       background-opacity = 0.85;
