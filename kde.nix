@@ -144,6 +144,12 @@ in
     };
   };
 
+  # Mouse pointer speed (KDE System Settings > Input Devices > Mouse)
+  programs.plasma.configFile."kcminputrc"."Mouse"."XLbInptPointerAcceleration" = {
+    value = 0.4;
+    immutable = true;
+  };
+
   # Keyboard repeat rate for KDE Wayland
   # (services.xserver.autoRepeatDelay/Interval only apply to X11)
   # immutable = true adds [$i] marker so KDE won't overwrite these on logout
