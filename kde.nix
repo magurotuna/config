@@ -17,9 +17,16 @@ in
 
   # Keyboard repeat rate for KDE Wayland
   # (services.xserver.autoRepeatDelay/Interval only apply to X11)
+  # immutable = true adds [$i] marker so KDE won't overwrite these on logout
   programs.plasma.configFile."kcminputrc"."Keyboard" = {
-    RepeatDelay = 50;
-    RepeatRate = 100; # chars per second (equivalent to 10ms interval)
+    RepeatDelay = {
+      value = 100;
+      immutable = true;
+    };
+    RepeatRate = {
+      value = 100; # chars per second (equivalent to 10ms interval)
+      immutable = true;
+    };
   };
 
   # Display output configuration (DP-1: Dell 4K @ 60Hz, 110% scale)

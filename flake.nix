@@ -82,7 +82,7 @@
             ./linux.nix
             ./kde.nix
             xremap.homeManagerModules.default
-            plasma-manager.homeManagerModules.plasma-manager
+            plasma-manager.homeModules.plasma-manager
           ];
         };
 
