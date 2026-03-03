@@ -352,6 +352,7 @@ in
   # ──────────────────────────────────────────────────────────────
   programs.zsh = {
     enable = true;
+    enableCompletion = false; # We call compinit manually after zinit loads completions
 
     # History settings
     history = {
@@ -517,8 +518,10 @@ in
       # Completions
       zinit ice blockf atpull'zinit creinstall -q .'
       zinit light zsh-users/zsh-completions
-      autoload compinit
-      compinit
+      autoload -Uz compinit
+      # Use -C to skip security audit and reuse cached .zcompdump (much faster).
+      # Run compinit without -C occasionally if completions seem stale.
+      compinit -C
 
       # fzf-tab (must be loaded after compinit, before autosuggestions/syntax-highlighting)
       zinit light Aloxaf/fzf-tab
