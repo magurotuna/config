@@ -34,10 +34,54 @@ in
     }
   ];
 
-  # Launch KRunner with Super+Space
+  # Disable KRunner shortcut (replaced by fuzzel)
   programs.plasma.configFile."kglobalshortcutsrc"."org.kde.krunner.desktop"."_launch" = {
-    value = "Meta+Space,Meta+Space,KRunner";
+    value = "none,Meta+Space,KRunner";
     immutable = true;
+  };
+
+  # Launch fuzzel with Meta+Space
+  programs.plasma.configFile."kglobalshortcutsrc"."fuzzel.desktop"."_launch" = {
+    value = "Meta+Space,Meta+Space,Fuzzel";
+    immutable = true;
+  };
+
+  # Desktop file for fuzzel (needed for KDE global shortcut)
+  xdg.dataFile."applications/fuzzel.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Fuzzel
+    Exec=fuzzel
+    NoDisplay=true
+  '';
+
+  # Fuzzel: fast Wayland-native app launcher
+  programs.fuzzel = {
+    enable = true;
+    settings = {
+      main = {
+        font = "monospace:size=13";
+        width = 35;
+        lines = 10;
+        terminal = "ghostty -e";
+        layer = "overlay";
+        icons-enabled = "yes";
+      };
+      colors = {
+        # Breeze Dark palette
+        background = "31363bee";
+        text = "fcfcfcff";
+        match = "3daee9ff";
+        selection = "2980b9ff";
+        selection-text = "ffffffff";
+        selection-match = "7fdbffff";
+        border = "475057ff";
+      };
+      border = {
+        width = 2;
+        radius = 8;
+      };
+    };
   };
 
   # Keyboard repeat rate for KDE Wayland
