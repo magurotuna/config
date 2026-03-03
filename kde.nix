@@ -85,7 +85,7 @@ in
     ];
     quick-terminal-position = "center";
     quick-terminal-screen = "main";
-    quick-terminal-size = "100%,70%";
+    quick-terminal-size = "70%,100%";
     quick-terminal-animation-duration = 0.01;
   };
 
