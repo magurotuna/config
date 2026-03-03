@@ -644,6 +644,9 @@ in
       clipboard-write = "allow";
       app-notifications = "no-clipboard-copy";
       shell-integration-features = "no-cursor";
+      config-file = [
+        "~/.config/ghostty/overrides"
+      ];
     };
   };
 
