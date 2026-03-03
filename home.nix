@@ -497,10 +497,16 @@ in
       export PATH="$HOME/go/bin:$PATH"
       export PATH="/snap/bin:$PATH"
 
-      # uv (Python) - managed by Nix
-      if command -v uv &> /dev/null; then
-        eval "$(uv generate-shell-completion zsh)"
-      fi
+      # uv (Python) completions - cached for speed
+      () {
+        local cache="''${XDG_DATA_HOME:-$HOME/.local/share}/zsh/uv-completion.zsh"
+        local uv_bin="${pkgs.uv}/bin/uv"
+        if [[ ! -f $cache || $uv_bin -nt $cache ]]; then
+          mkdir -p "''${cache:h}"
+          "$uv_bin" generate-shell-completion zsh > "$cache"
+        fi
+        source "$cache"
+      }
 
 
       # ─────────────────────────────────────────────────────────────
@@ -515,19 +521,21 @@ in
       autoload -Uz _zinit
       (( ''${+_comps} )) && _comps[zinit]=_zinit
 
-      # Completions
-      zinit ice blockf atpull'zinit creinstall -q .'
-      zinit light zsh-users/zsh-completions
+      # Completions (compinit runs synchronously; plugins deferred via turbo mode)
       autoload -Uz compinit
-      # Use -C to skip security audit and reuse cached .zcompdump (much faster).
-      # Run compinit without -C occasionally if completions seem stale.
       compinit -C
 
+      zinit ice wait lucid blockf atpull'zinit creinstall -q .'
+      zinit light zsh-users/zsh-completions
+
       # fzf-tab (must be loaded after compinit, before autosuggestions/syntax-highlighting)
+      zinit ice wait lucid
       zinit light Aloxaf/fzf-tab
 
       # Syntax highlighting and autosuggestions
+      zinit ice wait lucid
       zinit light zdharma-continuum/fast-syntax-highlighting
+      zinit ice wait lucid
       zinit light zsh-users/zsh-autosuggestions
 
       # fzf integration
