@@ -20,7 +20,7 @@ in
   # immutable = true adds [$i] marker so KDE won't overwrite these on logout
   programs.plasma.configFile."kcminputrc"."Keyboard" = {
     RepeatDelay = {
-      value = 100;
+      value = 200;
       immutable = true;
     };
     RepeatRate = {
