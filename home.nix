@@ -640,6 +640,7 @@ in
       clipboard-read = "allow";
       clipboard-write = "allow";
       app-notifications = "no-clipboard-copy";
+      shell-integration-features = "no-cursor";
     };
   };
 
@@ -654,13 +655,13 @@ in
     baseIndex = 1;
     mouse = true;
     keyMode = "vi";
-    terminal = "screen-256color";
+    terminal = "tmux-256color";
 
     extraConfig = ''
       # enable true color
       set -ga terminal-overrides ",xterm-256color:Tc"
-      # OSC52 clipboard for screen-256color (tmux default TERM)
-      set -ga terminal-overrides ",screen-256color:Ms=\E]52;c;%p1%s\007"
+      # OSC52 clipboard for tmux-256color
+      set -ga terminal-overrides ",tmux-256color:Ms=\E]52;c;%p1%s\007"
       # Cursor shape passthrough (Ss=set style, Se=reset to terminal default)
       set -ga terminal-overrides ",*:Ss=\\E[%p1%d q:Se=\\E[ q"
 

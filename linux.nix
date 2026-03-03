@@ -8,6 +8,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       "x-scheme-handler/https" = "firefox.desktop";
       "x-scheme-handler/about" = "firefox.desktop";
       "text/html" = "firefox.desktop";
+      "x-scheme-handler/slack" = "slack.desktop";
     };
   };
 
