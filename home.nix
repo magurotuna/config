@@ -628,7 +628,7 @@ in
       ];
       font-size = 11;
       theme = "Dracula";
-      cursor-style = "bar";
+      cursor-style = "block";
       background-opacity = 0.85;
       window-padding-x = 8;
       gtk-tabs-location = "hidden";
@@ -661,6 +661,8 @@ in
       set -ga terminal-overrides ",xterm-256color:Tc"
       # OSC52 clipboard for screen-256color (tmux default TERM)
       set -ga terminal-overrides ",screen-256color:Ms=\E]52;c;%p1%s\007"
+      # Cursor shape passthrough (Ss=set style, Se=reset to terminal default)
+      set -ga terminal-overrides ",*:Ss=\\E[%p1%d q:Se=\\E[ q"
 
       # pane base index
       set-option -g pane-base-index 1

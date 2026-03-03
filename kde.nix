@@ -108,11 +108,14 @@ in
     keybind = [
       "global:ctrl+period=toggle_quick_terminal"
     ];
-    quick-terminal-position = "center";
+    quick-terminal-position = "top";
     quick-terminal-screen = "main";
-    quick-terminal-size = "70%,100%";
+    quick-terminal-size = "95%,70%";
     quick-terminal-animation-duration = 0;
-    quick-terminal-autohide = true;
+    # I want to enable this option, but this seems buggy... when I hide the quick
+    # terminal window by pressing ctrl+period, no other window can get focus even
+    # if I click on them
+    # quick-terminal-autohide = true;
   };
 
   # Autostart Ghostty so the quick terminal global keybind works
