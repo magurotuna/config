@@ -34,16 +34,13 @@ in
     }
   ];
 
-  # Disable KRunner shortcut (replaced by fuzzel)
-  programs.plasma.configFile."kglobalshortcutsrc"."org.kde.krunner.desktop"."_launch" = {
-    value = "none,Meta+Space,KRunner";
-    immutable = true;
-  };
+  # Global launcher shortcuts (written to [services][*.desktop] in kglobalshortcutsrc)
+  programs.plasma.shortcuts = {
+    # Disable KRunner shortcut (replaced by fuzzel)
+    "services/org.kde.krunner.desktop"."_launch" = "none";
 
-  # Launch fuzzel with Meta+Space
-  programs.plasma.configFile."kglobalshortcutsrc"."fuzzel.desktop"."_launch" = {
-    value = "Meta+Space,Meta+Space,Fuzzel";
-    immutable = true;
+    # Launch fuzzel with Meta+Space
+    "services/fuzzel.desktop"."_launch" = "Meta+Space";
   };
 
   # Desktop file for fuzzel (needed for KDE global shortcut)
@@ -52,6 +49,7 @@ in
     Type=Application
     Name=Fuzzel
     Exec=fuzzel
+    X-KDE-Shortcuts=Meta+Space
     NoDisplay=true
   '';
 
