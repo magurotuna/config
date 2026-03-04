@@ -352,6 +352,7 @@ in
   # ──────────────────────────────────────────────────────────────
   programs.zsh = {
     enable = true;
+    enableCompletion = false; # We call compinit manually after zinit loads completions
 
     # History settings
     history = {
@@ -496,10 +497,16 @@ in
       export PATH="$HOME/go/bin:$PATH"
       export PATH="/snap/bin:$PATH"
 
-      # uv (Python) - managed by Nix
-      if command -v uv &> /dev/null; then
-        eval "$(uv generate-shell-completion zsh)"
-      fi
+      # uv (Python) completions - cached for speed
+      () {
+        local cache="''${XDG_DATA_HOME:-$HOME/.local/share}/zsh/uv-completion.zsh"
+        local uv_bin="${pkgs.uv}/bin/uv"
+        if [[ ! -f $cache || $uv_bin -nt $cache ]]; then
+          mkdir -p "''${cache:h}"
+          "$uv_bin" generate-shell-completion zsh > "$cache"
+        fi
+        source "$cache"
+      }
 
 
       # ─────────────────────────────────────────────────────────────
@@ -514,17 +521,21 @@ in
       autoload -Uz _zinit
       (( ''${+_comps} )) && _comps[zinit]=_zinit
 
-      # Completions
-      zinit ice blockf atpull'zinit creinstall -q .'
+      # Completions (compinit runs synchronously; plugins deferred via turbo mode)
+      autoload -Uz compinit
+      compinit -C
+
+      zinit ice wait lucid blockf atpull'zinit creinstall -q .'
       zinit light zsh-users/zsh-completions
-      autoload compinit
-      compinit
 
       # fzf-tab (must be loaded after compinit, before autosuggestions/syntax-highlighting)
+      zinit ice wait lucid
       zinit light Aloxaf/fzf-tab
 
       # Syntax highlighting and autosuggestions
+      zinit ice wait lucid
       zinit light zdharma-continuum/fast-syntax-highlighting
+      zinit ice wait lucid
       zinit light zsh-users/zsh-autosuggestions
 
       # fzf integration
@@ -626,8 +637,9 @@ in
         "JetBrainsMono Nerd Font"
         "Adwaita Mono"
       ];
-      font-size = 11;
+      font-size = 10;
       theme = "Dracula";
+      cursor-style = "block";
       background-opacity = 0.85;
       window-padding-x = 8;
       gtk-tabs-location = "hidden";
@@ -639,6 +651,10 @@ in
       clipboard-read = "allow";
       clipboard-write = "allow";
       app-notifications = "no-clipboard-copy";
+      shell-integration-features = "no-cursor";
+      config-file = [
+        "~/.config/ghostty/overrides"
+      ];
     };
   };
 
@@ -653,13 +669,15 @@ in
     baseIndex = 1;
     mouse = true;
     keyMode = "vi";
-    terminal = "screen-256color";
+    terminal = "tmux-256color";
 
     extraConfig = ''
       # enable true color
       set -ga terminal-overrides ",xterm-256color:Tc"
-      # OSC52 clipboard for screen-256color (tmux default TERM)
-      set -ga terminal-overrides ",screen-256color:Ms=\E]52;c;%p1%s\007"
+      # OSC52 clipboard for tmux-256color
+      set -ga terminal-overrides ",tmux-256color:Ms=\E]52;c;%p1%s\007"
+      # Cursor shape passthrough (Ss=set style, Se=reset to terminal default)
+      set -ga terminal-overrides ",*:Ss=\\E[%p1%d q:Se=\\E[ q"
 
       # pane base index
       set-option -g pane-base-index 1

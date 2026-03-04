@@ -19,13 +19,18 @@
       url = "github:sadjow/codex-cli-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    plasma-manager = {
+      url = "github:nix-community/plasma-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
     octorus-src = {
       url = "github:ushironoko/octorus/v0.4.1";
       flake = false;
     };
   };
 
-  outputs = { nixpkgs, home-manager, xremap, claude-code-overlay, codex-cli-nix, octorus-src, ... }:
+  outputs = { nixpkgs, home-manager, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, octorus-src, ... }:
     let
       mkPkgs = system: import nixpkgs {
         inherit system;
@@ -75,8 +80,9 @@
           modules = [
             ./home.nix
             ./linux.nix
-            ./gnome.nix
+            ./kde.nix
             xremap.homeManagerModules.default
+            plasma-manager.homeModules.plasma-manager
           ];
         };
 

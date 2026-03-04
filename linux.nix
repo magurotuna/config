@@ -1,6 +1,8 @@
 { pkgs, lib, ... }:
 
 lib.mkIf pkgs.stdenv.isLinux {
+  # KDE overwrites mimeapps.list at runtime, causing conflicts on next home-manager switch.
+  xdg.configFile."mimeapps.list".force = true;
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
@@ -8,6 +10,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       "x-scheme-handler/https" = "firefox.desktop";
       "x-scheme-handler/about" = "firefox.desktop";
       "text/html" = "firefox.desktop";
+      "x-scheme-handler/slack" = "slack.desktop";
     };
   };
 

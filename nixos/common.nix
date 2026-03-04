@@ -62,14 +62,15 @@
     variant = "";
   };
 
-  # GNOME Desktop Environment
-  services.displayManager.gdm.enable = true;
-  services.desktopManager.gnome.enable = true;
+  # KDE Plasma Desktop Environment
+  services.displayManager.sddm.enable = true;
+  services.displayManager.sddm.wayland.enable = true;
+  services.desktopManager.plasma6.enable = true;
 
-  # Portal for screen capture, file picker, etc. (needed for Flameshot on Wayland)
+  # Portal for screen capture, file picker, etc.
   xdg.portal = {
     enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
+    extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde ];
   };
 
   # Touchpad support
