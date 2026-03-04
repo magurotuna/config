@@ -86,6 +86,10 @@
     pulse.enable = true;
   };
 
+  # Bluetooth
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
+
   # Enable uinput for xremap
   hardware.uinput.enable = true;
   services.udev.extraRules = ''
