@@ -19,6 +19,10 @@
       url = "github:sadjow/codex-cli-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    deno-overlay = {
+      url = "github:haruki7049/deno-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     plasma-manager = {
       url = "github:nix-community/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -30,12 +34,30 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, octorus-src, ... }:
+  outputs = { nixpkgs, home-manager, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, octorus-src, ... }:
     let
+      latestVersion = versions:
+        builtins.foldl'
+          (latest: version:
+            if nixpkgs.lib.versionOlder latest version then version else latest
+          )
+          "0.0.0"
+          (builtins.attrNames versions);
+      latestDenoOverlay = final: prev:
+        let
+          # deno-overlay exposes every version under `pkgs.deno.<version>`.
+          denoVersions = (deno-overlay.overlays.deno-overlay final prev).deno;
+        in
+        {
+          denoVersions = denoVersions;
+          deno = denoVersions.${latestVersion denoVersions};
+        };
       mkPkgs = system: import nixpkgs {
         inherit system;
         config.allowUnfree = true;
-        overlays = [ claude-code-overlay.overlays.default ];
+        overlays =
+          [ claude-code-overlay.overlays.default ]
+          ++ nixpkgs.lib.optional (system == "x86_64-linux") latestDenoOverlay;
       };
       mkOctorus = pkgs: pkgs.rustPlatform.buildRustPackage {
         pname = "octorus";
