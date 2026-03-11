@@ -687,3 +687,14 @@ require('lazy').setup({
   install = { colorscheme = { 'rose-pine' } },
   checker = { enabled = true },
 })
+
+-- Auto-update plugins when the checker finds updates
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'LazyCheck',
+  callback = function()
+    local checker = require('lazy.manage.checker')
+    if #checker.updated > 0 then
+      require('lazy').update({ show = false })
+    end
+  end,
+})
