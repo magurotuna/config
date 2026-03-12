@@ -421,6 +421,9 @@ in
       mv = "mv -i";
       rm = "rm -i";
 
+      # Claude
+      claude = "claude --enable-auto-mode";
+
       # Docker
       dc = "docker-compose";
 
