@@ -28,7 +28,11 @@ in
           config.General.fill = "true";
         }
         { name = "org.kde.plasma.panelspacer"; }
-        "org.kde.plasma.systemtray"
+        {
+          systemTray.items.shown = [
+            "org.kde.plasma.bluetooth"
+          ];
+        }
         "org.kde.plasma.digitalclock"
       ];
     }
