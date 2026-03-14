@@ -215,6 +215,7 @@ in
 
     # Other
     imagemagick
+    sox
 
     # Load testing
     k6
