@@ -160,6 +160,575 @@ in
     - Uses stdin/stdout — no temporary files needed
   '';
 
+  # ── Claude Code Skills ──
+
+  home.file.".claude/skills/dig/SKILL.md".text = ''
+    ---
+    name: dig
+    description: Iteratively ask clarifying questions to enrich the current Plan before review.
+    allowed-tools: Skill(plan-review)
+    ---
+
+    # Dig
+
+    Read the current Plan file, identify missing information needed for implementation, and iteratively ask the user clarifying questions via AskUserQuestion. Incorporate answers into the Plan, re-analyze, and repeat until sufficiently detailed.
+
+    ## Prerequisites
+
+    - A plan file must already exist (created via Plan mode)
+
+    ## Execution Flow
+
+    ### Phase 1: Detect the Latest Plan File
+
+    ```bash
+    ls -t ./plans/*.md 2>/dev/null | head -1
+    ```
+
+    If no file is found, report an error and stop.
+    Use the Read tool to load the detected plan file.
+
+    ### Phase 2: Gap Analysis
+
+    Analyze the plan from the following perspectives and identify information gaps that would block implementation:
+
+    #### Analysis Perspectives
+
+    1. **Technical Design Decisions**
+       - Are library / framework choices explicitly stated?
+       - Are data structures and algorithms clearly chosen?
+       - Is the API design (endpoints, request/response shapes) concrete?
+
+    2. **Business Requirements Clarity**
+       - Are edge-case behaviors defined?
+       - Are error-state user experiences decided?
+       - Are input constraints and validation rules clear?
+       - Are success / failure criteria defined?
+
+    3. **Consistency with Existing Code**
+       - Is compatibility with existing APIs and type definitions considered?
+       - Are naming conventions and coding standards consistent?
+       - Are dependencies on existing modules clear?
+
+    4. **Implementation Specificity**
+       - Is each step broken down to an implementable granularity?
+       - Are target files for creation / modification identified?
+       - Is the test strategy (what to test and how) clear?
+
+    ### Phase 3: Question Cycle
+
+    When gaps are found, repeat this cycle:
+
+    ```
+    +-> Identify gaps
+    |   |
+    |   v
+    |   Ask 1-3 related questions via AskUserQuestion
+    |   |
+    |   v
+    |   Receive the user's answers
+    |   |
+    |   v
+    |   Update the Plan file with the Edit tool
+    |   |
+    |   v
+    |   Re-read and re-analyze the updated Plan
+    |   |
+    +-- If gaps remain, repeat
+    ```
+
+    #### Question Rules
+
+    - **1-3 related questions per round** — too many at once is overwhelming.
+    - **Be specific**: instead of "How will you design this?", ask "Should the return type be `Result<T, E>` or `Option<T>`?" — provide choices and concrete examples.
+    - **Leverage the codebase**: read relevant code before asking. Do not ask about information already available in the code.
+    - **Prioritize**: ask about implementation blockers first.
+
+    #### Exit Conditions
+
+    Stop the cycle when either:
+
+    1. All analysis perspectives are sufficiently covered.
+    2. The user signals completion ("that's enough", "looks good", etc.).
+
+    ### Phase 4: Completion Report & Auto-Review
+
+    After the cycle ends, report:
+
+    ```
+    === Dig Complete ===
+
+    Updated Plan file: <path>
+
+    Information added:
+    - [key decisions added, as bullet points]
+
+    Running /plan-review automatically...
+    ```
+
+    Then invoke `/plan-review` via the Skill tool automatically.
+
+    ## Error Handling
+
+    | Situation              | Response                                          |
+    | ---------------------- | ------------------------------------------------- |
+    | No plan file found     | Notify that the plans directory has no files       |
+    | Plan file update fails | Report the error and suggest manual editing        |
+
+    ## Notes
+
+    - Plans directory: `./plans` (relative to project root)
+    - The latest file is auto-detected — no path input required from the user
+    - Use before `/plan-review` to improve review quality
+    - Read related code before asking questions to avoid asking about things already evident in the codebase
+  '';
+
+  home.file.".claude/skills/output-learn/SKILL.md".text = ''
+    ---
+    name: output-learn
+    description: Extract technical learnings from the session and save them to the learn repository.
+    ---
+
+    # Output Learn
+
+    Extract and organize technical learnings from the current Claude Code session and save them to the `learn` repository.
+
+    ## Output Destination
+
+    ```
+    ${homeDirectory}/Repo/github.com/magurotuna/learn/<category>/<topic-slug>.md
+    ```
+
+    ## Execution Flow
+
+    ### Phase 1: Session Analysis
+
+    Analyze the conversation history and extract technical learnings.
+
+    Extraction targets:
+
+    - **New knowledge**: newly learned concepts, APIs, library usage
+    - **Design decisions**: architecture choices, pattern application rationale
+    - **Troubleshooting**: error investigation processes and solutions
+    - **Best practices**: efficient implementation methods, recommended patterns
+    - **Code examples**: reusable snippets, implementation patterns
+
+    If no learnings are found, notify the user that the session lacks technical content and stop.
+
+    ### Phase 2: Category Selection
+
+    Auto-detect candidate categories from keywords and confirm with the user via AskUserQuestion.
+
+    Example categories:
+
+    | Category         | Scope                                  |
+    | ---------------- | -------------------------------------- |
+    | `typescript`     | TypeScript language features, types    |
+    | `rust`           | Rust language, cargo, crates           |
+    | `go`             | Go language, modules                   |
+    | `nix`            | Nix, NixOS, home-manager, flakes      |
+    | `testing`        | Test methodology, frameworks           |
+    | `git`            | Git operations, workflows              |
+    | `cli`            | CLI development, command-line tools    |
+    | `architecture`   | Design patterns, architecture          |
+    | `library/<name>` | Specific library usage                 |
+    | `devops`         | CI/CD, infrastructure                  |
+    | `k8s`            | Kubernetes, Helm, k9s                  |
+    | `performance`    | Performance optimization               |
+
+    ```
+    Via AskUserQuestion:
+    - Present detected category candidates
+    - Allow custom category input
+    ```
+
+    ### Phase 3: Markdown Generation
+
+    Generate a markdown file based on this template.
+
+    Filename: `<topic-slug>.md` (lowercase kebab-case)
+
+    **Template:**
+
+    ````markdown
+    # <Title>
+
+    ## Summary
+
+    <1-2 sentence overview of the learning>
+
+    ## Background
+
+    <What situation led to this learning>
+
+    ## What I Learned
+
+    ### <Subtopic>
+
+    <Detailed explanation>
+
+    ```<language>
+    // code example
+    ```
+
+    ## Key Takeaways
+
+    - <Key point 1>
+    - <Key point 2>
+
+    ## References
+
+    - [Link text](URL)
+    ````
+
+    ### Phase 4: User Confirmation
+
+    Display a preview of the generated markdown and ask for confirmation via AskUserQuestion.
+
+    Confirmation items:
+
+    1. **Preview**: show the full generated markdown
+    2. **Duplicate check**: warn if a file with the same name exists
+
+    ```
+    Via AskUserQuestion:
+    - Approve and save
+    - Request modifications (provide instructions)
+    - Change filename
+    - Cancel
+    ```
+
+    If a file with the same name exists:
+
+    ```
+    Via AskUserQuestion:
+    - Overwrite
+    - Save with a different name (add suffix)
+    - Append to existing file
+    - Cancel
+    ```
+
+    ### Phase 5: Save & Push
+
+    After approval, save and push:
+
+    ```bash
+    LEARN_REPO="${homeDirectory}/Repo/github.com/magurotuna/learn"
+
+    if [ ! -d "$LEARN_REPO" ]; then
+      echo "learn repository not found"
+      echo "Run: ghq get magurotuna/learn"
+      exit 1
+    fi
+
+    # Create category directory if needed
+    mkdir -p "$LEARN_REPO/<category>"
+
+    # Write the markdown file via the Write tool
+
+    # Git operations
+    cd "$LEARN_REPO"
+    git add "<category>/<topic-slug>.md"
+    git commit -m "Add: <title>"
+    git push origin main
+    ```
+
+    ## Error Handling
+
+    | Situation                    | Response                                              |
+    | ---------------------------- | ----------------------------------------------------- |
+    | learn repo not cloned        | Suggest running `ghq get magurotuna/learn`            |
+    | No technical learnings found | Notify that the session lacks technical content, stop  |
+    | Git push fails               | Show the error and suggest manual resolution           |
+    | Duplicate filename           | Offer overwrite / rename / append via AskUserQuestion  |
+    | Directory creation fails     | Report permission error                                |
+
+    ## Notes
+
+    - Analyze the entire conversation history; best used toward the end of a session
+    - When multiple learnings exist, pick the most important one
+    - Keep code examples minimal; focus on explanation
+    - Only include reference URLs that were mentioned during the session
+  '';
+
+  home.file.".claude/skills/smart-compact/SKILL.md".text = ''
+    ---
+    name: smart-compact
+    description: Analyze session context and generate a targeted prompt for /compact to preserve important information.
+    disable-model-invocation: true
+    ---
+
+    # Smart Compact
+
+    Analyze the session context and generate a user-tailored `/compact` prompt that preserves the most important information.
+
+    ## Execution Flow
+
+    ### Phase 1: Session Context Analysis
+
+    Analyze the full conversation history and extract:
+
+    - **Active tasks**: current implementation, fix, or investigation in progress
+    - **Key technical decisions**: architecture, library, or design choices made
+    - **Unresolved issues**: remaining errors, bugs, or open questions
+    - **File change history**: files modified/created during the session and their purpose
+    - **Context-dependent information**: prerequisites and constraints needed for follow-up work
+
+    Display the analysis as concise bullet points.
+
+    ### Phase 2: User Interview
+
+    Based on the Phase 1 analysis, ask the user via AskUserQuestion what to preserve.
+
+    **Question generation rules:**
+
+    - Dynamically generate choices based on the session content
+    - Choices must include session-specific context (task names, file names, tech stack, etc.)
+    - Use multiSelect: true for multiple selections
+    - Provide 2-4 choices
+
+    **Question template:**
+
+    ```
+    Question: "Which information should /compact prioritize preserving?"
+    header: "Preserve"
+    multiSelect: true
+
+    Example choices (dynamically generated from session):
+    - "Implementation progress and remaining work for <specific task>"
+    - "Error investigation context around <filename>"
+    - "Design decisions and rationale for <technology>"
+    - "API specification and type definitions for <feature>"
+    ```
+
+    **Important**: Generate concrete choices derived from the session analysis, not generic presets.
+
+    ### Phase 3: Prompt Generation
+
+    Based on the user's selections, generate a `/compact` prompt.
+
+    **Prompt generation guidelines:**
+
+    1. Prioritize items the user selected
+    2. Include the minimum context needed to continue the current task
+    3. Include specific file names, function names, error messages, and other identifiers
+    4. Frame as "what to preserve" rather than "what to discard"
+
+    **Output format:**
+
+    ```
+    Please compress the context while prioritizing the following information:
+
+    1. [Specific content of preserve item 1]
+    2. [Specific content of preserve item 2]
+    3. [Specific content of preserve item 3]
+
+    Preserve the following accurately:
+    - [Important identifiers, paths, commands, etc.]
+    ```
+
+    ### Phase 4: Confirmation & Execution Guidance
+
+    Present the generated prompt and confirm via AskUserQuestion.
+
+    ```
+    Via AskUserQuestion:
+    - "Run compact with this prompt?"
+      - "Run it" — display the command
+      - "Modify" — apply modifications
+      - "Cancel"
+    ```
+
+    **On approval:**
+
+    Output the command in a copyable format:
+
+    ````
+    Copy and run the following command:
+
+    ```
+    /compact <generated prompt>
+    ```
+    ````
+
+    **On modification request:**
+
+    Regenerate the prompt reflecting the user's feedback and re-confirm.
+
+    ## Error Handling
+
+    | Situation                        | Response                                     |
+    | -------------------------------- | -------------------------------------------- |
+    | Session too short for compaction | Notify that compact is likely unnecessary     |
+    | Nothing worth preserving         | Suggest a bare `/compact` with no arguments  |
+    | User cancels                     | Do nothing and exit                          |
+
+    ## Notes
+
+    - `/compact` is a built-in Claude Code command and cannot be invoked programmatically from a skill
+    - The generated command must be copied and run manually by the user
+    - Most effective when the session is long and context is running low
+  '';
+
+  home.file.".claude/skills/plan-review/SKILL.md".text = ''
+    ---
+    name: plan-review
+    description: Review the current plan by auto-selecting appropriate reviewer agents based on project characteristics.
+    allowed-tools: Bash(codex exec *)
+    ---
+
+    # Plan Review
+
+    Review the latest plan file by analyzing project characteristics, selecting appropriate reviewer agents, and running them in parallel.
+
+    ## Prerequisites
+
+    - A plan file must already exist (created via Plan mode)
+    - Reviewer agents must be defined in `~/.claude/agents/`
+
+    ## Arguments
+
+    | Argument   | Required | Description                                             |
+    | ---------- | -------- | ------------------------------------------------------- |
+    | agent-name | No       | Explicit agent name. Omit for auto-selection (recommended) |
+
+    ## Execution Flow
+
+    ### Phase 1: Detect the Latest Plan File
+
+    ```bash
+    ls -t ./plans/*.md 2>/dev/null | head -1
+    ```
+
+    If no file is found, report an error and stop.
+    Use the Read tool to load the detected plan file.
+
+    ### Phase 2: Reviewer Selection
+
+    If an agent name is provided as an argument, use only that agent (manual mode).
+
+    If no argument is given (recommended), auto-select reviewers based on project signals.
+
+    #### 2a: Project Signal Detection
+
+    Collect the following signals **in parallel**:
+
+    | Signal             | Detection Method                                         |
+    | ------------------ | -------------------------------------------------------- |
+    | Rust project       | `Cargo.toml` exists, or `*.rs` files present             |
+    | Go project         | `go.mod` exists, or `*.go` files present                 |
+    | TypeScript project | `tsconfig.json` exists, or `*.ts` files present          |
+    | codex CLI available| `which codex` succeeds                                   |
+    | Refactoring-related| Plan body contains refactoring keywords (see below)      |
+    | Test infrastructure| Test files, test config, or test directories exist        |
+
+    **Refactoring keywords** (checked against plan body):
+
+    - refactor / refactoring / duplication / DRY / extract / consolidate / deduplicate
+
+    **Test infrastructure detection** — at least one primary signal:
+
+    - Test files: `*.test.ts`, `*.spec.ts`, `*.test.tsx`, `*.spec.tsx`, `*.test.js`, `*.spec.js`, `*_test.go`, `*_test.rs`
+    - Test configs: `vitest.config.*`, `jest.config.*`, `playwright.config.*`
+    - Test directories: `tests/`, `__tests__/`, `test/`
+
+    #### 2b: Reviewer Matching Rules
+
+    Based on collected signals, select reviewers:
+
+    | Condition                         | Reviewer to Launch  |
+    | --------------------------------- | ------------------- |
+    | codex CLI is available            | `codex-reviewer`    |
+
+    <!-- Future reviewers can be added here:
+    | Rust project detected             | `rust-reviewer`     |
+    | Refactoring keywords in plan      | `similarity`        |
+    | Test infrastructure exists        | `tdd-reviewer`      |
+    -->
+
+    - If multiple conditions match, launch **all** matching reviewers (in parallel).
+    - If no conditions match, notify the user and suggest manual agent selection.
+
+    #### 2c: Display Selection Results
+
+    Before launching, show the selection summary:
+
+    ```
+    Project analysis:
+      - codex CLI: Y (available)
+
+    Launching reviewers: codex-reviewer
+    ```
+
+    ### Phase 3: Parallel Review Execution
+
+    Launch **all selected agents in parallel** via the Agent tool.
+
+    Prompt passed to each agent:
+
+    ```
+    Please review the following Plan file.
+    Based on your expertise, provide feedback on:
+    1. Technical accuracy
+    2. Potential issues and risks
+    3. Improvement suggestions
+    4. Overlooked considerations
+
+    ---
+
+    Plan File: <path>
+
+    ---
+
+    <content>
+    ```
+
+    **Important**: Agent tool calls are independent — always invoke multiple agents in a **single message** for true parallelism.
+
+    ### Phase 4: Result Aggregation & Report
+
+    Aggregate all reviewer results in this format:
+
+    ```
+    === Plan Review Results ===
+
+    --- codex-reviewer ---
+    [feedback from codex-reviewer]
+
+    === Summary ===
+    Cross-cutting summary of all reviewer feedback, with high-severity issues listed first.
+    ```
+
+    ## Reviewer Registry
+
+    | Agent Name      | Auto-Select Condition                | Expertise                              |
+    | --------------- | ------------------------------------ | -------------------------------------- |
+    | codex-reviewer  | codex CLI is available               | General architecture & design review   |
+
+    <!-- To add a new reviewer:
+    1. Create the agent in ~/.claude/agents/<name>.md
+    2. Add a row to this table
+    3. Add a matching rule in Phase 2b
+    -->
+
+    ## Error Handling
+
+    | Situation                            | Response                                          |
+    | ------------------------------------ | ------------------------------------------------- |
+    | No plan file found                   | Notify that the plans directory has no files       |
+    | No matching reviewers in auto-select | List available agents and suggest manual selection |
+    | Specified agent not found            | List available agents and report error             |
+    | Some agents fail                     | Report successful results and note failures        |
+
+    ## Notes
+
+    - Plans directory: `./plans` (relative to project root)
+    - Latest file is auto-detected — no path input required
+    - Both signal collection and review execution are **parallelized** for speed
+    - Manual mode is fully supported for backward compatibility
+    - To add a new reviewer, update the Reviewer Registry table and the Phase 2b matching rules
+  '';
+
   home.file.".claude/statusline-command.sh" = {
     executable = true;
     text = ''
