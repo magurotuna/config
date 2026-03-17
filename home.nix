@@ -1221,6 +1221,9 @@ in
       "codeberg.org" = {
         identityFile = "~/.ssh/id_ed25519_codeberg";
       };
+      "avocet.deno.co" = {
+        identityFile = "~/.ssh/id_ed25519_avocet";
+      };
     };
   };
 
