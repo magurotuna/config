@@ -178,6 +178,9 @@ in
     immutable = true;
   };
 
+  # Disable automatic suspend/sleep
+  programs.plasma.powerdevil.AC.autoSuspend.action = "nothing";
+
   # Dark theme
   programs.plasma.workspace = {
     lookAndFeel = "org.kde.breezedark.desktop";
