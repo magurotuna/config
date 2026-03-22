@@ -178,8 +178,9 @@ in
     immutable = true;
   };
 
-  # Disable automatic suspend/sleep
+  # Disable automatic suspend/sleep and screen lock
   programs.plasma.powerdevil.AC.autoSuspend.action = "nothing";
+  programs.plasma.kscreenlocker.autoLock = false;
 
   # Dark theme
   programs.plasma.workspace = {
