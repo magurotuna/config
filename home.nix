@@ -772,7 +772,7 @@ in
 
     **PRs reviewed:**
     ```bash
-    gh search prs --reviewed-by=USERNAME --created=">SINCE" --json repository,title,url,state,createdAt --limit 50
+    gh search prs --reviewed-by=USERNAME --updated=">SINCE" --json repository,title,url,state,createdAt --limit 50
     ```
 
     **Issues authored or assigned:**
