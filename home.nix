@@ -52,8 +52,8 @@ in
       },
       "permissions": {
         "allow": [
-          "Bash(gh search *)",
-          "Bash(gh api *)"
+          "Bash(gh search:*)",
+          "Bash(gh api:*)"
         ]
       },
       "alwaysThinkingEnabled": true,
