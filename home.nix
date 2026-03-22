@@ -50,6 +50,12 @@ in
         "gopls-lsp@claude-plugins-official": true,
         "typescript-lsp@claude-plugins-official": true
       },
+      "permissions": {
+        "allow": [
+          "Bash(gh search *)",
+          "Bash(gh api *)"
+        ]
+      },
       "alwaysThinkingEnabled": true,
       "plansDirectory": "./plans",
       "hooks": {
