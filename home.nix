@@ -1055,7 +1055,6 @@ in
         clean = "git-lfs clean -- %f";
         smudge = "git-lfs smudge -- %f";
       };
-      url."https://github.com/".insteadOf = "git@github.com:";
       credential = {
         "https://github.com" = {
           helper = [
@@ -1310,6 +1309,9 @@ in
     enable = true;
     enableDefaultConfig = false;
     matchBlocks = {
+      "github.com" = {
+        identityFile = "~/.ssh/id_ed25519_github";
+      };
       "codeberg.org" = {
         identityFile = "~/.ssh/id_ed25519_codeberg";
       };
