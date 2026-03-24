@@ -982,6 +982,7 @@ in
 
     # Git worktree
     git-wt
+    bubblewrap
   ] ++ [
     tree-sitter-cli  # custom build (0.26.x for nvim-treesitter)
   ];
