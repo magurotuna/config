@@ -202,23 +202,6 @@
         "type": "github"
       }
     },
-    "octorus-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1771488735,
-        "narHash": "sha256-yIwnD5ef9Tb94wmrwnnbzkwOYKrwiphilXsHr/8JgJs=",
-        "owner": "ushironoko",
-        "repo": "octorus",
-        "rev": "58bdf13c58dee2171a1fe32813d310249a962f80",
-        "type": "github"
-      },
-      "original": {
-        "owner": "ushironoko",
-        "ref": "v0.4.1",
-        "repo": "octorus",
-        "type": "github"
-      }
-    },
     "plasma-manager": {
       "inputs": {
         "home-manager": [
@@ -249,7 +232,6 @@
         "deno-overlay": "deno-overlay",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
-        "octorus-src": "octorus-src",
         "plasma-manager": "plasma-manager",
         "xremap": "xremap"
       }
