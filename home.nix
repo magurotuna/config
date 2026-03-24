@@ -992,6 +992,7 @@ in
   # ──────────────────────────────────────────────────────────────
   programs.git = {
     enable = true;
+    signing.format = "openpgp";
 
     # Global gitignore patterns
     ignores = [
