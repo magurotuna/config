@@ -28,13 +28,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
-    octorus-src = {
-      url = "github:ushironoko/octorus/v0.4.1";
-      flake = false;
-    };
-  };
+};
 
-  outputs = { nixpkgs, home-manager, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, octorus-src, ... }:
+  outputs = { nixpkgs, home-manager, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, ... }:
     let
       latestVersion = versions:
         builtins.foldl'
@@ -59,15 +55,6 @@
           [ claude-code-overlay.overlays.default ]
           ++ nixpkgs.lib.optional (system == "x86_64-linux") latestDenoOverlay;
       };
-      mkOctorus = pkgs: pkgs.rustPlatform.buildRustPackage {
-        pname = "octorus";
-        version = "0.4.1";
-        src = octorus-src;
-        cargoLock.lockFile = "${octorus-src}/Cargo.lock";
-        nativeBuildInputs = [ pkgs.pkg-config ];
-        buildInputs = [ pkgs.openssl ];
-        doCheck = false;
-      };
     in
     {
       # NixOS system configurations
@@ -87,7 +74,6 @@
           extraSpecialArgs = {
             homeDirectory = "/home/yusuke";
             codexPkg = codex-cli-nix.packages.x86_64-linux.default;
-            octorusPkg = mkOctorus (mkPkgs "x86_64-linux");
           };
           modules = [ ./home.nix ];
         };
@@ -97,7 +83,6 @@
           extraSpecialArgs = {
             homeDirectory = "/home/yusuke";
             codexPkg = codex-cli-nix.packages.x86_64-linux.default;
-            octorusPkg = mkOctorus (mkPkgs "x86_64-linux");
           };
           modules = [
             ./home.nix
@@ -113,7 +98,6 @@
           extraSpecialArgs = {
             homeDirectory = "/Users/yusuke";
             codexPkg = codex-cli-nix.packages.aarch64-darwin.default;
-            octorusPkg = mkOctorus (mkPkgs "aarch64-darwin");
           };
           modules = [ ./home.nix ];
         };
