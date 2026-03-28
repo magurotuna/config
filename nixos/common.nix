@@ -84,6 +84,12 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
+    # Prevent auto-switching to low-quality HSP/HFP headset profile when an app starts recording
+    wireplumber.extraConfig."11-bluetooth-policy" = {
+      "wireplumber.settings" = {
+        "bluetooth.autoswitch-to-headset-profile" = false;
+      };
+    };
   };
 
   # Bluetooth
