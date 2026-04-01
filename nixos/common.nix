@@ -161,6 +161,7 @@
     wget
     git
     lsof
+    bubblewrap
   ];
 
   # Fonts
