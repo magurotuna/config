@@ -11,6 +11,10 @@
 
   # Networking
   networking.networkmanager.enable = true;
+  networking.networkmanager.wifi.powersave = false;
+
+  # iwlwifi: use CAM (Continuously Active Mode) for better throughput
+  boot.extraModprobeConfig = "options iwlmvm power_scheme=1";
 
   # Timezone and locale
   time.timeZone = "Asia/Tokyo";
