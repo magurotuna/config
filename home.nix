@@ -942,7 +942,7 @@ in
 
     # Language servers
     lua-language-server
-    nodePackages.typescript-language-server
+    typescript-language-server
     rust-analyzer
     gopls
     pyright
