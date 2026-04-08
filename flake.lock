@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775261198,
-        "narHash": "sha256-BdXWR+LoP8K0V71oT1pNXdlajowVxaLiXXeDXMdvLoM=",
+        "lastModified": 1775596386,
+        "narHash": "sha256-gm4uLwmMNxHse6ughtA2Oz6tdAbwDBAZ7q3l+Je9duo=",
         "owner": "ryoppippi",
         "repo": "claude-code-overlay",
-        "rev": "e4ec05a124e6a206e405091f245449291c58e8b6",
+        "rev": "a7b3970b0bb176f99e44572526ee5c6aee74fcfc",
         "type": "github"
       },
       "original": {
@@ -158,11 +158,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775556024,
-        "narHash": "sha256-j1u/859OVS54rGlsvFqJdwKPEnFYCI+4pyfTiSfv1Xc=",
+        "lastModified": 1775621688,
+        "narHash": "sha256-r4M1FJLvSiLpEDfGRdmWvIeMN+jpzw4wqV9fEygZM7g=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "4bdfeff1d9b7473e6e58f73f5809576e8a69e406",
+        "rev": "f0c13b0ebc4a5b7780954ab6a97d231f90bf5e6b",
         "type": "github"
       },
       "original": {
