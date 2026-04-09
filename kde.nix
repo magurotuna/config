@@ -252,6 +252,7 @@ in
   # KDE applications
   home.packages = with pkgs; [
     kdePackages.kdenlive
+    losslesscut-bin
   ];
 
   # Overrides pinentryPackage specified in home.nix
