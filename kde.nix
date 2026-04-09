@@ -249,6 +249,11 @@ in
     X-KDE-autostart-phase=2
   '';
 
+  # KDE applications
+  home.packages = with pkgs; [
+    kdePackages.kdenlive
+  ];
+
   # Overrides pinentryPackage specified in home.nix
   # Use curses so the prompt appears inline in the terminal (avoids popup hiding behind quick terminal)
   services.gpg-agent.pinentry.package = pkgs.pinentry-curses;
