@@ -109,6 +109,9 @@
   # Docker
   virtualisation.docker.enable = true;
 
+  # Trust Docker bridge interfaces so containers can reach host services
+  networking.firewall.trustedInterfaces = [ "docker0" "br-+" ];
+
   # KVM/QEMU virtualization
   virtualisation.libvirtd.enable = true;
   programs.virt-manager.enable = true;
