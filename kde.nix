@@ -253,6 +253,7 @@ in
   home.packages = with pkgs; [
     kdePackages.kdenlive
     losslesscut-bin
+    vlc
   ];
 
   # Overrides pinentryPackage specified in home.nix
