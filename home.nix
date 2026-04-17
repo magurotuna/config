@@ -51,6 +51,7 @@ in
         "typescript-lsp@claude-plugins-official": true
       },
       "permissions": {
+        "defaultMode": "auto",
         "allow": [
           "Bash(gh search:*)",
           "Bash(gh api:*)"
@@ -58,6 +59,7 @@ in
       },
       "alwaysThinkingEnabled": true,
       "plansDirectory": "./plans",
+      "outputStyle": "Explanatory",
       "hooks": {
         "Stop": [
           {
