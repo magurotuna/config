@@ -672,7 +672,13 @@ in
     )"
     ```
 
-    Substitute `<plan_path>` with the actual path. Set a generous Bash timeout (up to 600000 ms). Do NOT use `-m` — let Codex pick its default model.
+    Substitute `<plan_path>` with the actual path. Do NOT use `-m` — let Codex pick its default model.
+
+    **Run the command as a background Bash job** (`run_in_background: true`) to avoid the 10-minute foreground timeout — long reviews can exceed that cap. After starting the job:
+
+    1. Wait for the background-job completion notification from the harness. Do NOT poll or sleep in a loop; the notification arrives automatically.
+    2. Once notified, read the job's stdout via the background-job handle and use it as the review output.
+    3. If the job exits non-zero, treat it as a Codex failure per the Safety Guards below (report exit code and stderr; do not retry).
 
     #### 2b: Termination Check
 
@@ -717,7 +723,7 @@ in
     | ----------------------------- | ---------------------------------------------------------- |
     | No plan file found            | Notify that `./plans/` has no markdown files and stop      |
     | `codex` CLI not on PATH       | Instruct the user to install and authenticate `codex`      |
-    | `codex exec` timeout          | Report the timeout; do not auto-retry                      |
+    | `codex exec` runs very long   | Expected — it's backgrounded. Keep waiting for the completion notification, don't kill it |
     | Authentication error          | Guide the user to check `codex login` status               |
     | Plan edit fails               | Report the error and stop — do not continue reviewing stale content |
 
