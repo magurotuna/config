@@ -313,10 +313,10 @@ require('lazy').setup({
       'neovim/nvim-lspconfig',
       cond = not vim.g.vscode,
       dependencies = {
-        'hrsh7th/cmp-nvim-lsp',
+        'saghen/blink.cmp',
       },
       config = function()
-        local capabilities = require('cmp_nvim_lsp').default_capabilities()
+        local capabilities = require('blink.cmp').get_lsp_capabilities()
 
         -- Configure LSP servers using Neovim 0.11 API
         vim.lsp.config('lua_ls', {
@@ -442,77 +442,60 @@ require('lazy').setup({
         panel = { enabled = false },
       },
     },
+    -- Completion: blink.cmp (skip in VSCode)
     {
-      'zbirenbaum/copilot-cmp',
+      'saghen/blink.cmp',
       cond = not vim.g.vscode,
-      dependencies = { 'zbirenbaum/copilot.lua' },
-      opts = {},
-    },
-
-    -- Completion (skip in VSCode)
-    {
-      'hrsh7th/nvim-cmp',
-      cond = not vim.g.vscode,
+      version = '*',
+      build = 'cargo build --release',
       dependencies = {
-        'hrsh7th/cmp-nvim-lsp',
-        'hrsh7th/cmp-buffer',
-        'hrsh7th/cmp-path',
-        'hrsh7th/cmp-cmdline',
-        'zbirenbaum/copilot-cmp',
+        { 'giuxtaposition/blink-cmp-copilot', dependencies = { 'zbirenbaum/copilot.lua' } },
       },
-      config = function()
-        local cmp = require('cmp')
-        cmp.setup({
-          window = {
-            completion = {
-              border = 'rounded',
-              winhighlight = 'Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None',
-              side_padding = 1,
-            },
-            documentation = {
+      opts = {
+        keymap = {
+          preset = 'none',
+          ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+          ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+          ['<C-l>'] = { 'show', 'show_documentation', 'hide_documentation' },
+          ['<C-e>'] = { 'cancel', 'fallback' },
+          ['<CR>'] = { 'accept', 'fallback' },
+          ['<Tab>'] = { 'select_next', 'fallback' },
+          ['<S-Tab>'] = { 'select_prev', 'fallback' },
+          ['<C-n>'] = { 'select_next', 'fallback' },
+          ['<C-p>'] = { 'select_prev', 'fallback' },
+        },
+        completion = {
+          -- Don't preselect; <CR> with no selection falls through to newline.
+          list = { selection = { preselect = false, auto_insert = false } },
+          menu = {
+            border = 'rounded',
+            winhighlight = 'Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None',
+          },
+          documentation = {
+            auto_show = true,
+            window = {
               border = 'rounded',
               winhighlight = 'Normal:NormalFloat,FloatBorder:FloatBorder',
-              side_padding = 1,
             },
           },
-          mapping = cmp.mapping.preset.insert({
-            ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-            ['<C-f>'] = cmp.mapping.scroll_docs(4),
-            ['<C-l>'] = cmp.mapping.complete(),
-            ['<C-e>'] = cmp.mapping.abort(),
-            ['<CR>'] = cmp.mapping.confirm({ select = false }),
-            ['<Tab>'] = cmp.mapping.select_next_item(),
-            ['<S-Tab>'] = cmp.mapping.select_prev_item(),
-            ['<C-n>'] = cmp.mapping.select_next_item(),
-            ['<C-p>'] = cmp.mapping.select_prev_item(),
-          }),
-          sources = cmp.config.sources({
-            { name = 'copilot',  group_index = 1 },
-            { name = 'nvim_lsp', group_index = 1 },
-          }, {
-            { name = 'buffer' },
-            { name = 'path' },
-          }),
-        })
-
-        -- Cmdline ':' completion (commands, paths)
-        cmp.setup.cmdline(':', {
-          mapping = cmp.mapping.preset.cmdline(),
-          sources = cmp.config.sources({
-            { name = 'path' },
-          }, {
-            { name = 'cmdline' },
-          }),
-        })
-
-        -- Cmdline '/' and '?' completion (buffer search)
-        cmp.setup.cmdline({ '/', '?' }, {
-          mapping = cmp.mapping.preset.cmdline(),
-          sources = {
-            { name = 'buffer' },
+        },
+        sources = {
+          default = { 'copilot', 'lsp', 'buffer', 'path' },
+          providers = {
+            copilot = {
+              name = 'copilot',
+              module = 'blink-cmp-copilot',
+              score_offset = 100,
+              async = true,
+            },
           },
-        })
-      end,
+        },
+        cmdline = {
+          enabled = true,
+          keymap = { preset = 'cmdline' },
+          completion = { menu = { auto_show = true } },
+        },
+      },
     },
 
     -- Autopairs (skip in VSCode)
@@ -520,15 +503,7 @@ require('lazy').setup({
       'windwp/nvim-autopairs',
       cond = not vim.g.vscode,
       event = 'InsertEnter',
-      config = function()
-        local autopairs = require('nvim-autopairs')
-        autopairs.setup({})
-
-        -- Integration with nvim-cmp
-        local cmp_autopairs = require('nvim-autopairs.completion.cmp')
-        local cmp = require('cmp')
-        cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
-      end,
+      opts = {},
     },
 
     -- Telescope (skip in VSCode)
