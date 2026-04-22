@@ -669,8 +669,10 @@ in
     - If the plan is solid and you have no remaining substantive issues, output exactly one line: NO_FURTHER_ISSUES
     - Do not nitpick wording. Only raise issues that would materially affect implementation quality.
     EOF
-    )"
+    )" < /dev/null
     ```
+
+    **Critical: the `< /dev/null` redirect is mandatory.** When stdin is not a TTY (which is always the case inside Claude Code's Bash tool), `codex exec` treats stdin as piped input to be appended to the prompt and will block forever waiting for EOF. Redirecting from `/dev/null` closes stdin immediately so Codex stops waiting and proceeds. Never omit this, even when using `run_in_background`.
 
     Substitute `<plan_path>` with the actual path. Do NOT use `-m` — let Codex pick its default model.
 
@@ -724,6 +726,7 @@ in
     | No plan file found            | Notify that `./plans/` has no markdown files and stop      |
     | `codex` CLI not on PATH       | Instruct the user to install and authenticate `codex`      |
     | `codex exec` runs very long   | Expected — it's backgrounded. Keep waiting for the completion notification, don't kill it |
+    | `codex exec` hangs with 0 bytes output | Almost always a missing `< /dev/null`. Kill it, add the stdin redirect, retry |
     | Authentication error          | Guide the user to check `codex login` status               |
     | Plan edit fails               | Report the error and stop — do not continue reviewing stale content |
 
