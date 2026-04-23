@@ -1543,6 +1543,7 @@ in
     settings = {
       font-family = [
         "JetBrainsMono Nerd Font"
+        "Noto Sans Mono CJK JP"
         "Adwaita Mono"
       ];
       font-size = 10;
