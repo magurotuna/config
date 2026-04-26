@@ -176,6 +176,7 @@
     packages = with pkgs; [
       nerd-fonts.jetbrains-mono
       noto-fonts-cjk-sans
+      (google-fonts.override { fonts = [ "Google Sans Code" ]; })
     ];
 
     fontconfig.defaultFonts = {

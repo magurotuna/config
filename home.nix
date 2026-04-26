@@ -1147,6 +1147,9 @@ in
     git-wt
   ] ++ [
     tree-sitter-cli  # custom build (0.26.x for nvim-treesitter)
+  ] ++ lib.optionals pkgs.stdenv.isDarwin [
+    # On NixOS this comes from nixos/common.nix's fonts.packages; darwin needs it via home-manager.
+    (pkgs.google-fonts.override { fonts = [ "Google Sans Code" ]; })
   ];
 
   # ──────────────────────────────────────────────────────────────
