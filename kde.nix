@@ -249,6 +249,18 @@ in
     X-KDE-autostart-phase=2
   '';
 
+  # Konsole: declarative profile using Google Sans Code
+  programs.konsole = {
+    defaultProfile = "GoogleSansCode";
+    profiles."GoogleSansCode" = {
+      font = {
+        name = "Google Sans Code";
+        size = 11;
+      };
+      colorScheme = "BreezeDark";
+    };
+  };
+
   # KDE applications
   home.packages = with pkgs; [
     kdePackages.kdenlive
