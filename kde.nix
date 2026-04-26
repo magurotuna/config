@@ -256,6 +256,9 @@ in
     vlc
   ];
 
+  # Default browser for CLI tools (xdg-open, gh, etc.)
+  programs.zsh.sessionVariables.BROWSER = "firefox";
+
   # Overrides pinentryPackage specified in home.nix
   # Use curses so the prompt appears inline in the terminal (avoids popup hiding behind quick terminal)
   services.gpg-agent.pinentry.package = pkgs.pinentry-curses;
