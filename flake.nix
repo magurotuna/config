@@ -32,28 +32,20 @@
 
   outputs = { nixpkgs, home-manager, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, ... }:
     let
-      latestVersion = versions:
-        builtins.foldl'
-          (latest: version:
-            if nixpkgs.lib.versionOlder latest version then version else latest
-          )
-          "0.0.0"
-          (builtins.attrNames versions);
-      latestDenoOverlay = final: prev:
+      denoVersionsOverlay = final: prev:
         let
           # deno-overlay exposes every version under `pkgs.deno.<version>`.
           denoVersions = (deno-overlay.overlays.deno-overlay final prev).deno;
         in
         {
           denoVersions = denoVersions;
-          deno = denoVersions.${latestVersion denoVersions};
         };
       mkPkgs = system: import nixpkgs {
         inherit system;
         config.allowUnfree = true;
         overlays =
           [ claude-code-overlay.overlays.default ]
-          ++ nixpkgs.lib.optional (system == "x86_64-linux") latestDenoOverlay;
+          ++ nixpkgs.lib.optional (system == "x86_64-linux") denoVersionsOverlay;
       };
     in
     {

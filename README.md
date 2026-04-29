@@ -104,7 +104,7 @@ See `home.packages` in `home.nix`. Includes:
 - **Clipboard**: xsel (X11), wl-clipboard (Wayland)
 - **Network**: oha, websocat
 - **Kubernetes**: k9s, stern, kubectl, helm, minikube, talosctl
-- **Cloud**: awscli2, terraform, google-cloud-sql-proxy, minio, minio-client
+- **Cloud**: awscli2, terraform, google-cloud-sql-proxy, minio-client
 - **Databases**: duckdb, redis
 - **Languages/tools**: protobuf, typst, ast-grep
 - **Load testing**: k6, hey

@@ -1077,7 +1077,6 @@ in
     terraform
     google-cloud-sdk
     google-cloud-sql-proxy
-    minio
     minio-client
 
     # Databases
