@@ -6,8 +6,8 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Use latest kernel
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # Use NixOS' default kernel; linuxPackages_latest exposed iwlwifi instability on this host.
+  boot.kernelPackages = pkgs.linuxPackages;
 
   # Networking
   networking.networkmanager.enable = true;
