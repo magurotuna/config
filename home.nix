@@ -1086,6 +1086,7 @@ in
 
     # Languages / Build tools
     gcc
+    lld
     protobuf
     typst
     ast-grep
