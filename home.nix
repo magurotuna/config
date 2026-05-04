@@ -1478,6 +1478,12 @@ in
       "github.com" = {
         identityFile = "~/.ssh/id_ed25519_github";
       };
+      "github.com-magurobot" = {
+        hostname = "github.com";
+        user = "git";
+        identityFile = "~/.ssh/magurobot_auth";
+        identitiesOnly = true;
+      };
       "codeberg.org" = {
         identityFile = "~/.ssh/id_ed25519_codeberg";
       };
