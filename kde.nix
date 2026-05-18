@@ -282,6 +282,7 @@ in
   services.xremap = {
     enable = true;
     withKDE = true;
+    watch = true;  # Re-scan /dev/input on udev add/remove so hot-plugged keyboards work
 
     config = {
       modmap = [
