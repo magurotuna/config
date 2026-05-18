@@ -1400,6 +1400,7 @@ in
       # Additional PATH entries
       export PATH="/usr/local/bin:$HOME/bin:$PATH"
       export PATH="$HOME/go/bin:$PATH"
+      export PATH="$HOME/.local/bin:$PATH"
       export PATH="/snap/bin:$PATH"
 
       # uv (Python) completions - cached for speed
