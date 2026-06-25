@@ -17,6 +17,10 @@ let
     BINDGEN_EXTRA_CLANG_ARGS = "-isystem ${pkgs.stdenv.cc.libc.dev}/include";
     doCheck = false;  # tests require grammar fixtures
   };
+  tmuxCopyAction =
+    if pkgs.stdenv.isDarwin
+    then ''copy-pipe-and-cancel "/usr/bin/pbcopy"''
+    else "copy-selection-and-cancel";
 in
 {
   # Home Manager needs these to know where to install things
@@ -1369,10 +1373,17 @@ in
     };
 
     # Raw zsh configuration
-    initContent = ''
+    initContent = lib.mkMerge [
+      ''
       # Additional shell options
       setopt no_global_rcs
       setopt AUTO_PARAM_KEYS
+
+      # zsh-autosuggestions searches zsh's in-memory history, while Home
+      # Manager sets HISTFILE after zsh's startup history import point.
+      # Import the persistent history before loading autosuggestions so fresh
+      # terminals can suggest commands from previous sessions.
+      [[ -r "$HISTFILE" ]] && fc -R "$HISTFILE" 2>/dev/null || true
 
       # Disable accept-line-and-down-history
       bindkey -r "^O"
@@ -1488,7 +1499,17 @@ in
       # Secrets (not tracked in git)
       # ─────────────────────────────────────────────────────────────
       [ -f ~/.secrets.zsh ] && source ~/.secrets.zsh
-    '';
+      ''
+      (lib.mkOrder 1500 ''
+        # Atuin prepends its own autosuggestion strategy, which bypasses zsh's
+        # in-memory history. Keep Atuin widgets, but make inline suggestions use
+        # the history imported above.
+        if [[ $options[zle] = on ]]; then
+          ZSH_AUTOSUGGEST_STRATEGY=(history)
+          (( $+functions[_zsh_autosuggest_start] )) && _zsh_autosuggest_start
+        fi
+      '')
+    ];
   };
 
   # ──────────────────────────────────────────────────────────────
@@ -1584,7 +1605,6 @@ in
         "Noto Sans Mono CJK JP"
         "Adwaita Mono"
       ];
-      font-size = 10;
       theme = "Dracula";
       cursor-style = "block";
       background-opacity = 0.85;
@@ -1602,13 +1622,27 @@ in
       # macOS-only: don't persist window state, so macOS won't auto-relaunch
       # Ghostty at login (its "Reopen windows" restoration). No-op on Linux.
       window-save-state = "never";
-      # `?` prefix = optional: Ghostty won't error if the file is absent
-      # (it's a machine-local, non-Nix overrides file that may not exist).
+      # `?` prefix = optional: Ghostty won't error if the local override file
+      # is absent. On macOS we seed this file below, but keep it mutable.
       config-file = [
         "?~/.config/ghostty/overrides"
       ];
+    } // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
+      font-size = 10;
     };
   };
+
+  home.activation.seedGhosttyOverrides = lib.mkIf pkgs.stdenv.isDarwin (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      overrides="${homeDirectory}/.config/ghostty/overrides"
+      if [[ ! -s "$overrides" ]]; then
+        mkdir -p "$(dirname "$overrides")"
+        cat > "$overrides" <<'EOF'
+font-size = 13
+EOF
+      fi
+    ''
+  );
 
   # ──────────────────────────────────────────────────────────────
   # Tmux
@@ -1625,9 +1659,9 @@ in
 
     extraConfig = ''
       # enable true color
-      set -ga terminal-overrides ",xterm-256color:Tc"
-      # OSC52 clipboard for tmux-256color
-      set -ga terminal-overrides ",tmux-256color:Ms=\E]52;c;%p1%s\007"
+      set -g terminal-overrides "xterm-256color:Tc"
+      # OSC52 clipboard. `%p2%s` is the base64-encoded selection payload.
+      set -ga terminal-overrides ",*:Ms=\E]52;c;%p2%s\007"
       # Cursor shape passthrough (Ss=set style, Se=reset to terminal default)
       set -ga terminal-overrides ",*:Ss=\\E[%p1%d q:Se=\\E[ q"
 
@@ -1653,12 +1687,15 @@ in
 
       # OSC52 clipboard
       set-option -s set-clipboard on
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+        set-option -s copy-command "/usr/bin/pbcopy"
+      ''}
 
       # vi copy mode
       bind-key -T copy-mode-vi v send -X begin-selection
-      bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
-      bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-selection-and-cancel
-      bind-key -T copy-mode-vi Enter send-keys -X copy-selection-and-cancel
+      bind-key -T copy-mode-vi y send-keys -X ${tmuxCopyAction}
+      bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X ${tmuxCopyAction}
+      bind-key -T copy-mode-vi Enter send-keys -X ${tmuxCopyAction}
 
       ##################
       #   Appearance   #
