@@ -30,21 +30,28 @@ vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
 vim.opt.scrolloff = 10  -- keep 10 lines above/below cursor
 
--- Use OSC52 for clipboard
+-- Use the native macOS clipboard locally; fall back to OSC52 elsewhere.
 do
-  local ok, osc52 = pcall(require, 'vim.ui.clipboard.osc52')
-  if ok then
-    vim.g.clipboard = {
-      name = 'osc52',
-      copy = {
-        ['+'] = osc52.copy('+'),
-        ['*'] = osc52.copy('*'),
-      },
-      paste = {
-        ['+'] = osc52.paste('+'),
-        ['*'] = osc52.paste('*'),
-      },
-    }
+  local has_macos_clipboard =
+    vim.fn.has('macunix') == 1
+    and vim.fn.executable('pbcopy') == 1
+    and vim.fn.executable('pbpaste') == 1
+
+  if not has_macos_clipboard then
+    local ok, osc52 = pcall(require, 'vim.ui.clipboard.osc52')
+    if ok then
+      vim.g.clipboard = {
+        name = 'osc52',
+        copy = {
+          ['+'] = osc52.copy('+'),
+          ['*'] = osc52.copy('*'),
+        },
+        paste = {
+          ['+'] = osc52.paste('+'),
+          ['*'] = osc52.paste('*'),
+        },
+      }
+    end
   end
 end
 vim.opt.clipboard = 'unnamedplus'
