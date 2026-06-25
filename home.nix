@@ -1140,6 +1140,51 @@ in
 
     # Git worktree
     git-wt
+
+    # Shell enhancements (migrated from brew)
+    atuin          # shell history with sync
+    direnv         # per-directory env vars
+    starship       # cross-shell prompt
+
+    # CLI tools (migrated from brew)
+    cmake
+    findutils      # GNU find/xargs (gfind, gxargs on darwin)
+    git-filter-repo
+    gnused         # GNU sed (available as gsed on darwin)
+    hyperfine      # benchmarking
+    jnv            # interactive jq TUI
+    mosh           # mobile shell
+    silicon        # code screenshot (source → image)
+    watch          # watch command
+    wget
+
+    # GitHub CLI
+    gh
+
+    # Databases (migrated from brew)
+    clickhouse
+    # NOTE: postgresql NOT migrated as v14 — `postgresql` (v17) is already in
+    # home.packages above; can't have two versions (pg_rewind etc. collide).
+    # If a project needs PG14 specifically, keep `postgresql@14` in brew.
+    # NOTE: minio (server) intentionally NOT migrated — nixpkgs marks it
+    # insecure (abandoned upstream, unpatched CVEs). Kept in Homebrew.
+
+    # Network
+    ngrok
+
+    # Kubernetes
+    kubectx
+
+    # Build tools / Java
+    maven
+    cargo-make
+
+    # Multimedia
+    mkvtoolnix
+
+    # Runtime version managers (migrated from brew)
+    volta
+    mise
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     tree-sitter-cli  # custom build (0.26.x for nvim-treesitter); see let-binding above
 
@@ -1160,6 +1205,17 @@ in
     gradia
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     tree-sitter  # nixpkgs CLI (the custom 0.26.x build above is Linux-only for now)
+
+    # macOS-specific pinentry for GPG (integrates with macOS Keychain)
+    pinentry_mac
+
+    # Fonts (replaces brew cask font-jetbrains-mono-nerd-font)
+    nerd-fonts.jetbrains-mono
+
+    # GUI apps / tools with nixpkgs darwin builds (migrated from brew casks)
+    _1password-cli
+    rectangle
+    wezterm
 
     # On NixOS this comes from nixos/common.nix's fonts.packages; darwin needs it via home-manager.
     (pkgs.google-fonts.override { fonts = [ "Google Sans Code" ]; })
