@@ -85,10 +85,14 @@ in
     }
   '';
   # Sound files for Claude Code hooks (Linux only; macOS uses built-in sounds).
-  home.file.".local/share/sounds/claude-done.oga".source =
-    "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/service-login.oga";
-  home.file.".local/share/sounds/claude-notification.oga".source =
-    "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/complete.oga";
+  # mkIf on the whole entry keeps it (and the Linux-only package reference) off
+  # darwin entirely, where the hooks fall back to afplay.
+  home.file.".local/share/sounds/claude-done.oga" = lib.mkIf pkgs.stdenv.isLinux {
+    source = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/service-login.oga";
+  };
+  home.file.".local/share/sounds/claude-notification.oga" = lib.mkIf pkgs.stdenv.isLinux {
+    source = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/complete.oga";
+  };
 
   home.file.".claude/agents/codex-reviewer.md".text = ''
     ---
@@ -1047,22 +1051,11 @@ in
     gnupg
     lazygit
 
-    # Clipboard
-    xsel          # X11
-    wl-clipboard  # Wayland
-
     # Network / HTTP
     dnsutils
     nghttp2
     oha
     websocat
-
-    # Browser
-    google-chrome
-
-    # Communication
-    discord
-    slack
 
     # Kubernetes
     k9s
@@ -1085,7 +1078,6 @@ in
     redis
 
     # Languages / Build tools
-    gcc
     lld
     protobuf
     typst
@@ -1135,19 +1127,29 @@ in
     gemini-cli
     claude-code
 
-    # Editor
-    vscode
-    zed-editor
-
-    # Screenshot / Recording
-    gradia
-    obs-studio
-
     # Git worktree
     git-wt
-  ] ++ [
-    tree-sitter-cli  # custom build (0.26.x for nvim-treesitter)
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    tree-sitter-cli  # custom build (0.26.x for nvim-treesitter); see let-binding above
+
+    gcc  # on macOS the native clang from stdenv is used instead
+
+    # Clipboard (X11 / Wayland)
+    xsel
+    wl-clipboard
+
+    # GUI apps. On macOS these come from Homebrew casks (see darwin.nix),
+    # because nixpkgs has no (or no reliable) darwin build for them.
+    google-chrome
+    discord
+    slack
+    vscode
+    zed-editor
+    obs-studio
+    gradia
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
+    tree-sitter  # nixpkgs CLI (the custom 0.26.x build above is Linux-only for now)
+
     # On NixOS this comes from nixos/common.nix's fonts.packages; darwin needs it via home-manager.
     (pkgs.google-fonts.override { fonts = [ "Google Sans Code" ]; })
   ];
@@ -1392,10 +1394,19 @@ in
         alias pbpaste='xsel --clipboard --output | tr -d "\r"'
       fi
 
-      # Library path for native npm modules (e.g., @parcel/watcher) - Linux only
-      if [[ "$(uname)" == "Linux" ]]; then
+      # Library path for native npm modules (e.g., @parcel/watcher) - Linux only.
+      # Guarded in Nix (not just at runtime) so pkgs.stdenv.cc.cc.lib is never
+      # forced on darwin, where that output doesn't exist.
+      ${lib.optionalString pkgs.stdenv.isLinux ''
         export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:''${LD_LIBRARY_PATH:-}"
-      fi
+      ''}
+
+      # Homebrew (kept for GUI casks during/after the Nix migration). Note this
+      # prepends /opt/homebrew/bin, so during migration a brew copy can shadow
+      # the Nix one for duplicated tools — uninstall the brew copy to let Nix win.
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      ''}
 
       # Additional PATH entries
       export PATH="/usr/local/bin:$HOME/bin:$PATH"
@@ -1441,7 +1452,11 @@ in
       # Syntax highlighting and autosuggestions
       zinit ice wait lucid
       zinit light zdharma-continuum/fast-syntax-highlighting
-      zinit ice wait lucid
+      # atload'!_zsh_autosuggest_start' is required when loading autosuggestions
+      # under turbo (wait): otherwise the plugin sources after the first prompt's
+      # precmd has run, its widget hooks never bind, and the inline "shadow"
+      # suggestions never appear. atload runs the start function right after load.
+      zinit ice wait lucid atload'!_zsh_autosuggest_start'
       zinit light zsh-users/zsh-autosuggestions
 
       # fzf integration
@@ -1498,7 +1513,10 @@ in
   # GPG
   # ──────────────────────────────────────────────────────────────
   programs.gpg.enable = true;
-  services.gpg-agent = {
+  # home-manager's gpg-agent service is systemd-based, so it's Linux-only. On
+  # macOS gpg-agent is started on demand; set `pinentry-program` in
+  # ~/.gnupg/gpg-agent.conf (e.g. pkgs.pinentry_mac) if you want a GUI prompt.
+  services.gpg-agent = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
     # Set a default pinentry here. Use pinentry-curses unless another module overrides it.
     pinentry.package = lib.mkDefault pkgs.pinentry-curses;
@@ -1550,6 +1568,9 @@ in
   # ──────────────────────────────────────────────────────────────
   programs.ghostty = {
     enable = true;
+    # nixpkgs has no macOS build of ghostty, so on darwin install it via the
+    # Homebrew cask and let home-manager manage only the config file.
+    package = if pkgs.stdenv.isDarwin then null else pkgs.ghostty;
     settings = {
       font-family = [
         "JetBrainsMono Nerd Font"
@@ -1571,6 +1592,9 @@ in
       clipboard-write = "allow";
       app-notifications = "no-clipboard-copy";
       shell-integration-features = "no-cursor";
+      # macOS-only: don't persist window state, so macOS won't auto-relaunch
+      # Ghostty at login (its "Reopen windows" restoration). No-op on Linux.
+      window-save-state = "never";
       config-file = [
         "~/.config/ghostty/overrides"
       ];

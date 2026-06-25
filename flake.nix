@@ -7,6 +7,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     xremap = {
       url = "github:xremap/nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -30,7 +34,7 @@
     };
 };
 
-  outputs = { nixpkgs, home-manager, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, ... }:
+  outputs = { nixpkgs, home-manager, nix-darwin, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, ... }:
     let
       denoVersionsOverlay = final: prev:
         let
@@ -93,6 +97,21 @@
           };
           modules = [ ./home.nix ];
         };
+      };
+
+      # macOS system (nix-darwin) — manages system settings + Homebrew only.
+      # The user environment is managed separately by the standalone
+      # homeConfigurations."yusuke@macbook" above, exactly like nixos-mini.
+      #   System changes:  sudo darwin-rebuild switch --flake .#macbook
+      #   Home changes:    home-manager switch --flake .#yusuke@macbook   (no sudo)
+      darwinConfigurations."macbook" = nix-darwin.lib.darwinSystem {
+        modules = [
+          {
+            nixpkgs.hostPlatform = "aarch64-darwin";
+            nixpkgs.config.allowUnfree = true;
+          }
+          ./darwin.nix
+        ];
       };
     };
 }
