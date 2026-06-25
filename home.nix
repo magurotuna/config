@@ -35,6 +35,13 @@ in
   xdg.configFile."nvim/init.lua".source = ./nvim/init.lua;
   xdg.configFile."nvim/lua".source = ./nvim/lua;
 
+  # Karabiner-Elements (macOS only). Declarative config: edit
+  # ./karabiner/karabiner.json in this repo and `home-manager switch`.
+  # NOTE: this deploys a read-only symlink into the Nix store, so the
+  # Karabiner GUI can no longer save changes — manage keybinds here instead.
+  xdg.configFile."karabiner/karabiner.json" =
+    lib.mkIf pkgs.stdenv.isDarwin { source = ./karabiner/karabiner.json; };
+
   # ──────────────────────────────────────────────────────────────
   # Claude Code
   # ──────────────────────────────────────────────────────────────
