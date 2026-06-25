@@ -1067,6 +1067,7 @@ in
     nghttp2
     oha
     websocat
+    tailscale
 
     # Kubernetes
     k9s
