@@ -1457,17 +1457,19 @@ in
       # GPG
       export GPG_TTY=$(tty)
 
-      # Clipboard (auto-detect X11 vs Wayland)
-      if [[ -n "$WAYLAND_DISPLAY" ]]; then
-        pbcopy() { printf '\e]52;c;'; base64 -w0; printf '\a'; }
-        # Avoid wl-copy because it causes a terminal window opened by quake-terminal (GNOME extension) to disappear
-        alias pbpaste='xsel --clipboard --output | tr -d "\r"'
-        alias pbcopy-wl='wl-copy'
-        alias pbpaste-wl='wl-paste'
-      else
-        alias pbcopy='xsel --clipboard --input'
-        alias pbpaste='xsel --clipboard --output | tr -d "\r"'
-      fi
+      ${lib.optionalString pkgs.stdenv.isLinux ''
+        # Clipboard (auto-detect X11 vs Wayland)
+        if [[ -n "$WAYLAND_DISPLAY" ]]; then
+          pbcopy() { printf '\e]52;c;'; base64 -w0; printf '\a'; }
+          # Avoid wl-copy because it causes a terminal window opened by quake-terminal (GNOME extension) to disappear
+          alias pbpaste='xsel --clipboard --output | tr -d "\r"'
+          alias pbcopy-wl='wl-copy'
+          alias pbpaste-wl='wl-paste'
+        else
+          alias pbcopy='xsel --clipboard --input'
+          alias pbpaste='xsel --clipboard --output | tr -d "\r"'
+        fi
+      ''}
 
       # Library path for native npm modules (e.g., @parcel/watcher) - Linux only.
       # Guarded in Nix (not just at runtime) so pkgs.stdenv.cc.cc.lib is never
