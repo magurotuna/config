@@ -17,6 +17,10 @@ let
     BINDGEN_EXTRA_CLANG_ARGS = "-isystem ${pkgs.stdenv.cc.libc.dev}/include";
     doCheck = false;  # tests require grammar fixtures
   };
+  tmuxCopyAction =
+    if pkgs.stdenv.isDarwin
+    then ''copy-pipe-and-cancel "/usr/bin/pbcopy"''
+    else "copy-selection-and-cancel";
 in
 {
   # Home Manager needs these to know where to install things
@@ -34,6 +38,13 @@ in
   # ──────────────────────────────────────────────────────────────
   xdg.configFile."nvim/init.lua".source = ./nvim/init.lua;
   xdg.configFile."nvim/lua".source = ./nvim/lua;
+
+  # Karabiner-Elements (macOS only). Declarative config: edit
+  # ./karabiner/karabiner.json in this repo and `home-manager switch`.
+  # NOTE: this deploys a read-only symlink into the Nix store, so the
+  # Karabiner GUI can no longer save changes — manage keybinds here instead.
+  xdg.configFile."karabiner/karabiner.json" =
+    lib.mkIf pkgs.stdenv.isDarwin { source = ./karabiner/karabiner.json; };
 
   # ──────────────────────────────────────────────────────────────
   # Claude Code
@@ -85,10 +96,14 @@ in
     }
   '';
   # Sound files for Claude Code hooks (Linux only; macOS uses built-in sounds).
-  home.file.".local/share/sounds/claude-done.oga".source =
-    "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/service-login.oga";
-  home.file.".local/share/sounds/claude-notification.oga".source =
-    "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/complete.oga";
+  # mkIf on the whole entry keeps it (and the Linux-only package reference) off
+  # darwin entirely, where the hooks fall back to afplay.
+  home.file.".local/share/sounds/claude-done.oga" = lib.mkIf pkgs.stdenv.isLinux {
+    source = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/service-login.oga";
+  };
+  home.file.".local/share/sounds/claude-notification.oga" = lib.mkIf pkgs.stdenv.isLinux {
+    source = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/complete.oga";
+  };
 
   home.file.".claude/agents/codex-reviewer.md".text = ''
     ---
@@ -1047,22 +1062,11 @@ in
     gnupg
     lazygit
 
-    # Clipboard
-    xsel          # X11
-    wl-clipboard  # Wayland
-
     # Network / HTTP
     dnsutils
     nghttp2
     oha
     websocat
-
-    # Browser
-    google-chrome
-
-    # Communication
-    discord
-    slack
 
     # Kubernetes
     k9s
@@ -1085,7 +1089,6 @@ in
     redis
 
     # Languages / Build tools
-    gcc
     lld
     protobuf
     typst
@@ -1135,19 +1138,85 @@ in
     gemini-cli
     claude-code
 
-    # Editor
-    vscode
-    zed-editor
-
-    # Screenshot / Recording
-    gradia
-    obs-studio
-
     # Git worktree
     git-wt
-  ] ++ [
-    tree-sitter-cli  # custom build (0.26.x for nvim-treesitter)
+
+    # Shell enhancements (migrated from brew)
+    atuin          # shell history with sync
+    direnv         # per-directory env vars
+    starship       # cross-shell prompt
+
+    # CLI tools (migrated from brew)
+    cmake
+    findutils      # GNU find/xargs (gfind, gxargs on darwin)
+    git-filter-repo
+    gnused         # GNU sed (available as gsed on darwin)
+    hyperfine      # benchmarking
+    jnv            # interactive jq TUI
+    mosh           # mobile shell
+    silicon        # code screenshot (source → image)
+    watch          # watch command
+    wget
+
+    # GitHub CLI
+    gh
+
+    # Databases (migrated from brew)
+    clickhouse
+    # NOTE: postgresql NOT migrated as v14 — `postgresql` (v17) is already in
+    # home.packages above; can't have two versions (pg_rewind etc. collide).
+    # If a project needs PG14 specifically, keep `postgresql@14` in brew.
+    # NOTE: minio (server) intentionally NOT migrated — nixpkgs marks it
+    # insecure (abandoned upstream, unpatched CVEs). Kept in Homebrew.
+
+    # Network
+    ngrok
+
+    # Kubernetes
+    kubectx
+
+    # Build tools / Java
+    maven
+    cargo-make
+
+    # Multimedia
+    mkvtoolnix
+
+    # Runtime version managers (migrated from brew)
+    volta
+    mise
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    tree-sitter-cli  # custom build (0.26.x for nvim-treesitter); see let-binding above
+
+    gcc  # on macOS the native clang from stdenv is used instead
+
+    # Clipboard (X11 / Wayland)
+    xsel
+    wl-clipboard
+
+    # GUI apps. On macOS these come from Homebrew casks (see darwin.nix),
+    # because nixpkgs has no (or no reliable) darwin build for them.
+    google-chrome
+    discord
+    slack
+    vscode
+    zed-editor
+    obs-studio
+    gradia
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
+    tree-sitter  # nixpkgs CLI (the custom 0.26.x build above is Linux-only for now)
+
+    # macOS-specific pinentry for GPG (integrates with macOS Keychain)
+    pinentry_mac
+
+    # Fonts (replaces brew cask font-jetbrains-mono-nerd-font)
+    nerd-fonts.jetbrains-mono
+
+    # GUI apps / tools with nixpkgs darwin builds (migrated from brew casks)
+    _1password-cli
+    rectangle
+    wezterm
+
     # On NixOS this comes from nixos/common.nix's fonts.packages; darwin needs it via home-manager.
     (pkgs.google-fonts.override { fonts = [ "Google Sans Code" ]; })
   ];
@@ -1360,10 +1429,17 @@ in
     };
 
     # Raw zsh configuration
-    initContent = ''
+    initContent = lib.mkMerge [
+      ''
       # Additional shell options
       setopt no_global_rcs
       setopt AUTO_PARAM_KEYS
+
+      # zsh-autosuggestions searches zsh's in-memory history, while Home
+      # Manager sets HISTFILE after zsh's startup history import point.
+      # Import the persistent history before loading autosuggestions so fresh
+      # terminals can suggest commands from previous sessions.
+      [[ -r "$HISTFILE" ]] && fc -R "$HISTFILE" 2>/dev/null || true
 
       # Disable accept-line-and-down-history
       bindkey -r "^O"
@@ -1392,10 +1468,19 @@ in
         alias pbpaste='xsel --clipboard --output | tr -d "\r"'
       fi
 
-      # Library path for native npm modules (e.g., @parcel/watcher) - Linux only
-      if [[ "$(uname)" == "Linux" ]]; then
+      # Library path for native npm modules (e.g., @parcel/watcher) - Linux only.
+      # Guarded in Nix (not just at runtime) so pkgs.stdenv.cc.cc.lib is never
+      # forced on darwin, where that output doesn't exist.
+      ${lib.optionalString pkgs.stdenv.isLinux ''
         export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:''${LD_LIBRARY_PATH:-}"
-      fi
+      ''}
+
+      # Homebrew (kept for GUI casks during/after the Nix migration). Note this
+      # prepends /opt/homebrew/bin, so during migration a brew copy can shadow
+      # the Nix one for duplicated tools — uninstall the brew copy to let Nix win.
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      ''}
 
       # Additional PATH entries
       export PATH="/usr/local/bin:$HOME/bin:$PATH"
@@ -1441,7 +1526,11 @@ in
       # Syntax highlighting and autosuggestions
       zinit ice wait lucid
       zinit light zdharma-continuum/fast-syntax-highlighting
-      zinit ice wait lucid
+      # atload'!_zsh_autosuggest_start' is required when loading autosuggestions
+      # under turbo (wait): otherwise the plugin sources after the first prompt's
+      # precmd has run, its widget hooks never bind, and the inline "shadow"
+      # suggestions never appear. atload runs the start function right after load.
+      zinit ice wait lucid atload'!_zsh_autosuggest_start'
       zinit light zsh-users/zsh-autosuggestions
 
       # fzf integration
@@ -1466,7 +1555,17 @@ in
       # Secrets (not tracked in git)
       # ─────────────────────────────────────────────────────────────
       [ -f ~/.secrets.zsh ] && source ~/.secrets.zsh
-    '';
+      ''
+      (lib.mkOrder 1500 ''
+        # Atuin prepends its own autosuggestion strategy, which bypasses zsh's
+        # in-memory history. Keep Atuin widgets, but make inline suggestions use
+        # the history imported above.
+        if [[ $options[zle] = on ]]; then
+          ZSH_AUTOSUGGEST_STRATEGY=(history)
+          (( $+functions[_zsh_autosuggest_start] )) && _zsh_autosuggest_start
+        fi
+      '')
+    ];
   };
 
   # ──────────────────────────────────────────────────────────────
@@ -1498,7 +1597,10 @@ in
   # GPG
   # ──────────────────────────────────────────────────────────────
   programs.gpg.enable = true;
-  services.gpg-agent = {
+  # home-manager's gpg-agent service is systemd-based, so it's Linux-only. On
+  # macOS gpg-agent is started on demand; set `pinentry-program` in
+  # ~/.gnupg/gpg-agent.conf (e.g. pkgs.pinentry_mac) if you want a GUI prompt.
+  services.gpg-agent = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
     # Set a default pinentry here. Use pinentry-curses unless another module overrides it.
     pinentry.package = lib.mkDefault pkgs.pinentry-curses;
@@ -1550,13 +1652,15 @@ in
   # ──────────────────────────────────────────────────────────────
   programs.ghostty = {
     enable = true;
+    # nixpkgs has no macOS build of ghostty, so on darwin install it via the
+    # Homebrew cask and let home-manager manage only the config file.
+    package = if pkgs.stdenv.isDarwin then null else pkgs.ghostty;
     settings = {
       font-family = [
         "JetBrainsMono Nerd Font"
         "Noto Sans Mono CJK JP"
         "Adwaita Mono"
       ];
-      font-size = 10;
       theme = "Dracula";
       cursor-style = "block";
       background-opacity = 0.85;
@@ -1571,11 +1675,30 @@ in
       clipboard-write = "allow";
       app-notifications = "no-clipboard-copy";
       shell-integration-features = "no-cursor";
+      # macOS-only: don't persist window state, so macOS won't auto-relaunch
+      # Ghostty at login (its "Reopen windows" restoration). No-op on Linux.
+      window-save-state = "never";
+      # `?` prefix = optional: Ghostty won't error if the local override file
+      # is absent. On macOS we seed this file below, but keep it mutable.
       config-file = [
-        "~/.config/ghostty/overrides"
+        "?~/.config/ghostty/overrides"
       ];
+    } // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
+      font-size = 10;
     };
   };
+
+  home.activation.seedGhosttyOverrides = lib.mkIf pkgs.stdenv.isDarwin (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      overrides="${homeDirectory}/.config/ghostty/overrides"
+      if [[ ! -s "$overrides" ]]; then
+        mkdir -p "$(dirname "$overrides")"
+        cat > "$overrides" <<'EOF'
+font-size = 13
+EOF
+      fi
+    ''
+  );
 
   # ──────────────────────────────────────────────────────────────
   # Tmux
@@ -1592,9 +1715,9 @@ in
 
     extraConfig = ''
       # enable true color
-      set -ga terminal-overrides ",xterm-256color:Tc"
-      # OSC52 clipboard for tmux-256color
-      set -ga terminal-overrides ",tmux-256color:Ms=\E]52;c;%p1%s\007"
+      set -g terminal-overrides "xterm-256color:Tc"
+      # OSC52 clipboard. `%p2%s` is the base64-encoded selection payload.
+      set -ga terminal-overrides ",*:Ms=\E]52;c;%p2%s\007"
       # Cursor shape passthrough (Ss=set style, Se=reset to terminal default)
       set -ga terminal-overrides ",*:Ss=\\E[%p1%d q:Se=\\E[ q"
 
@@ -1620,12 +1743,15 @@ in
 
       # OSC52 clipboard
       set-option -s set-clipboard on
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+        set-option -s copy-command "/usr/bin/pbcopy"
+      ''}
 
       # vi copy mode
       bind-key -T copy-mode-vi v send -X begin-selection
-      bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
-      bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-selection-and-cancel
-      bind-key -T copy-mode-vi Enter send-keys -X copy-selection-and-cancel
+      bind-key -T copy-mode-vi y send-keys -X ${tmuxCopyAction}
+      bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X ${tmuxCopyAction}
+      bind-key -T copy-mode-vi Enter send-keys -X ${tmuxCopyAction}
 
       ##################
       #   Appearance   #
