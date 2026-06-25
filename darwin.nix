@@ -64,7 +64,8 @@
     casks = [
       # "1password"
       # "1password-cli"
-      # "karabiner-elements"
+      # Reads ~/.config/karabiner/karabiner.json managed by home.nix.
+      "karabiner-elements"
       # "google-japanese-ime"
       # "raycast"
       # "rectangle"

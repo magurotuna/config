@@ -1602,8 +1602,10 @@ in
       # macOS-only: don't persist window state, so macOS won't auto-relaunch
       # Ghostty at login (its "Reopen windows" restoration). No-op on Linux.
       window-save-state = "never";
+      # `?` prefix = optional: Ghostty won't error if the file is absent
+      # (it's a machine-local, non-Nix overrides file that may not exist).
       config-file = [
-        "~/.config/ghostty/overrides"
+        "?~/.config/ghostty/overrides"
       ];
     };
   };
