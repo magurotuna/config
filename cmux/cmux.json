@@ -12,7 +12,8 @@
       "newSurface": ["ctrl+t", "c"],
       "nextSurface": ["ctrl+t", "n"],
       "prevSurface": ["ctrl+t", "p"],
-      "closeTab": ["ctrl+t", "x"]
+      "closeTab": ["ctrl+t", "x"],
+      "toggleTerminalCopyMode": ["ctrl+t", "["]
     }
   }
 }
