@@ -1618,6 +1618,17 @@ in
           (( $+functions[_zsh_autosuggest_start] )) && _zsh_autosuggest_start
         fi
       '')
+      (lib.mkIf pkgs.stdenv.isDarwin ''
+        # cmux uses libghostty as its rendering engine and turns on the kitty
+        # keyboard protocol's "disambiguate" flag at the PTY level, with no option
+        # to disable it (cmux#3837). Unlike the Linux setup there is no tmux layer
+        # to shield the shell, so Ctrl+M / Ctrl+I / Ctrl+[ arrive as CSI-u
+        # sequences instead of their legacy bytes and Ctrl+M stops acting as
+        # Enter. Bind the leaked Ctrl+M sequence back to accept-line. This is a
+        # no-op whenever the protocol is inactive (the sequence never arrives), so
+        # it is safe to set unconditionally on macOS.
+        bindkey '\e[109;5u' accept-line   # Ctrl+M (kitty CSI-u) -> Enter
+      '')
     ];
   };
 
