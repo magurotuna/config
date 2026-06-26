@@ -21,6 +21,25 @@ let
     if pkgs.stdenv.isDarwin
     then ''copy-pipe-and-cancel "/usr/bin/pbcopy"''
     else "copy-selection-and-cancel";
+
+  # App that the skhd ctrl+. hotkey visibility-toggles (macOS).
+  hotkeyTerminalApp = "cmux";
+
+  # Visibility toggle used by skhd: if the target app is frontmost, hide it
+  # completely; otherwise activate it (launching if it isn't running). The
+  # comparison is case-insensitive because an app's System Events process name
+  # can differ in case from its bundle name (e.g. Ghostty.app -> "ghostty").
+  # Absolute paths are used because skhd's launchd agent runs with a minimal PATH.
+  toggleAppScript = pkgs.writeShellScript "skhd-toggle-app" ''
+    app="$1"
+    front=$(/usr/bin/osascript -e 'tell application "System Events" to get name of first process whose frontmost is true')
+    lc() { printf '%s' "$1" | /usr/bin/tr '[:upper:]' '[:lower:]'; }
+    if [ "$(lc "$front")" = "$(lc "$app")" ]; then
+      /usr/bin/osascript -e 'tell application "System Events" to set visible of (first process whose frontmost is true) to false'
+    else
+      /usr/bin/open -a "$app"
+    fi
+  '';
 in
 {
   # Home Manager needs these to know where to install things
@@ -52,6 +71,19 @@ in
   # Action IDs verified against cmux docs; edit ./cmux/cmux.json + `home-manager switch`.
   xdg.configFile."cmux/cmux.json" =
     lib.mkIf pkgs.stdenv.isDarwin { source = ./cmux/cmux.json; };
+
+  # skhd (macOS only): simple global hotkey daemon, installed from nixpkgs and
+  # run as a launchd agent that Home Manager manages. ctrl+. visibility-toggles
+  # the terminal app (summon to front; press again to hide). One-time manual
+  # step: grant skhd Accessibility permission in System Settings > Privacy.
+  # Note: 0x2F is the period key (0x2B is comma). skhd only accepts UPPERCASE
+  # hex keycodes (0x2f is rejected with a parse error) and has no "." key token.
+  services.skhd = lib.mkIf pkgs.stdenv.isDarwin {
+    enable = true;
+    config = ''
+      ctrl - 0x2F : ${toggleAppScript} ${hotkeyTerminalApp}
+    '';
+  };
 
   # ──────────────────────────────────────────────────────────────
   # Claude Code
