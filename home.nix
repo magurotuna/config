@@ -95,6 +95,36 @@ in
     '';
   };
 
+  # Clawpatrol.app (macOS only). The clawpatrol CLI is a normal Nix package in
+  # home.packages; but `clawpatrol run` also needs Clawpatrol.app installed in
+  # /Applications, because it hosts the NetworkExtension system extension that
+  # intercepts per-process flows. macOS validates and activates a system
+  # extension from a real bundle in /Applications, so a Nix store symlink won't
+  # do — we copy the store-staged bundle in, exactly like install.sh does.
+  #
+  # This is an imperative side effect outside the Nix store: it is NOT rolled
+  # back on generation switch and NOT garbage-collected. Removing this block
+  # won't uninstall the app — `sudo rm -rf /Applications/Clawpatrol.app` for that.
+  # Activating the system extension itself is still a one-time manual step:
+  # run `clawpatrol run`, then approve it in System Settings > Privacy & Security
+  # (and allow the network filter). install.sh doesn't automate that either.
+  home.activation.clawpatrolApp = lib.mkIf pkgs.stdenv.isDarwin (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      src="${pkgs.clawpatrol-app}/Applications/Clawpatrol.app"
+      dest="/Applications/Clawpatrol.app"
+      # Only touch /Applications when the bundle actually differs, so routine
+      # `home-manager switch` runs stay no-ops.
+      if [ ! -e "$dest" ] || ! /usr/bin/diff -rq "$src" "$dest" >/dev/null 2>&1; then
+        $DRY_RUN_CMD rm -rf "$dest"
+        $DRY_RUN_CMD cp -R "$src" "$dest"
+        # Store copy is read-only (0444/0555); make the installed bundle
+        # writable so a later rm/refresh doesn't need sudo. Does not affect
+        # the code signature.
+        $DRY_RUN_CMD chmod -R u+w "$dest"
+      fi
+    ''
+  );
+
   # ──────────────────────────────────────────────────────────────
   # Claude Code
   # ──────────────────────────────────────────────────────────────

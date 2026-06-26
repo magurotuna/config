@@ -21,26 +21,31 @@ gh release download "v$ver" -R "$repo" -p SHA256SUMS -D "$tmp"
 to_sri() { nix hash convert --hash-algo sha256 --to sri "$1"; }
 
 declare -A sri
+app_sri=""
 while read -r hex name; do
   case "$name" in
     clawpatrol-linux-amd64)  sri[x86_64-linux]=$(to_sri "$hex") ;;
     clawpatrol-linux-arm64)  sri[aarch64-linux]=$(to_sri "$hex") ;;
     clawpatrol-darwin-amd64) sri[x86_64-darwin]=$(to_sri "$hex") ;;
     clawpatrol-darwin-arm64) sri[aarch64-darwin]=$(to_sri "$hex") ;;
+    Clawpatrol.app.tar.gz)   app_sri=$(to_sri "$hex") ;;
   esac
 done < "$tmp/SHA256SUMS"
 
 for s in x86_64-linux aarch64-linux x86_64-darwin aarch64-darwin; do
   [ -n "${sri[$s]:-}" ] || { echo "missing hash for $s in SHA256SUMS" >&2; exit 1; }
 done
+[ -n "$app_sri" ] || { echo "missing hash for Clawpatrol.app.tar.gz in SHA256SUMS" >&2; exit 1; }
 
 block=$(cat <<EOF
-  asset = {
+  binAssets = {
     "x86_64-linux"   = { name = "clawpatrol-linux-amd64";  hash = "${sri[x86_64-linux]}"; };
     "aarch64-linux"  = { name = "clawpatrol-linux-arm64";  hash = "${sri[aarch64-linux]}"; };
     "x86_64-darwin"  = { name = "clawpatrol-darwin-amd64"; hash = "${sri[x86_64-darwin]}"; };
     "aarch64-darwin" = { name = "clawpatrol-darwin-arm64"; hash = "${sri[aarch64-darwin]}"; };
-  }.\${system} or (throw "clawpatrol: unsupported system \${system}");
+  };
+  # macOS .app bundle (same artifact for both darwin arches in the release).
+  appHash = "${app_sri}";
 EOF
 )
 
