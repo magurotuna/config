@@ -25,21 +25,31 @@ let
   # App that the skhd ctrl+. hotkey visibility-toggles (macOS).
   hotkeyTerminalApp = "cmux";
 
-  # Visibility toggle used by skhd: if the target app is frontmost, hide it
-  # completely; otherwise activate it (launching if it isn't running). The
-  # comparison is case-insensitive because an app's System Events process name
-  # can differ in case from its bundle name (e.g. Ghostty.app -> "ghostty").
-  # Absolute paths are used because skhd's launchd agent runs with a minimal PATH.
-  toggleAppScript = pkgs.writeShellScript "skhd-toggle-app" ''
-    app="$1"
-    front=$(/usr/bin/osascript -e 'tell application "System Events" to get name of first process whose frontmost is true')
-    lc() { printf '%s' "$1" | /usr/bin/tr '[:upper:]' '[:lower:]'; }
-    if [ "$(lc "$front")" = "$(lc "$app")" ]; then
-      /usr/bin/osascript -e 'tell application "System Events" to set visible of (first process whose frontmost is true) to false'
-    else
-      /usr/bin/open -a "$app"
-    fi
-  '';
+  # Compiled Cocoa helper that visibility-toggles an app entirely in-process
+  # (NSWorkspace/NSRunningApplication), so skhd's ctrl+. is near-instant. The old
+  # osascript approach paid a ~190ms Apple Event round-trip to System Events on
+  # every press; reading the same state in-process is ~0.0001ms, so the dominant
+  # cost is gone. Built from skhd/toggle-app.m with the stdenv clang and the
+  # default macOS SDK. Only referenced from the darwin-gated services.skhd below,
+  # so it is never built on Linux.
+  toggleAppHelper = pkgs.stdenv.mkDerivation {
+    pname = "skhd-toggle-app";
+    version = "1.0";
+    src = ./skhd;
+    dontConfigure = true;
+    buildPhase = ''
+      runHook preBuild
+      $CC -fobjc-arc -Wno-deprecated-declarations -O2 \
+        -framework AppKit -framework Foundation \
+        -o skhd-toggle-app toggle-app.m
+      runHook postBuild
+    '';
+    installPhase = ''
+      runHook preInstall
+      install -Dm755 skhd-toggle-app $out/bin/skhd-toggle-app
+      runHook postInstall
+    '';
+  };
 in
 {
   # Home Manager needs these to know where to install things
@@ -81,7 +91,7 @@ in
   services.skhd = lib.mkIf pkgs.stdenv.isDarwin {
     enable = true;
     config = ''
-      ctrl - 0x2F : ${toggleAppScript} ${hotkeyTerminalApp}
+      ctrl - 0x2F : ${toggleAppHelper}/bin/skhd-toggle-app ${hotkeyTerminalApp}
     '';
   };
 
