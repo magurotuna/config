@@ -65,6 +65,8 @@
       # "1password"
       # "1password-cli"
       "cmux"
+      # OpenAI's Codex desktop app (GUI; proprietary, auto-updating .app).
+      "codex-app"
       # Reads ~/.config/karabiner/karabiner.json managed by home.nix.
       "karabiner-elements"
       # "google-japanese-ime"
