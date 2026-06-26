@@ -1187,6 +1187,7 @@ in
     codexPkg # from codex-cli-nix flake, not nixpkgs
     gemini-cli
     claude-code
+    clawpatrol # security firewall for agents; overlays/clawpatrol.nix
 
     # Git worktree
     git-wt
