@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux.schema.json",
+  "schemaVersion": 1,
+  "shortcuts": {
+    "bindings": {
+      "splitRight": ["ctrl+t", "shift+\\"],
+      "splitDown": ["ctrl+t", "-"],
+      "focusLeft": ["ctrl+t", "h"],
+      "focusDown": ["ctrl+t", "j"],
+      "focusUp": ["ctrl+t", "k"],
+      "focusRight": ["ctrl+t", "l"],
+      "newSurface": ["ctrl+t", "c"],
+      "nextSurface": ["ctrl+t", "n"],
+      "prevSurface": ["ctrl+t", "p"],
+      "closeTab": ["ctrl+t", "x"]
+    }
+  }
+}

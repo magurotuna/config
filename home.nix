@@ -46,6 +46,13 @@ in
   xdg.configFile."karabiner/karabiner.json" =
     lib.mkIf pkgs.stdenv.isDarwin { source = ./karabiner/karabiner.json; };
 
+  # cmux terminal (macOS only). tmux-style `C-t` prefix chords so the muscle
+  # memory from programs.tmux below carries over to cmux's native splits/tabs
+  # (which is what keeps its per-surface agent progress tracking working).
+  # Action IDs verified against cmux docs; edit ./cmux/cmux.json + `home-manager switch`.
+  xdg.configFile."cmux/cmux.json" =
+    lib.mkIf pkgs.stdenv.isDarwin { source = ./cmux/cmux.json; };
+
   # ──────────────────────────────────────────────────────────────
   # Claude Code
   # ──────────────────────────────────────────────────────────────
