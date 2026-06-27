@@ -1653,11 +1653,14 @@ in
         # keyboard protocol's "disambiguate" flag at the PTY level, with no option
         # to disable it (cmux#3837). Unlike the Linux setup there is no tmux layer
         # to shield the shell, so Ctrl+M / Ctrl+I / Ctrl+[ arrive as CSI-u
-        # sequences instead of their legacy bytes and Ctrl+M stops acting as
-        # Enter. Bind the leaked Ctrl+M sequence back to accept-line. This is a
-        # no-op whenever the protocol is inactive (the sequence never arrives), so
-        # it is safe to set unconditionally on macOS.
+        # sequences instead of their legacy bytes, so Ctrl+M stops acting as Enter
+        # and Ctrl+[ stops acting as Esc. Map the leaked sequences back to their
+        # legacy meaning. These are no-ops whenever the protocol is inactive (the
+        # sequences never arrive), so they are safe to set unconditionally on
+        # macOS. Ctrl+[ uses `bindkey -s` to re-inject a real Esc byte because Esc
+        # is a Meta prefix in our emacs keymap, not a single widget.
         bindkey '\e[109;5u' accept-line   # Ctrl+M (kitty CSI-u) -> Enter
+        bindkey -s '\e[91;5u' '\e'        # Ctrl+[ (kitty CSI-u) -> Esc (Meta prefix)
       '')
     ];
   };
