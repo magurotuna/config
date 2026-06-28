@@ -89,8 +89,21 @@ in
   # memory from programs.tmux below carries over to cmux's native splits/tabs
   # (which is what keeps its per-surface agent progress tracking working).
   # Action IDs verified against cmux docs; edit ./cmux/cmux.json + `home-manager switch`.
-  xdg.configFile."cmux/cmux.json" =
-    lib.mkIf pkgs.stdenv.isDarwin { source = ./cmux/cmux.json; };
+  #
+  # NOT xdg.configFile (read-only store symlink): cmux re-saves this file on
+  # launch via atomic write-and-rename, which replaces the symlink with a fresh
+  # default template and wipes our bindings. Instead seed a *writable* copy cmux
+  # can read and re-own. Overwrite on every switch (unlike seedGhosttyOverrides'
+  # seed-if-missing) so the repo stays the source of truth and a clobbered file
+  # self-heals; cmux.json is an override layer, so keys we omit fall back to
+  # cmux's own Settings store.
+  home.activation.seedCmuxConfig = lib.mkIf pkgs.stdenv.isDarwin (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      dest="${homeDirectory}/.config/cmux/cmux.json"
+      mkdir -p "$(dirname "$dest")"
+      install -m600 ${./cmux/cmux.json} "$dest"
+    ''
+  );
 
   # skhd (macOS only): simple global hotkey daemon, installed from nixpkgs and
   # run as a launchd agent that Home Manager manages. ctrl+. visibility-toggles
@@ -1674,6 +1687,20 @@ in
         bindkey '\e[109;5u' accept-line   # Ctrl+M (kitty CSI-u) -> Enter
         bindkey -s '\e[91;5u' '\e'        # Ctrl+[ (kitty CSI-u) -> Esc (Meta prefix)
       '')
+      (lib.mkOrder 1550 ''
+        # Ghostty shell integration, hardened. We disable the home-manager
+        # ghostty module's own injection (programs.ghostty.enableZshIntegration
+        # = false) because its guard only checks that GHOSTTY_RESOURCES_DIR is
+        # set, not that the script exists. cmux renders with libghostty and sets
+        # that var to its app bundle (.../cmux.app/Contents/Resources/ghostty),
+        # which ships no shell-integration script, so the unguarded `source`
+        # errored on every new tab. Add a `-r` file check: real Ghostty loads
+        # integration, cmux/other libghostty hosts silently skip it.
+        if [[ -n $GHOSTTY_RESOURCES_DIR \
+              && -r "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration" ]]; then
+          source "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
+        fi
+      '')
     ];
   };
 
@@ -1764,6 +1791,10 @@ in
     # nixpkgs has no macOS build of ghostty, so on darwin install it via the
     # Homebrew cask and let home-manager manage only the config file.
     package = if pkgs.stdenv.isDarwin then null else pkgs.ghostty;
+    # Replaced by a file-existence-guarded `source` in programs.zsh.initContent
+    # above: the module's injection only checks that GHOSTTY_RESOURCES_DIR is
+    # set, which breaks under cmux (libghostty sets the var but ships no script).
+    enableZshIntegration = false;
     settings = {
       font-family = [
         "JetBrainsMono Nerd Font"
