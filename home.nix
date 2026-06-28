@@ -17,6 +17,16 @@ let
     BINDGEN_EXTRA_CLANG_ARGS = "-isystem ${pkgs.stdenv.cc.libc.dev}/include";
     doCheck = false;  # tests require grammar fixtures
   };
+  # mise 2026.6.11's OCI-layer test asserts a setuid bit (mode 0o4755) survives
+  # packing, but the Nix build sandbox strips special permission bits, so it sees
+  # 0o755 and fails. Skip just that one test; the other ~1349 still run. Remove
+  # this override once nixpkgs disables the test upstream. Shadows pkgs.mise via
+  # let-over-with, same as tree-sitter-cli above.
+  mise = pkgs.mise.overrideAttrs (old: {
+    checkFlags = (old.checkFlags or []) ++ [
+      "--skip=oci::layer::tests::preserve_metadata_dir_layer_keeps_special_permission_bits"
+    ];
+  });
   tmuxCopyAction =
     if pkgs.stdenv.isDarwin
     then ''copy-pipe-and-cancel "/usr/bin/pbcopy"''
@@ -1242,7 +1252,9 @@ in
     # GitHub CLI
     gh
 
-    # Databases (migrated from brew)
+    # Databases (migrated from brew). clickhouse: prebuilt client binary on
+    # darwin (server runs in Docker), nixpkgs build on Linux; see
+    # overlays/clickhouse.nix.
     clickhouse
     # NOTE: postgresql NOT migrated as v14 — `postgresql` (v17) is already in
     # home.packages above; can't have two versions (pg_rewind etc. collide).

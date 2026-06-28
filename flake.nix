@@ -51,6 +51,7 @@
           [
             claude-code-overlay.overlays.default
             (import ./overlays/clawpatrol.nix)
+            (import ./overlays/clickhouse.nix)
           ]
           ++ nixpkgs.lib.optional (system == "x86_64-linux") denoVersionsOverlay;
       };
