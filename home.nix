@@ -171,6 +171,7 @@ in
         ]
       },
       "alwaysThinkingEnabled": true,
+      "effortLevel": "xhigh",
       "plansDirectory": "./plans",
       "outputStyle": "Explanatory",
       "hooks": {
