@@ -172,6 +172,7 @@ in
       },
       "alwaysThinkingEnabled": true,
       "effortLevel": "high",
+      "advisorModel": "fable",
       "plansDirectory": "./plans",
       "outputStyle": "Explanatory",
       "hooks": {
