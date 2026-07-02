@@ -1,0 +1,33 @@
+# Herdr terminal agent multiplexer.
+# Managed by home-manager from magurotuna/config.
+# https://herdr.dev/docs/configuration/
+
+# Disable first-run setup because the declarative config below is the source of truth.
+onboarding = false
+
+[terminal]
+# Keep new panes/tabs/workspaces in the same project directory by default.
+new_cwd = "follow"
+
+[update]
+# This Home Manager install is updated by bumping the packaged release here, not `herdr update`.
+channel = "stable"
+version_check = true
+manifest_check = true
+
+[keys]
+# Match the cmux/tmux muscle memory used in this dotfiles repo.
+prefix = "ctrl+t"
+new_workspace = "prefix+shift+n"
+new_tab = "prefix+c"
+next_tab = "prefix+n"
+previous_tab = "prefix+p"
+close_tab = "prefix+shift+x"
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+split_vertical = "prefix+v"
+split_horizontal = "prefix+minus"
+close_pane = "prefix+x"
+edit_scrollback = "prefix+["

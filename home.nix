@@ -27,6 +27,38 @@ let
       "--skip=oci::layer::tests::preserve_metadata_dir_layer_keeps_special_permission_bits"
     ];
   });
+  herdr = pkgs.stdenv.mkDerivation rec {
+    pname = "herdr";
+    version = "0.7.1";
+
+    src = pkgs.fetchurl {
+      url =
+        if pkgs.stdenv.hostPlatform.isDarwin then
+          "https://github.com/ogulcancelik/herdr/releases/download/v${version}/herdr-macos-aarch64"
+        else
+          "https://github.com/ogulcancelik/herdr/releases/download/v${version}/herdr-linux-x86_64";
+      hash =
+        if pkgs.stdenv.hostPlatform.isDarwin then
+          "sha256-FvRlPwSR6h59K0a1sCVC8Y4bguiNqvnikAVy5btjTfg="
+        else
+          "sha256-uWWsr/wsIvVLbmxkr3z46Yo/SsJiJjCgWZxnpLnYplQ=";
+    };
+
+    dontUnpack = true;
+    installPhase = ''
+      runHook preInstall
+      install -Dm755 $src $out/bin/herdr
+      runHook postInstall
+    '';
+
+    meta = {
+      description = "Terminal workspace manager for AI coding agents";
+      homepage = "https://herdr.dev";
+      license = lib.licenses.mit;
+      platforms = [ "x86_64-linux" "aarch64-darwin" ];
+      mainProgram = "herdr";
+    };
+  };
   tmuxCopyAction =
     if pkgs.stdenv.isDarwin
     then ''copy-pipe-and-cancel "/usr/bin/pbcopy"''
@@ -77,6 +109,7 @@ in
   # ──────────────────────────────────────────────────────────────
   xdg.configFile."nvim/init.lua".source = ./nvim/init.lua;
   xdg.configFile."nvim/lua".source = ./nvim/lua;
+  xdg.configFile."herdr/config.toml".source = ./herdr/config.toml;
 
   # Karabiner-Elements (macOS only). Declarative config: edit
   # ./karabiner/karabiner.json in this repo and `home-manager switch`.
@@ -1413,6 +1446,7 @@ in
 
     # AI
     codexPkg # from codex-cli-nix flake, not nixpkgs
+    herdr # terminal agent multiplexer; prebuilt upstream binary
     gemini-cli
     claude-code
     clawpatrol # security firewall for agents; overlays/clawpatrol.nix
