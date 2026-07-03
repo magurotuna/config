@@ -299,6 +299,8 @@ in
   home.file.".claude/skills/plan-review/SKILL.md".source = ./claude/skills/plan-review/SKILL.md;
   home.file.".claude/skills/standup/SKILL.md".source = ./claude/skills/standup/SKILL.md;
   home.file.".claude/skills/git-worktree/SKILL.md".source = ./claude/skills/git-worktree/SKILL.md;
+  home.file.".claude/skills/publish-research-artifact/SKILL.md".source = ./claude/skills/publish-research-artifact/SKILL.md;
+  home.file.".claude/skills/publish-research-artifact/references/agent-research-vault-setup.md".source = ./claude/skills/publish-research-artifact/references/agent-research-vault-setup.md;
 
   home.file.".claude/skills/output-learn/SKILL.md".text =
     builtins.replaceStrings [ "@homeDirectory@" ] [ homeDirectory ]
