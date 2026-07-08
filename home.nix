@@ -173,6 +173,7 @@ in
       "alwaysThinkingEnabled": true,
       "effortLevel": "high",
       "advisorModel": "fable",
+      "remoteControlAtStartup": true,
       "plansDirectory": "./plans",
       "outputStyle": "Explanatory",
       "hooks": {
