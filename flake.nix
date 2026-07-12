@@ -36,13 +36,21 @@
 
   outputs = { nixpkgs, home-manager, nix-darwin, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, ... }:
     let
+      # nixpkgs' deno lags behind upstream; deno-overlay exposes every release
+      # so we can track latest. We auto-select the newest version available in
+      # the (locked) overlay, so `nix flake update` transparently upgrades deno.
       denoVersionsOverlay = final: prev:
         let
           # deno-overlay exposes every version under `pkgs.deno.<version>`.
           denoVersions = (deno-overlay.overlays.deno-overlay final prev).deno;
+          # compareVersions is semver-aware (2.9.2 > 2.1.10), unlike a string sort.
+          latest = final.lib.last (final.lib.sort
+            (a: b: builtins.compareVersions a b < 0)
+            (builtins.attrNames denoVersions));
         in
         {
           denoVersions = denoVersions;
+          deno = denoVersions.${latest};
         };
       mkPkgs = system: import nixpkgs {
         inherit system;
@@ -52,8 +60,8 @@
             claude-code-overlay.overlays.default
             (import ./overlays/clawpatrol.nix)
             (import ./overlays/clickhouse.nix)
-          ]
-          ++ nixpkgs.lib.optional (system == "x86_64-linux") denoVersionsOverlay;
+            denoVersionsOverlay
+          ];
       };
     in
     {
