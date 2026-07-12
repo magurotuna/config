@@ -307,87 +307,11 @@ in
     builtins.replaceStrings [ "@homeDirectory@" ] [ homeDirectory ]
       (builtins.readFile ./claude/skills/output-learn/SKILL.md);
 
-  # Codex equivalent of the git-worktree skill, invoked on demand as `/git-worktree`.
-  home.file.".codex/prompts/git-worktree.md".text = ''
-    ---
-    description: How to work with git worktrees using the `git wt` (git-wt) CLI.
-    ---
-
-    # Working with Git Worktrees (`git wt`)
-
-    `git wt` is the `git-wt` CLI (a `git worktree` wrapper). A worktree is a separate
-    working directory with its own checked-out branch that shares the repository's
-    single object store. Use worktrees to work on several branches at once without
-    stashing or re-checking-out.
-
-    ## This machine's setup (from git config)
-
-    - `wt.basedir = ../{gitroot}-wt` -> worktrees live next to the repo at
-      `../<reponame>-wt/<branch>` (e.g. `../config-wt/feature-x`).
-    - `wt.copyignored` and `wt.copyuntracked` are on -> gitignored files (like `.env`)
-      and untracked files are copied into each new worktree. Be mindful of secrets.
-
-    ## CRITICAL: directory switching does NOT work in non-interactive shells
-
-    `git wt <branch>` is meant to `cd` you into the worktree, but that `cd` is performed
-    by a `git()` shell-wrapper installed via `eval "$(git-wt --init zsh)"`. The wrapper
-    reads the worktree path from the **last line** of output and changes the interactive
-    shell's directory.
-
-    Commands you run are executed in non-interactive subshells that do not load that
-    wrapper, so `git wt <branch>` will create/select the worktree but the working
-    directory will NOT change. Capture the path and act on it explicitly:
-
-    ```bash
-    dir=$(git wt <branch> --nocd 2>/dev/null | tail -1)
-    cd "$dir" && <your commands>      # cd within the same invocation
-    # or, without cd:
-    git -C "$dir" status
-    ```
-
-    `--nocd` plus `tail -1` is robust: on create, `git wt` prints status lines followed
-    by the path; on selecting an existing worktree it prints only the path. The last line
-    is always the worktree path.
-
-    ## Commands
-
-    - **List:** `git wt` (table) or `git wt --json` (fields: `path`, `branch`, `head`,
-      `bare`, `current`). Prefer `--json` when parsing.
-    - **Create or switch:** `git wt <branch>` — selects if it exists, else creates the
-      worktree and branch.
-    - **Create from a start-point:** `git wt <branch> <start-point>`, e.g.
-      `git wt fix-bug origin/main`.
-    - **Delete (safe):** `git wt -d <name>...` — only if the branch is merged.
-    - **Force delete:** `git wt -D <name>...`.
-    - The default branch (`main`/`master`) is protected; use `--allow-delete-default` to
-      override.
-
-    ## Footgun: every non-flag argument is a worktree name
-
-    `git wt` has no verb subcommands. ANY non-flag word is treated as a name to create.
-    `git wt rm foo` does NOT remove anything — it creates worktrees `rm` and `foo`. Use
-    the `-d`/`-D` flags to delete, and `git wt -h` (not `git wt help`) for usage.
-
-    ## Typical workflow
-
-    ```bash
-    # 1. Start an isolated task on its own branch off the latest main
-    dir=$(git wt feature/my-task origin/main --nocd 2>/dev/null | tail -1)
-    cd "$dir"
-
-    # 2. Do the work, commit, push from inside $dir ...
-
-    # 3. Clean up once merged — run from a DIFFERENT worktree (e.g. the main repo).
-    cd <main-repo-dir>
-    git wt -d feature/my-task
-    ```
-
-    ## Gotchas
-
-    - Do not delete the worktree you are currently inside.
-    - `wt.hook` commands run only on create, not when switching to an existing worktree.
-    - Two worktrees cannot check out the same branch simultaneously.
-  '';
+  # Codex skill: single-sourced from the same file Claude uses so both agents stay
+  # in sync. Personal Codex skills are discovered under ~/.agents/skills and can be
+  # invoked explicitly or implicitly. (Codex custom prompts are deprecated.)
+  home.file.".agents/skills/git-worktree".source =
+    ./claude/skills/git-worktree;
 
   home.file.".claude/statusline-command.sh" = {
     executable = true;
