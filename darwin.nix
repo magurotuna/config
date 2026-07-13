@@ -71,7 +71,7 @@
       "karabiner-elements"
       # "google-japanese-ime"
       # "raycast"
-      # "rectangle"
+      "rectangle"
       # "wireshark"
       # "ngrok"
       # "google-chrome"

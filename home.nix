@@ -388,7 +388,7 @@ in
     stern
     kubectl
     kubernetes-helm
-    minikube
+    (lib.lowPrio minikube) # Prefer the standalone kubectl over minikube's kubectl symlink.
     talosctl
 
     # Cloud / Infrastructure
@@ -497,9 +497,6 @@ in
     maven
     cargo-make
 
-    # Multimedia
-    mkvtoolnix
-
     # Runtime version managers (migrated from brew)
     volta
     mise
@@ -532,7 +529,6 @@ in
 
     # GUI apps / tools with nixpkgs darwin builds (migrated from brew casks)
     _1password-cli
-    rectangle
     wezterm
 
     # On NixOS this comes from nixos/common.nix's fonts.packages; darwin needs it via home-manager.
