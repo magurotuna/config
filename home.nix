@@ -60,7 +60,53 @@ let
       runHook postInstall
     '';
   };
+
+  # ── Claude Code / Codex skills ──────────────────────────────────────────────
+  # Single-sourced from ./claude/skills/<name>/. Every skill is deployed to BOTH
+  # the Claude dir (~/.claude/skills) and the Codex dir (~/.agents/skills) so the
+  # two agents share one definition — add a name to `verbatimSkills` and it lands
+  # in both. Whole-directory sources also pick up any references/ subfolder.
+  # New files must be `git add`ed for the flake to see them.
+  skillTargets = [ ".claude/skills" ".agents/skills" ];
+
+  # Skills copied byte-for-byte. output-learn is intentionally NOT listed here: it
+  # needs @homeDirectory@ substituted per machine, so it is generated separately.
+  verbatimSkills = [
+    "dig"
+    "smart-compact"
+    "plan-refine"
+    "plan-review"
+    "standup"
+    "git-worktree"
+    "publish-research-artifact"
+  ];
+
+  outputLearnText =
+    builtins.replaceStrings [ "@homeDirectory@" ] [ homeDirectory ]
+      (builtins.readFile ./claude/skills/output-learn/SKILL.md);
+
+  # Produces { "<target>/<name>".source = ./claude/skills/<name>; ... } for every
+  # (target, skill) pair, plus the substituted output-learn SKILL.md per target.
+  skillFiles =
+    builtins.listToAttrs (lib.concatMap
+      (base: map
+        (name: {
+          name = "${base}/${name}";
+          value.source = ./claude/skills + "/${name}";
+        })
+        verbatimSkills)
+      skillTargets)
+    // builtins.listToAttrs (map
+      (base: {
+        name = "${base}/output-learn/SKILL.md";
+        value.text = outputLearnText;
+      })
+      skillTargets);
 in
+lib.mkMerge [
+{
+  home.file = skillFiles;
+}
 {
   # Home Manager needs these to know where to install things
   home.username = "yusuke";
@@ -288,30 +334,12 @@ in
     - Uses stdin/stdout — no temporary files needed
   '';
 
-  # ── Claude Code Skills ──
-  # Skill bodies live in ./claude/skills/<name>/SKILL.md (kept out of this file
-  # so it stays readable). output-learn interpolates the per-machine home dir,
-  # so it is read as a string with @homeDirectory@ substituted; the rest are
-  # copied verbatim. New files must be `git add`ed for the flake to see them.
-
-  home.file.".claude/skills/dig/SKILL.md".source = ./claude/skills/dig/SKILL.md;
-  home.file.".claude/skills/smart-compact/SKILL.md".source = ./claude/skills/smart-compact/SKILL.md;
-  home.file.".claude/skills/plan-refine/SKILL.md".source = ./claude/skills/plan-refine/SKILL.md;
-  home.file.".claude/skills/plan-review/SKILL.md".source = ./claude/skills/plan-review/SKILL.md;
-  home.file.".claude/skills/standup/SKILL.md".source = ./claude/skills/standup/SKILL.md;
-  home.file.".claude/skills/git-worktree/SKILL.md".source = ./claude/skills/git-worktree/SKILL.md;
-  home.file.".claude/skills/publish-research-artifact/SKILL.md".source = ./claude/skills/publish-research-artifact/SKILL.md;
-  home.file.".claude/skills/publish-research-artifact/references/agent-research-vault-setup.md".source = ./claude/skills/publish-research-artifact/references/agent-research-vault-setup.md;
-
-  home.file.".claude/skills/output-learn/SKILL.md".text =
-    builtins.replaceStrings [ "@homeDirectory@" ] [ homeDirectory ]
-      (builtins.readFile ./claude/skills/output-learn/SKILL.md);
-
-  # Codex skill: single-sourced from the same file Claude uses so both agents stay
-  # in sync. Personal Codex skills are discovered under ~/.agents/skills and can be
-  # invoked explicitly or implicitly. (Codex custom prompts are deprecated.)
-  home.file.".agents/skills/git-worktree".source =
-    ./claude/skills/git-worktree;
+  # ── Claude Code / Codex skills ──
+  # Deployed by the generated `skillFiles` set in the `let` block above (merged
+  # via lib.mkMerge at the top of this module). Both agents read the same source:
+  # Claude from ~/.claude/skills, Codex from ~/.agents/skills (personal Codex
+  # skills are discovered there; Codex custom prompts are deprecated). To add a
+  # skill, drop it in ./claude/skills/<name>/ and add <name> to `verbatimSkills`.
 
   home.file.".claude/statusline-command.sh" = {
     executable = true;
@@ -1136,3 +1164,4 @@ EOF
     '';
   };
 }
+]
