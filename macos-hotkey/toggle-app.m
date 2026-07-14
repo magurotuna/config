@@ -1,8 +1,9 @@
-// skhd-toggle-app: visibility toggle for a macOS app, done entirely in-process
+// toggle-app: visibility toggle for a macOS app, done entirely in-process
 // via Cocoa (NSWorkspace / NSRunningApplication) so there is no Apple Event
-// round-trip to System Events (which costs ~190ms per call). Usage:
+// round-trip to System Events (which costs ~190ms per call). Bound to ctrl+.
+// via a Karabiner shell_command (see ../karabiner/karabiner.json). Usage:
 //
-//   skhd-toggle-app <App Name>
+//   toggle-app <App Name>
 //
 // Behaviour: if the named app is frontmost, hide it completely; else if it is
 // running, activate it (bring all windows forward); else launch it. App-name
@@ -18,7 +19,7 @@ static BOOL matches(NSRunningApplication *app, NSString *target) {
 int main(int argc, const char *argv[]) {
     @autoreleasepool {
         if (argc < 2) {
-            fprintf(stderr, "usage: skhd-toggle-app <App Name>\n");
+            fprintf(stderr, "usage: toggle-app <App Name>\n");
             return 1;
         }
         NSString *target = [NSString stringWithUTF8String:argv[1]];

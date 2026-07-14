@@ -32,31 +32,36 @@ let
     then ''copy-pipe-and-cancel "/usr/bin/pbcopy"''
     else "copy-selection-and-cancel";
 
-  # App that the skhd ctrl+. hotkey visibility-toggles (macOS).
-  hotkeyTerminalApp = "cmux";
-
   # Compiled Cocoa helper that visibility-toggles an app entirely in-process
-  # (NSWorkspace/NSRunningApplication), so skhd's ctrl+. is near-instant. The old
-  # osascript approach paid a ~190ms Apple Event round-trip to System Events on
-  # every press; reading the same state in-process is ~0.0001ms, so the dominant
-  # cost is gone. Built from skhd/toggle-app.m with the stdenv clang and the
-  # default macOS SDK. Only referenced from the darwin-gated services.skhd below,
-  # so it is never built on Linux.
+  # (NSWorkspace/NSRunningApplication) — no Apple Event round-trip. Invoked from
+  # the Karabiner ctrl+. rule in ./karabiner/karabiner.json as a shell_command:
+  #   /Users/yusuke/.nix-profile/bin/toggle-app cmux
+  #
+  # Karabiner (not skhd) owns this hotkey because cmux enables macOS Secure
+  # Keyboard Entry while it is frontmost, which blocks CGEventTap-based daemons
+  # like skhd from ever seeing the keypress ("secure keyboard entry is enabled
+  # by 'cmux'! abort" in skhd's log). Karabiner intercepts at the IOKit HID
+  # layer, below Secure Keyboard Entry, so it fires regardless.
+  #
+  # Added to the darwin home.packages below so it lands at a STABLE profile path
+  # (~/.nix-profile/bin/...); karabiner.json is a read-only store symlink and
+  # can't interpolate the unstable /nix/store/<hash>/ path. Built from
+  # macos-hotkey/toggle-app.m with the stdenv clang; only referenced on darwin.
   toggleAppHelper = pkgs.stdenv.mkDerivation {
-    pname = "skhd-toggle-app";
+    pname = "toggle-app";
     version = "1.0";
-    src = ./skhd;
+    src = ./macos-hotkey;
     dontConfigure = true;
     buildPhase = ''
       runHook preBuild
       $CC -fobjc-arc -Wno-deprecated-declarations -O2 \
         -framework AppKit -framework Foundation \
-        -o skhd-toggle-app toggle-app.m
+        -o toggle-app toggle-app.m
       runHook postBuild
     '';
     installPhase = ''
       runHook preInstall
-      install -Dm755 skhd-toggle-app $out/bin/skhd-toggle-app
+      install -Dm755 toggle-app $out/bin/toggle-app
       runHook postInstall
     '';
   };
@@ -151,18 +156,10 @@ lib.mkMerge [
     ''
   );
 
-  # skhd (macOS only): simple global hotkey daemon, installed from nixpkgs and
-  # run as a launchd agent that Home Manager manages. ctrl+. visibility-toggles
-  # the terminal app (summon to front; press again to hide). One-time manual
-  # step: grant skhd Accessibility permission in System Settings > Privacy.
-  # Note: 0x2F is the period key (0x2B is comma). skhd only accepts UPPERCASE
-  # hex keycodes (0x2f is rejected with a parse error) and has no "." key token.
-  services.skhd = lib.mkIf pkgs.stdenv.isDarwin {
-    enable = true;
-    config = ''
-      ctrl - 0x2F : ${toggleAppHelper}/bin/skhd-toggle-app ${hotkeyTerminalApp}
-    '';
-  };
+  # NOTE: the ctrl+. "toggle cmux" hotkey is defined in ./karabiner/karabiner.json
+  # (a shell_command manipulator calling toggle-app), NOT here. skhd used to
+  # own it but cmux's Secure Keyboard Entry made skhd's event tap permanently
+  # blind to the keypress — see the toggleAppHelper comment above for details.
 
   # Clawpatrol.app (macOS only). The clawpatrol CLI is a normal Nix package in
   # home.packages; but `clawpatrol run` also needs Clawpatrol.app installed in
@@ -548,6 +545,11 @@ lib.mkMerge [
     gradia
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     tree-sitter  # nixpkgs CLI (the custom 0.26.x build above is Linux-only for now)
+
+    # In-process app visibility toggler, invoked by the Karabiner ctrl+. rule.
+    # Here (not just as a let-binding) so it gets a stable ~/.nix-profile path
+    # that karabiner.json can hardcode. See toggleAppHelper above.
+    toggleAppHelper
 
     # macOS-specific pinentry for GPG (integrates with macOS Keychain)
     pinentry_mac
