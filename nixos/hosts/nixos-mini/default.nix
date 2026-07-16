@@ -5,6 +5,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../common.nix
+    ../../hermes-agent.nix
   ];
 
   networking.hostName = "nixos-mini";
