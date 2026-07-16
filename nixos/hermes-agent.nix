@@ -54,7 +54,11 @@
     environment = {
       HOME = "/home/hermes";
       HERMES_HOME = "/home/hermes/.hermes";
-      PATH = lib.mkForce "/home/hermes/.local/bin:/run/current-system/sw/bin";
+      # Include ~/.nix-profile/bin so tools hermes installs imperatively with
+      # `nix profile install` (psql, kubectl, clickhouse, aws, …) are visible to
+      # the daemon without a nixos-rebuild. This keeps package additions a
+      # sudo-free, no-rebuild operation the agent can do itself.
+      PATH = lib.mkForce "/home/hermes/.local/bin:/home/hermes/.nix-profile/bin:/run/current-system/sw/bin";
     };
 
     serviceConfig = {
