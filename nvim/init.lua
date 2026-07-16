@@ -229,6 +229,8 @@ require('lazy').setup({
     -- Treesitter (skip in VSCode)
     {
       'nvim-treesitter/nvim-treesitter',
+      branch = 'main',  -- master branch is archived (2026-04-03) & incompatible with nvim 0.12
+      lazy = false,
       cond = not vim.g.vscode,
       build = ':TSUpdate',
       config = function()
@@ -668,6 +670,11 @@ require('lazy').setup({
   },
   install = { colorscheme = { 'rose-pine' } },
   checker = { enabled = true },
+  -- Network resilience: cap parallel git jobs so a transient blip can't
+  -- time out a whole batch, and fail fast (30s) instead of hanging ~75-120s
+  -- on a black-holed connection so the failed plugin can just be retried.
+  concurrency = 8,
+  git = { timeout = 30 },
 })
 
 -- Auto-update plugins when the checker finds updates
