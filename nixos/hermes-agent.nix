@@ -69,8 +69,12 @@
       # clawpatrol run creates the netns/TUN first, then the agent is
       # confined with no_new_privs (the reverse order would break
       # namespace setup).
+      # Reference the configured package directly rather than the mutable
+      # /run/current-system profile. The store path changes on a clawpatrol
+      # upgrade, so NixOS sees the unit change and restarts the gateway with
+      # the new client during `nixos-rebuild switch`.
       ExecStart = lib.concatStringsSep " " [
-        "/run/current-system/sw/bin/clawpatrol"
+        "${pkgs.clawpatrol}/bin/clawpatrol"
         "run"
         "--"
         "${pkgs.util-linux}/bin/setpriv"
