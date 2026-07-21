@@ -35,13 +35,17 @@ let
   # Compiled Cocoa helper that visibility-toggles an app entirely in-process
   # (NSWorkspace/NSRunningApplication) — no Apple Event round-trip. Invoked from
   # the Karabiner ctrl+. rule in ./karabiner/karabiner.json as a shell_command:
-  #   /Users/yusuke/.nix-profile/bin/toggle-app cmux
+  #   /Users/yusuke/.nix-profile/bin/toggle-app Ghostty
   #
-  # Karabiner (not skhd) owns this hotkey because cmux enables macOS Secure
-  # Keyboard Entry while it is frontmost, which blocks CGEventTap-based daemons
-  # like skhd from ever seeing the keypress ("secure keyboard entry is enabled
-  # by 'cmux'! abort" in skhd's log). Karabiner intercepts at the IOKit HID
-  # layer, below Secure Keyboard Entry, so it fires regardless.
+  # The arg is matched against NSRunningApplication.localizedName, case-
+  # insensitively, so "Ghostty" matches even though the process is "ghostty".
+  #
+  # Karabiner (not skhd) owns this hotkey. Originally forced by cmux, which
+  # enabled macOS Secure Keyboard Entry while frontmost and so blinded
+  # CGEventTap daemons like skhd to the keypress ("secure keyboard entry is
+  # enabled by 'cmux'! abort" in skhd's log). Ghostty does not enable SKE by
+  # default, but Karabiner is kept: it intercepts at the IOKit HID layer, below
+  # SKE, so the hotkey survives if SKE is ever turned on.
   #
   # Added to the darwin home.packages below so it lands at a STABLE profile path
   # (~/.nix-profile/bin/...); karabiner.json is a read-only store symlink and
@@ -162,7 +166,7 @@ lib.mkMerge [
     ''
   );
 
-  # NOTE: the ctrl+. "toggle cmux" hotkey is defined in ./karabiner/karabiner.json
+  # NOTE: the ctrl+. "toggle Ghostty" hotkey is defined in ./karabiner/karabiner.json
   # (a shell_command manipulator calling toggle-app), NOT here. skhd used to
   # own it but cmux's Secure Keyboard Entry made skhd's event tap permanently
   # blind to the keypress — see the toggleAppHelper comment above for details.

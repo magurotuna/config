@@ -95,7 +95,7 @@
                         ]
                     },
                     {
-                        "description": "Ctrl+. → toggle cmux visibility (Karabiner, not skhd: cmux enables Secure Keyboard Entry which blinds event-tap daemons)",
+                        "description": "Ctrl+. → toggle Ghostty visibility (Karabiner, not skhd: intercepts at the IOKit HID layer, below Secure Keyboard Entry)",
                         "manipulators": [
                             {
                                 "from": {
@@ -107,7 +107,7 @@
                                 },
                                 "to": [
                                     {
-                                        "shell_command": "/Users/yusuke/.nix-profile/bin/toggle-app cmux"
+                                        "shell_command": "/Users/yusuke/.nix-profile/bin/toggle-app Ghostty"
                                     }
                                 ],
                                 "type": "basic"
