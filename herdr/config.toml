@@ -1,0 +1,51 @@
+# herdr — terminal workspace manager for AI coding agents.
+# Managed by Nix: edit this file + `home-manager switch`, then reload a running
+# server with `herdr server reload-config` (or the reload_config keybinding).
+#
+# Delivered as a read-only ~/.config/herdr/config.toml symlink (xdg.configFile
+# in home.nix). Safe because herdr only READS this file — its sole write is the
+# first-run onboarding flag, which we preempt below with `onboarding = false`.
+#
+# Keybindings intentionally mirror the tmux/cmux setup so muscle memory carries
+# over: C-t prefix, hjkl pane focus, `|`/`-` splits, `c` new tab, `r` reload.
+# Run `herdr config check` after editing to validate.
+
+# Skip first-run onboarding (and the config write it would trigger).
+onboarding = false
+
+[theme]
+# Match the Ghostty terminal theme (programs.ghostty: theme = "Dracula").
+name = "dracula"
+
+[keys]
+# Prefix = ctrl+t, same as `programs.tmux.prefix = "C-t"`.
+prefix = "ctrl+t"
+
+# Splits — mirror tmux: `|` = side-by-side, `-` = stacked.
+# herdr names splits by divider orientation, so side-by-side = split_vertical.
+split_vertical = "prefix+\\"      # tmux: bind | split-window -h
+split_horizontal = "prefix+minus" # tmux: bind - split-window -v
+
+# Pane focus with hjkl (tmux: bind h/j/k/l select-pane -L/-D/-U/-R).
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+
+# New tab on `c` (tmux: bind c new-window).
+new_tab = "prefix+c"
+
+# Tab navigation with n/p — herdr tabs are the analog of tmux windows, so this
+# matches tmux's default `C-t n` next-window / `C-t p` previous-window.
+next_tab = "prefix+n"
+previous_tab = "prefix+p"
+# Jump straight to a tab by number: C-t 1 .. C-t 9.
+switch_tab = "prefix+1..9"
+
+# `r` reloads config (tmux: bind r source-file ...). Swap resize_mode off the
+# default prefix+r to avoid colliding with this.
+reload_config = "prefix+r"
+resize_mode = "prefix+shift+r"
+
+# Scrollback on `[`, echoing tmux/cmux copy-mode entry (bind [ / ctrl+t [).
+edit_scrollback = "prefix+["
