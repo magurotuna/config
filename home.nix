@@ -129,6 +129,12 @@ lib.mkMerge [
   xdg.configFile."nvim/init.lua".source = ./nvim/init.lua;
   xdg.configFile."nvim/lua".source = ./nvim/lua;
 
+  # herdr (all machines). Read-only symlink like nvim above — herdr only reads
+  # config.toml, so no writable-seed hack (cf. cmux). Keybinds mirror tmux/cmux;
+  # edit ./herdr/config.toml + `home-manager switch`, then `herdr server
+  # reload-config`. Validate edits with `herdr config check`.
+  xdg.configFile."herdr/config.toml".source = ./herdr/config.toml;
+
   # Karabiner-Elements (macOS only). Declarative config: edit
   # ./karabiner/karabiner.json in this repo and `home-manager switch`.
   # NOTE: this deploys a read-only symlink into the Nix store, so the
