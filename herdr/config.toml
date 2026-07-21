@@ -23,7 +23,7 @@ prefix = "ctrl+t"
 
 # Splits — mirror tmux: `|` = side-by-side, `-` = stacked.
 # herdr names splits by divider orientation, so side-by-side = split_vertical.
-split_vertical = "prefix+\\"      # tmux: bind | split-window -h
+split_vertical = "prefix+|"       # tmux: bind | split-window -h
 split_horizontal = "prefix+minus" # tmux: bind - split-window -v
 
 # Pane focus with hjkl (tmux: bind h/j/k/l select-pane -L/-D/-U/-R).
@@ -49,3 +49,21 @@ resize_mode = "prefix+shift+r"
 
 # Scrollback on `[`, echoing tmux/cmux copy-mode entry (bind [ / ctrl+t [).
 edit_scrollback = "prefix+["
+
+# Notifications when an agent finishes a turn or needs attention.
+# These default to OFF (delivery = "off"), which disables sound too — the
+# [ui.sound] block below is inert without a delivery mode set here.
+# Verify with: herdr notification show test --sound done
+#   -> {"reason":"disabled"} = pipeline off, {"reason":"shown"} = working.
+[ui.toast]
+# "terminal" emits an escape sequence for the *outer* terminal to raise a
+# desktop notification. Chosen because it survives `herdr --remote`: the bytes
+# ride the ssh pty up to Ghostty on the macbook, whereas "system" would notify
+# whichever host the notification service runs on.
+delivery = "terminal"
+delay_seconds = 1
+
+[ui.sound]
+# Sounds fire only for agents in *background* workspaces — the focused
+# workspace stays silent by design, so test by switching away first.
+enabled = true
