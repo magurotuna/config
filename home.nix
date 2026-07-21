@@ -478,6 +478,7 @@ lib.mkMerge [
     gemini-cli
     claude-code
     clawpatrol # security firewall for agents; overlays/clawpatrol.nix
+    herdr      # agent multiplexer for the terminal (nixpkgs)
 
     # Git worktree
     git-wt
