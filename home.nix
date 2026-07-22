@@ -27,6 +27,25 @@ let
       "--skip=oci::layer::tests::preserve_metadata_dir_layer_keeps_special_permission_bits"
     ];
   });
+  # codex-cli-nix ships `codex` as a launcher that execs the real binary under the
+  # name `codex-raw` (its bubblewrap wrapper). herdr identifies the agent in a pane
+  # by matching the foreground process name from /proc against a fixed built-in list
+  # (…|codex|…); it sees `codex-raw`, never matches, and codex never shows up in
+  # herdr's Agents sidebar. herdr treats renamed third-party binaries as out of scope
+  # (herdr#1354) and documents the fix: set HERDR_AGENT=<agent>, which the wrapped
+  # process inherits and which tells herdr which screen manifest to apply. The hint
+  # is a Linux feature since herdr 0.5.10, so this works on the current 0.7.4 — no
+  # herdr upgrade needed. symlinkJoin preserves codex-raw and every other file from
+  # the package; wrapProgram only rewraps the `codex` entrypoint to inject the var.
+  # --set-default so an explicit HERDR_AGENT in the environment still wins.
+  codexWrapped = pkgs.symlinkJoin {
+    name = "codex-herdr";
+    paths = [ codexPkg ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/codex --set-default HERDR_AGENT codex
+    '';
+  };
   tmuxCopyAction =
     if pkgs.stdenv.isDarwin
     then ''copy-pipe-and-cancel "/usr/bin/pbcopy"''
@@ -484,7 +503,7 @@ lib.mkMerge [
     codecrafters-cli
 
     # AI
-    codexPkg # from codex-cli-nix flake, not nixpkgs
+    codexWrapped # codexPkg (codex-cli-nix), wrapped to set HERDR_AGENT=codex for herdr detection
     gemini-cli
     claude-code
     clawpatrol # security firewall for agents; overlays/clawpatrol.nix
