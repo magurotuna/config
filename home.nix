@@ -282,6 +282,21 @@ lib.mkMerge [
     source = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/complete.oga";
   };
 
+  # `codex remote-control start` refuses to run unless it finds a binary at the
+  # fixed path ~/.codex/packages/standalone/current/codex — the daemon respawns and
+  # auto-updates app-server from there, so it only accepts the mutable install laid
+  # down by the curl|sh installer and bails with "managed standalone Codex install
+  # not found at …" otherwise. Nothing about that path is nix-installable: the store
+  # is read-only and the installer would have to own $HOME. Symlinking the wrapped
+  # package into the expected layout satisfies the check and the daemon then runs
+  # the exact same binary as the one on PATH (verified: daemon reports version
+  # 0.145.0, and its updater leaves these links alone). The tradeoff is that codex
+  # can no longer self-update the daemon — which is what we want, since the version
+  # is pinned by codex-cli-nix in flake.nix anyway.
+  home.file.".codex/packages/standalone/current/codex".source = "${codexWrapped}/bin/codex";
+  home.file.".codex/packages/standalone/current/codex-raw".source = "${codexWrapped}/bin/codex-raw";
+  home.file.".codex/packages/standalone/current/codex-code-mode-host".source = "${codexWrapped}/bin/codex-code-mode-host";
+
   home.file.".claude/agents/codex-reviewer.md".text = ''
     ---
     name: codex-reviewer
