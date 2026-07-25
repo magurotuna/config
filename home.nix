@@ -993,21 +993,21 @@ lib.mkMerge [
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
-    matchBlocks = {
+    settings = {
       "github.com" = {
-        identityFile = "~/.ssh/id_ed25519_github";
+        IdentityFile = "~/.ssh/id_ed25519_github";
       };
       "github.com-magurobot" = {
-        hostname = "github.com";
-        user = "git";
-        identityFile = "~/.ssh/magurobot_auth";
-        identitiesOnly = true;
+        HostName = "github.com";
+        User = "git";
+        IdentityFile = "~/.ssh/magurobot_auth";
+        IdentitiesOnly = true;
       };
       "codeberg.org" = {
-        identityFile = "~/.ssh/id_ed25519_codeberg";
+        IdentityFile = "~/.ssh/id_ed25519_codeberg";
       };
       "avocet.deno.co" = {
-        identityFile = "~/.ssh/id_ed25519_avocet";
+        IdentityFile = "~/.ssh/id_ed25519_avocet";
       };
     };
   };
