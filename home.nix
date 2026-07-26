@@ -1023,6 +1023,11 @@ lib.mkMerge [
     enable = true;
     # Set a default pinentry here. Use pinentry-curses unless another module overrides it.
     pinentry.package = lib.mkDefault pkgs.pinentry-curses;
+
+    # Both are needed: maxCacheTtl is an absolute cap (default 7200s) that
+    # evicts the key regardless of defaultCacheTtl's sliding idle window.
+    defaultCacheTtl = 86400;
+    maxCacheTtl = 86400;
   };
 
   # ──────────────────────────────────────────────────────────────
