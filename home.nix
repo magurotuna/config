@@ -521,6 +521,7 @@ lib.mkMerge [
     codexWrapped # codexPkg (codex-cli-nix), wrapped to set HERDR_AGENT=codex for herdr detection
     gemini-cli
     claude-code
+    opencode
     clawpatrol # security firewall for agents; overlays/clawpatrol.nix
     herdr      # agent multiplexer for the terminal (nixpkgs)
 
