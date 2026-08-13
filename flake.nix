@@ -11,6 +11,7 @@
       url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
     xremap = {
       url = "github:xremap/nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -34,7 +35,7 @@
     };
 };
 
-  outputs = { nixpkgs, home-manager, nix-darwin, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, ... }:
+  outputs = { nixpkgs, home-manager, nix-darwin, determinate, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, ... }:
     let
       # nixpkgs' deno lags behind upstream; deno-overlay exposes every release
       # so we can track latest. We auto-select the newest version available in
@@ -122,6 +123,7 @@
             nixpkgs.hostPlatform = "aarch64-darwin";
             nixpkgs.config.allowUnfree = true;
           }
+          determinate.darwinModules.default
           ./darwin.nix
         ];
       };

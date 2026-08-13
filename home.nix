@@ -504,6 +504,7 @@ lib.mkMerge [
 
     # Other
     imagemagick
+    poppler-utils
     sox
 
     # Load testing

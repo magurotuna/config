@@ -20,12 +20,17 @@
     home = "/Users/yusuke";
   };
 
-  # Enable flakes and the modern nix CLI.
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
-  # If you installed Nix with the Determinate Systems installer, uncomment the
-  # next line so nix-darwin does not also try to manage the nix daemon:
-  nix.enable = false;
+  # Let Determinate Nix manage the Nix installation while keeping its
+  # configuration declarative in this flake.
+  determinateNix = {
+    enable = true;
+    customSettings = {
+      # Keep two of the Mac's fourteen logical cores available for interactive
+      # work while allowing one-core derivations to build concurrently.
+      max-jobs = 12;
+      cores = 1;
+    };
+  };
 
   # zsh is the login shell on macOS; nix-darwin manages /etc/zshrc bits.
   programs.zsh.enable = true;
