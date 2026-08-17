@@ -462,6 +462,7 @@ lib.mkMerge [
 
     # Cloud / Infrastructure
     awscli2
+    azure-cli
     terraform
     google-cloud-sdk
     google-cloud-sql-proxy
