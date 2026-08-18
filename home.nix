@@ -413,9 +413,39 @@ lib.mkMerge [
           fi
       fi
 
+      # Usage limits: Claude Code reports the server-authoritative 5-hour rolling
+      # window and 7-day cap on stdin, so no external tool (e.g. ccusage) is
+      # needed -- and unlike ccusage's cost-derived "block", these are the real
+      # quota numbers behind /usage. `// empty` drops the whole segment when the
+      # field is absent (API-key billing, or a Claude Code predating the field).
+      # jq's localtime/strftime keeps timestamp formatting identical on Darwin
+      # and Linux, unlike `date -r` vs `date -d`. Emits "<worst pct>\t<text>" so
+      # the colour threshold and the text come from one jq invocation.
+      limits=$(echo "$input" | jq -r '
+          .rate_limits // empty
+          | [(.five_hour.used_percentage // 0), (.seven_day.used_percentage // 0)] as $pcts
+          | [(.five_hour | select(.) | "5h \(.used_percentage | floor)% →\(.resets_at | localtime | strftime("%H:%M"))"),
+             (.seven_day | select(.) | "7d \(.used_percentage | floor)% →\(.resets_at | localtime | strftime("%a %H:%M"))")]
+          | select(length > 0)
+          | "\($pcts | max | floor)\t\(join("  "))"' 2>/dev/null)
+
+      limit_text=""
+      limit_color="32"  # green
+      if [ -n "$limits" ]; then
+          IFS=$'\t' read -r limit_pct limit_text <<< "$limits"
+          if [ "$limit_pct" -ge 80 ]; then
+              limit_color="31"  # red
+          elif [ "$limit_pct" -ge 50 ]; then
+              limit_color="33"  # yellow
+          fi
+      fi
+
       # Format the output with colors (using printf for ANSI codes)
       # Note: Colors will be dimmed by Claude Code
       printf "\033[01;32m%s@%s\033[00m:\033[01;34m%s\033[00m%s" "$user" "$host" "$current_dir" "$git_branch"
+      if [ -n "$limit_text" ]; then
+          printf " \033[01;%sm[%s]\033[00m" "$limit_color" "$limit_text"
+      fi
     '';
   };
 
