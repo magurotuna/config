@@ -243,6 +243,7 @@ lib.mkMerge [
         ]
       },
       "alwaysThinkingEnabled": true,
+      "includeCoAuthoredBy": false,
       "effortLevel": "high",
       "advisorModel": "fable",
       "remoteControlAtStartup": true,
