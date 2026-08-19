@@ -1043,6 +1043,23 @@ lib.mkMerge [
       "avocet.deno.co" = {
         IdentityFile = "~/.ssh/id_ed25519_avocet";
       };
+
+      # nixos-mini saturates its 16 cores during uncached Nix builds. Its only
+      # resolvers are Tailscale MagicDNS (100.100.100.100), and SSH to it rides
+      # Tailscale too, so a starved userspace tailscaled stalls the connection
+      # for tens of seconds. Default OpenSSH gives up well before that recovers.
+      #
+      # 15s x 40 = tolerate a 10-minute stall before declaring the peer dead.
+      # `herdr --remote nixos-mini` shells out to ssh, so it inherits this and
+      # stops dropping its pane during builds.
+      #
+      # TCPKeepAlive off: those probes let the *kernel* tear the socket down on
+      # its own schedule, which would defeat the ServerAlive budget above.
+      "nixos-mini" = {
+        ServerAliveInterval = 15;
+        ServerAliveCountMax = 40;
+        TCPKeepAlive = false;
+      };
     };
   };
 
