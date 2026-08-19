@@ -1,4 +1,4 @@
-{ pkgs, lib, homeDirectory, codexPkg, ... }:
+{ config, pkgs, lib, homeDirectory, codexPkg, ... }:
 
 let
   tree-sitter-cli = pkgs.rustPlatform.buildRustPackage rec {
@@ -145,6 +145,47 @@ lib.mkMerge [
 
   # Let Home Manager manage itself
   programs.home-manager.enable = true;
+
+  # Garbage-collect *this user's* Nix profiles.
+  #
+  # NixOS' `nix.gc` (nixos/common.nix) runs nix-collect-garbage as root, which
+  # only walks /nix/var/nix/profiles. Standalone home-manager keeps its
+  # generations in $XDG_STATE_HOME/nix/profiles instead, so root's timer never
+  # sees them: nixos-mini had accumulated 55 generations reaching back months,
+  # each one pinning its entire closure and keeping /nix at 160 GB while only
+  # two system generations existed.
+  #
+  # Every machine here runs standalone home-manager, so every machine has the
+  # gap — hence this lives in home.nix rather than a per-host module. Matches
+  # the 14-day window nix.gc already uses on the NixOS side.
+  nix.gc = {
+    automatic = true;
+    dates = "weekly"; # systemd OnCalendar (home-manager renamed `frequency` -> `dates`)
+    options = "--delete-older-than 14d";
+  };
+
+  # Work around a home-manager bug on Darwin.
+  #
+  # The Linux unit runs `nix.gc.options` through writeShellScript, so the shell
+  # word-splits it. The Darwin agent instead appends the option string to
+  # ProgramArguments as a SINGLE argv element, and launchd passes argv verbatim
+  # — so nix-collect-garbage receives the one token "--delete-older-than 14d"
+  # and exits with `unrecognised flag`. There is no single-token spelling to
+  # fall back on either; `--delete-older-than=14d` is rejected as well (nix's
+  # legacy argument parser does not split on `=`). Both verified by hand.
+  #
+  # Setting this on Linux is inert: home-manager only realises launchd agents
+  # on Darwin, and the option itself exists on every platform.
+  #
+  # Verified against home-manager rev 079a3b5d. Note the deliberate
+  # duplication: the "14d" below must be kept in step with nix.gc.options
+  # above, and mkForce will happily keep overriding upstream even after they
+  # fix this — recheck when bumping the home-manager input.
+  launchd.agents.nix-gc.config.ProgramArguments = lib.mkForce [
+    "${if config.nix.enable && config.nix.package != null then config.nix.package else pkgs.nix}/bin/nix-collect-garbage"
+    "--delete-older-than"
+    "14d"
+  ];
 
   # ──────────────────────────────────────────────────────────────
   # XDG Config Files

@@ -182,6 +182,18 @@ in
   programs.plasma.powerdevil.AC.autoSuspend.action = "nothing";
   programs.plasma.kscreenlocker.autoLock = false;
 
+  # Disable Baloo, KDE's file-content indexer.
+  #
+  # ~/Repo holds ~400 GB of source checkouts and git worktrees; Baloo had
+  # indexed 1,668,654 files into a 10 GB database, and every rebuild in a
+  # worktree feeds it a fresh wave of target/ and node_modules/ churn to
+  # re-scan. The desktop search it powers is not something this machine is
+  # used for — grep and fd cover it.
+  #
+  # This only stops future indexing. Reclaim the existing database once with:
+  #   balooctl6 disable && balooctl6 purge
+  programs.plasma.configFile."baloofilerc"."Basic Settings"."Indexing-Enabled" = false;
+
   # Dark theme
   programs.plasma.workspace = {
     lookAndFeel = "org.kde.breezedark.desktop";
