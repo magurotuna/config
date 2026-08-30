@@ -1205,6 +1205,9 @@ lib.mkMerge [
       ];
     } // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
       font-size = 10;
+    } // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      # Required on macOS for background-opacity to take effect at all.
+      macos-titlebar-style = "transparent";
     };
   };
 
