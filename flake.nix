@@ -61,6 +61,7 @@
             claude-code-overlay.overlays.default
             (import ./overlays/clawpatrol.nix)
             (import ./overlays/clickhouse.nix)
+            (import ./overlays/mr-boxington.nix)
             denoVersionsOverlay
           ];
       };

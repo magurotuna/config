@@ -27,6 +27,57 @@ let
       "--skip=oci::layer::tests::preserve_metadata_dir_layer_keeps_special_permission_bits"
     ];
   });
+  # mbx uses the platform data directory for its stable Cargo shim. Keep the
+  # path identical to `mbx setup`, but let Home Manager own every file so an
+  # activation never mutates mise or a shell startup file behind Nix's back.
+  mbxDataDir =
+    if pkgs.stdenv.hostPlatform.isDarwin
+    then "${homeDirectory}/Library/Application Support/mbx"
+    else "${homeDirectory}/.local/share/mbx";
+  mbxDataRelativeDir =
+    if pkgs.stdenv.hostPlatform.isDarwin
+    then "Library/Application Support/mbx"
+    else ".local/share/mbx";
+  mbxConfigRelativePath =
+    if pkgs.stdenv.hostPlatform.isDarwin
+    then "Library/Application Support/mbx/config.toml"
+    else ".config/mbx/config.toml";
+  rustAnalyzerConfigRelativePath =
+    if pkgs.stdenv.hostPlatform.isDarwin
+    then "Library/Application Support/rust-analyzer/rust-analyzer.toml"
+    else ".config/rust-analyzer/rust-analyzer.toml";
+  mbxShimDir = "${mbxDataDir}/bin";
+  # rusty_v8 downloads this archive into every fresh Cargo target unless the
+  # URL-keyed Cargo cache already contains it. Celld currently pins v152.1.0,
+  # so keep one verified archive in the Nix store and let every worktree copy
+  # from it. A different rusty_v8 version uses a different cache key safely.
+  rustyV8ArchiveUrl =
+    "https://github.com/denoland/rusty_v8/releases/download/v152.1.0/"
+    + "librusty_v8_release_x86_64-unknown-linux-gnu.a.gz";
+  rustyV8Archive = pkgs.fetchurl {
+    url = rustyV8ArchiveUrl;
+    hash = "sha256-VrPZwer2AINF3rP3yWqtIhfpHGXYt4v+VQ9Sw6jbtQ8=";
+  };
+  rustyV8ArchiveCacheName =
+    builtins.replaceStrings [ ":" "/" "." "-" ] [ "_" "_" "_" "_" ] rustyV8ArchiveUrl;
+  # This is the stable launcher installed by mbx 1.1.0. The target file pins
+  # the current Home Manager generation, and PATH fallback keeps rollbacks and
+  # upgrades usable if that store path disappears.
+  mbxCargoShim = ''
+    #!/bin/sh
+    shim_dir=$(dirname "$0")
+    IFS= read -r mbx_executable <"$shim_dir/mbx-target"
+    if [ ! -x "$mbx_executable" ]; then
+      mbx_executable=$(command -v mbx 2>/dev/null)
+    fi
+    if [ -z "$mbx_executable" ] || [ ! -x "$mbx_executable" ]; then
+      echo 'mbx cargo shim: mbx is not active on PATH; activate or install mbx, then run `mbx setup`' >&2
+      exit 127
+    fi
+    MBX_CARGO_SHIM_MODE=1
+    export MBX_CARGO_SHIM_MODE
+    exec "$mbx_executable" "$@"
+  '';
   # codex-cli-nix ships `codex` as a launcher that execs the real binary under the
   # name `codex-raw` (its bubblewrap wrapper). herdr identifies the agent in a pane
   # by matching the foreground process name from /proc against a fixed built-in list
@@ -143,6 +194,11 @@ lib.mkMerge [
   # Version of Home Manager state - don't change this casually
   home.stateVersion = "24.11";
 
+  # Put the stable mbx Cargo launcher before the Nix profile's real Cargo.
+  # This also applies to non-interactive agent shells that source Home
+  # Manager's session variables.
+  home.sessionPath = [ mbxShimDir ];
+
   # Let Home Manager manage itself
   programs.home-manager.enable = true;
 
@@ -198,6 +254,29 @@ lib.mkMerge [
   # edit ./herdr/config.toml + `home-manager switch`, then `herdr server
   # reload-config`. Validate edits with `herdr config check`.
   xdg.configFile."herdr/config.toml".source = ./herdr/config.toml;
+
+  # mbx uses XDG paths on Linux and Library/Application Support on macOS, so
+  # home.file owns the platform-specific destination instead of xdg.configFile.
+  home.file."${mbxConfigRelativePath}".source = ./mbx/config.toml;
+  home.file."${mbxDataRelativeDir}/bin/cargo" = {
+    text = mbxCargoShim;
+    executable = true;
+  };
+  home.file."${mbxDataRelativeDir}/bin/mbx-target".text = "${pkgs.mr-boxington}/bin/mbx\n";
+  home.file.".cargo/.rusty_v8/${rustyV8ArchiveCacheName}" =
+    lib.mkIf (pkgs.stdenv.hostPlatform.system == "x86_64-linux") {
+      source = rustyV8Archive;
+    };
+  home.file."${rustAnalyzerConfigRelativePath}".text = ''
+    [check]
+    overrideCommand = [
+      "${mbxShimDir}/cargo",
+      "check",
+      "--workspace",
+      "--all-targets",
+      "--message-format=json",
+    ]
+  '';
 
   # Karabiner-Elements (macOS only). Declarative config: edit
   # ./karabiner/karabiner.json in this repo and `home-manager switch`.
@@ -601,6 +680,7 @@ lib.mkMerge [
 
     # Git worktree
     git-wt
+    mr-boxington
 
     # Shell enhancements (migrated from brew)
     atuin          # shell history with sync
@@ -718,6 +798,10 @@ lib.mkMerge [
       ".idea/"
       "*.iml"
 
+      # Rust and mr-boxington. Do not add a trailing slash: mbx replaces a
+      # target directory with a symlink, and Git does not match it as a directory.
+      "target"
+
       # Vim
       "Session.vim"
       ".netrwhist"
@@ -740,8 +824,8 @@ lib.mkMerge [
       init.defaultBranch = "main";
       wt = {
         basedir = "../{gitroot}-wt";
-        copyignored = true;
-        copyuntracked = true;
+        copyignored = false;
+        copyuntracked = false;
       };
       user = {
         name = "Yusuke Tanaka";
@@ -791,6 +875,14 @@ lib.mkMerge [
   programs.zsh = {
     enable = true;
     enableCompletion = false; # We call compinit manually after zinit loads completions
+
+    # An existing desktop session can retain Home Manager's session-variable
+    # guard after a switch. Reassert the shim for every zsh process so a new
+    # shell activates mbx without requiring a logout.
+    envExtra = ''
+      typeset -U path
+      path=("${mbxShimDir}" $path)
+    '';
 
     # History settings
     history = {
