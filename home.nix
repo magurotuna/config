@@ -876,6 +876,14 @@ lib.mkMerge [
     enable = true;
     enableCompletion = false; # We call compinit manually after zinit loads completions
 
+    # An existing desktop session can retain Home Manager's session-variable
+    # guard after a switch. Reassert the shim for every zsh process so a new
+    # shell activates mbx without requiring a logout.
+    envExtra = ''
+      typeset -U path
+      path=("${mbxShimDir}" $path)
+    '';
+
     # History settings
     history = {
       size = 100000;
