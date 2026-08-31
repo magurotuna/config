@@ -1,0 +1,14 @@
+# ext4 copies restored outputs instead of reflinking them. The disk-scaled
+# defaults on nixos-mini allow 45 GiB for actions and 90 GiB for targets, so a
+# combined ceiling is necessary for the worktree-heavy Celld workflow.
+incremental = false
+savings = "plain"
+
+[gc]
+max_size = "20GiB"
+max_total_size = "40GiB"
+
+[target]
+views = true
+max_size = "30GiB"
+max_age = "14d"
