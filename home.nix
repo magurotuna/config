@@ -17,19 +17,9 @@ let
     BINDGEN_EXTRA_CLANG_ARGS = "-isystem ${pkgs.stdenv.cc.libc.dev}/include";
     doCheck = false;  # tests require grammar fixtures
   };
-  # mise 2026.6.11's OCI-layer test asserts a setuid bit (mode 0o4755) survives
-  # packing, but the Nix build sandbox strips special permission bits, so it sees
-  # 0o755 and fails. Skip just that one test; the other ~1349 still run. Remove
-  # this override once nixpkgs disables the test upstream. Shadows pkgs.mise via
-  # let-over-with, same as tree-sitter-cli above.
-  mise = pkgs.mise.overrideAttrs (old: {
-    checkFlags = (old.checkFlags or []) ++ [
-      "--skip=oci::layer::tests::preserve_metadata_dir_layer_keeps_special_permission_bits"
-    ];
-  });
   # mbx uses the platform data directory for its stable Cargo shim. Keep the
   # path identical to `mbx setup`, but let Home Manager own every file so an
-  # activation never mutates mise or a shell startup file behind Nix's back.
+  # activation never mutates a shell startup file behind Nix's back.
   mbxDataDir =
     if pkgs.stdenv.hostPlatform.isDarwin
     then "${homeDirectory}/Library/Application Support/mbx"
@@ -722,9 +712,8 @@ lib.mkMerge [
     maven
     cargo-make
 
-    # Runtime version managers (migrated from brew)
+    # Runtime version manager (migrated from brew)
     volta
-    mise
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     tree-sitter-cli  # custom build (0.26.x for nvim-treesitter); see let-binding above
 
