@@ -13,6 +13,10 @@
 # Skip first-run onboarding (and the config write it would trigger).
 onboarding = false
 
+[experimental]
+# Allow remote Herdr sessions to be launched from inside a local Herdr pane.
+allow_nested = true
+
 [theme]
 # Match the Ghostty terminal theme (programs.ghostty: theme = "Dracula").
 name = "dracula"
