@@ -295,6 +295,16 @@ lib.mkMerge [
     ''
   );
 
+  # Zed re-saves settings.json itself from the UI, so it needs a writable file,
+  # not an xdg.configFile store symlink. Re-seeded on every switch — UI-side
+  # changes are lost unless brought back into ./zed/.
+  home.activation.seedZedConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    dest="${homeDirectory}/.config/zed"
+    mkdir -p "$dest"
+    install -m600 ${./zed/settings.json} "$dest/settings.json"
+    install -m644 ${./zed/keymap.json} "$dest/keymap.json"
+  '';
+
   # NOTE: the ctrl+. "toggle Ghostty" hotkey is defined in ./karabiner/karabiner.json
   # (a shell_command manipulator calling toggle-app), NOT here. skhd used to
   # own it but cmux's Secure Keyboard Entry made skhd's event tap permanently
