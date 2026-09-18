@@ -68,17 +68,10 @@ let
     export MBX_CARGO_SHIM_MODE
     exec "$mbx_executable" "$@"
   '';
-  # codex-cli-nix ships `codex` as a launcher that execs the real binary under the
-  # name `codex-raw` (its bubblewrap wrapper). herdr identifies the agent in a pane
-  # by matching the foreground process name from /proc against a fixed built-in list
-  # (…|codex|…); it sees `codex-raw`, never matches, and codex never shows up in
-  # herdr's Agents sidebar. herdr treats renamed third-party binaries as out of scope
-  # (herdr#1354) and documents the fix: set HERDR_AGENT=<agent>, which the wrapped
-  # process inherits and which tells herdr which screen manifest to apply. The hint
-  # is a Linux feature since herdr 0.5.10, so this works on the current 0.7.4 — no
-  # herdr upgrade needed. symlinkJoin preserves codex-raw and every other file from
-  # the package; wrapProgram only rewraps the `codex` entrypoint to inject the var.
-  # --set-default so an explicit HERDR_AGENT in the environment still wins.
+  # Set HERDR_AGENT explicitly so herdr recognizes Codex, including package
+  # versions whose launcher runs a differently named executable (herdr#1354).
+  # Keep this wrapper on PATH; the managed daemon below must use the real binary.
+  # --set-default preserves an explicit HERDR_AGENT from the environment.
   codexWrapped = pkgs.symlinkJoin {
     name = "codex-herdr";
     paths = [ codexPkg ];
@@ -403,20 +396,14 @@ lib.mkMerge [
     source = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/complete.oga";
   };
 
-  # `codex remote-control start` refuses to run unless it finds a binary at the
-  # fixed path ~/.codex/packages/standalone/current/codex — the daemon respawns and
-  # auto-updates app-server from there, so it only accepts the mutable install laid
-  # down by the curl|sh installer and bails with "managed standalone Codex install
-  # not found at …" otherwise. Nothing about that path is nix-installable: the store
-  # is read-only and the installer would have to own $HOME. Symlinking the wrapped
-  # package into the expected layout satisfies the check and the daemon then runs
-  # the exact same binary as the one on PATH (verified: daemon reports version
-  # 0.145.0, and its updater leaves these links alone). The tradeoff is that codex
-  # can no longer self-update the daemon — which is what we want, since the version
-  # is pinned by codex-cli-nix in flake.nix anyway.
-  home.file.".codex/packages/standalone/current/codex".source = "${codexWrapped}/bin/codex";
-  home.file.".codex/packages/standalone/current/codex-raw".source = "${codexWrapped}/bin/codex-raw";
-  home.file.".codex/packages/standalone/current/codex-code-mode-host".source = "${codexWrapped}/bin/codex-code-mode-host";
+  # Provide the standalone layout required by `codex remote-control start`
+  # while keeping the version pinned by Nix. The daemon updater compares its
+  # running executable's SHA-256 with standalone/current/codex every five minutes.
+  # A shell wrapper always differs and triggers repeated app-server restarts,
+  # even when both report the same version. Link directly to the native binary.
+  # Both Linux and Darwin native packages keep these binaries in libexec.
+  home.file.".codex/packages/standalone/current/codex".source = "${codexPkg}/libexec/codex";
+  home.file.".codex/packages/standalone/current/codex-code-mode-host".source = "${codexPkg}/libexec/codex-code-mode-host";
 
   home.file.".claude/agents/codex-reviewer.md".text = ''
     ---
