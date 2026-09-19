@@ -718,7 +718,7 @@ lib.mkMerge [
     cursor-cli
     opencode
     clawpatrol # security firewall for agents; overlays/clawpatrol.nix
-    herdr      # agent multiplexer for the terminal (nixpkgs)
+    herdr      # agent multiplexer; temporary selection fix in overlays/herdr.nix
 
     # Git worktree
     git-wt
