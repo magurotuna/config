@@ -140,12 +140,43 @@ let
     "plan-review"
     "standup"
     "git-worktree"
+    "i-have-adhd"
     "publish-research-artifact"
   ];
 
   outputLearnText =
     builtins.replaceStrings [ "@homeDirectory@" ] [ homeDirectory ]
       (builtins.readFile ./claude/skills/output-learn/SKILL.md);
+
+  # Reuse the full upstream rules for automatic output shaping in every agent.
+  # Strip the skill frontmatter, which describes manual skill invocation.
+  adhdAlwaysOnText =
+    let
+      sections = lib.splitString "\n---\n"
+        (builtins.readFile ./claude/skills/i-have-adhd/SKILL.md);
+    in
+    assert builtins.length sections > 1;
+    ''
+      Apply the i-have-adhd output rules below from the first response in every
+      session, without requiring a skill invocation. If the user says
+      "stop adhd mode" or "normal mode", disable them for that session only.
+    '' + lib.concatStringsSep "\n---\n" (builtins.tail sections);
+
+  cursorAdhdManifest = pkgs.writeText "i-have-adhd-cursor-plugin.json" (builtins.toJSON {
+    name = "i-have-adhd-always";
+    version = "1.0.0";
+    description = "Always-on ADHD-friendly output from the vendored i-have-adhd skill.";
+    homepage = "https://github.com/ayghri/i-have-adhd";
+    license = "MIT";
+    rules = "./rules/";
+  });
+  cursorAdhdRule = pkgs.writeText "i-have-adhd.mdc" (''
+    ---
+    description: ADHD-friendly output for every conversation.
+    alwaysApply: true
+    ---
+
+  '' + adhdAlwaysOnText);
 
   # Produces { "<target>/<name>".source = ./claude/skills/<name>; ... } for every
   # (target, skill) pair, plus the substituted output-learn SKILL.md per target.
@@ -361,7 +392,7 @@ lib.mkMerge [
       "advisorModel": "fable",
       "remoteControlAtStartup": true,
       "plansDirectory": "./plans",
-      "outputStyle": "Explanatory",
+      "outputStyle": "i-have-adhd",
       "hooks": {
         "Stop": [
           {
@@ -489,6 +520,29 @@ lib.mkMerge [
   # Claude from ~/.claude/skills, Codex from ~/.agents/skills (personal Codex
   # skills are discovered there; Codex custom prompts are deprecated). To add a
   # skill, drop it in ./claude/skills/<name>/ and add <name> to `verbatimSkills`.
+
+  # Personal defaults load for every project; the vendored skill stays intact.
+  home.file.".codex/AGENTS.md".text = adhdAlwaysOnText;
+  xdg.configFile."opencode/AGENTS.md".text = adhdAlwaysOnText;
+  home.file.".claude/output-styles/i-have-adhd.md".text = ''
+    ---
+    name: i-have-adhd
+    description: Always-on ADHD-friendly output.
+    keep-coding-instructions: true
+    ---
+
+  '' + adhdAlwaysOnText;
+
+  # Cursor CLI discovers user-local plugins, but rejects plugin files whose
+  # symlinks escape the plugin directory. Install regular copies from the store
+  # on each switch. Removing this activation also requires deleting the copy.
+  home.activation.installCursorAdhdPlugin = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    dest="${homeDirectory}/.cursor/plugins/local/i-have-adhd-always"
+    run mkdir -p "$dest/.cursor-plugin" "$dest/rules"
+    run install -m644 ${cursorAdhdManifest} "$dest/.cursor-plugin/plugin.json"
+    run install -m644 ${cursorAdhdRule} "$dest/rules/i-have-adhd.mdc"
+    run install -m644 ${./claude/skills/i-have-adhd/LICENSE} "$dest/LICENSE"
+  '';
 
   home.file.".claude/statusline-command.sh" = {
     executable = true;
