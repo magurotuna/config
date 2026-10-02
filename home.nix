@@ -389,6 +389,9 @@ lib.mkMerge [
       "alwaysThinkingEnabled": true,
       "includeCoAuthoredBy": false,
       "effortLevel": "high",
+      "modelSettings": {
+        "claude-opus-5-5": { "effortLevel": "xhigh" }
+      },
       "advisorModel": "fable",
       "remoteControlAtStartup": true,
       "plansDirectory": "./plans",
