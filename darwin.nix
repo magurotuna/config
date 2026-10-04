@@ -59,7 +59,7 @@
       upgrade = false;
     };
 
-    taps = [ ];
+    taps = [ "stablyai/orca" ];
 
     # CLI formulae generally move to home.packages (Nix), not here.
     brews = [ ];
@@ -74,6 +74,9 @@
       "codex-app"
       # Reads ~/.config/karabiner/karabiner.json managed by home.nix.
       "karabiner-elements"
+      # Orca ADE: parallel CLI agents, each in its own git worktree.
+      # Full tap path: plain "orca" resolves to an unrelated cask.
+      "stablyai/orca/orca"
       # "google-japanese-ime"
       # "raycast"
       "rectangle"
