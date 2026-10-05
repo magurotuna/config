@@ -35,9 +35,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+    # Agent skills deployed by home.nix; source only, not a flake.
+    explainer = {
+      url = "github:mizchi/explainer";
+      flake = false;
+    };
 };
 
-  outputs = { nixpkgs, nixpkgs-clickhouse, home-manager, nix-darwin, determinate, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, ... }:
+  outputs = { nixpkgs, nixpkgs-clickhouse, home-manager, nix-darwin, determinate, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, explainer, ... }:
     let
       # nixpkgs' deno lags behind upstream; deno-overlay exposes every release
       # so we can track latest. We auto-select the newest version available in
@@ -87,6 +92,7 @@
           extraSpecialArgs = {
             homeDirectory = "/home/yusuke";
             codexPkg = codex-cli-nix.packages.x86_64-linux.default;
+            explainerSrc = explainer;
           };
           modules = [ ./home.nix ];
         };
@@ -96,6 +102,7 @@
           extraSpecialArgs = {
             homeDirectory = "/home/yusuke";
             codexPkg = codex-cli-nix.packages.x86_64-linux.default;
+            explainerSrc = explainer;
           };
           modules = [
             ./home.nix
@@ -111,6 +118,7 @@
           extraSpecialArgs = {
             homeDirectory = "/Users/yusuke";
             codexPkg = codex-cli-nix.packages.aarch64-darwin.default;
+            explainerSrc = explainer;
           };
           modules = [ ./home.nix ];
         };

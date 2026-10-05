@@ -153,6 +153,22 @@
         "url": "https://install.determinate.systems/determinate-nixd/tag/v3.23.0/x86_64-linux"
       }
     },
+    "explainer": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791040884,
+        "narHash": "sha256-bmFG/AHfZZPu6EaYBLsVPcMCcengykljBVq+mKbQqEo=",
+        "owner": "mizchi",
+        "repo": "explainer",
+        "rev": "6abf6fc2ae92a81b140b47ab9b7c96894e5faecc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mizchi",
+        "repo": "explainer",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "locked": {
         "lastModified": 1767039857,
@@ -482,6 +498,7 @@
         "codex-cli-nix": "codex-cli-nix",
         "deno-overlay": "deno-overlay",
         "determinate": "determinate",
+        "explainer": "explainer",
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs_3",

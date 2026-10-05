@@ -1,4 +1,4 @@
-{ config, pkgs, lib, homeDirectory, codexPkg, ... }:
+{ config, pkgs, lib, homeDirectory, codexPkg, explainerSrc, ... }:
 
 let
   tree-sitter-cli = pkgs.rustPlatform.buildRustPackage rec {
@@ -144,6 +144,17 @@ let
     "publish-research-artifact"
   ];
 
+  # Pinned upstream via the `explainer` flake input; bump with
+  # `nix flake update explainer`. explainer-book calls ../explainer/scripts, so
+  # the two must stay siblings.
+  explainerSkills = [
+    "explainer"
+    "explainer-book"
+    "first-reader"
+    "d2-diagram"
+    "d2-slides"
+  ];
+
   outputLearnText =
     builtins.replaceStrings [ "@homeDirectory@" ] [ homeDirectory ]
       (builtins.readFile ./claude/skills/output-learn/SKILL.md);
@@ -188,6 +199,14 @@ let
           value.source = ./claude/skills + "/${name}";
         })
         verbatimSkills)
+      skillTargets)
+    // builtins.listToAttrs (lib.concatMap
+      (base: map
+        (name: {
+          name = "${base}/${name}";
+          value.source = "${explainerSrc}/skills/${name}";
+        })
+        explainerSkills)
       skillTargets)
     // builtins.listToAttrs (map
       (base: {
