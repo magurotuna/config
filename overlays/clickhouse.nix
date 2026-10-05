@@ -2,8 +2,13 @@
 # compiles from source (~1-2h, one of the heaviest C++ builds in nixpkgs) on every
 # closure change. On the Mac we only want the client CLI (the server runs in
 # Docker), and clickhouse is a single monolithic binary, so we wrap ClickHouse's
-# official prebuilt macOS release binary instead of building. On Linux, nixpkgs
-# clickhouse IS cached, so this overlay leaves `prev.clickhouse` untouched.
+# official prebuilt macOS release binary instead of building.
+#
+# On Linux, clickhouse comes from the pinned `nixpkgs-clickhouse` input: at newer
+# nixpkgs its final link fails (undefined Rust symbols in lib_ch_rust_prql.a), so
+# Hydra has no cached build and a local build burns ~2h before failing. Drop the
+# pin once https://hydra.nixos.org/job/nixos/unstable/nixpkgs.clickhouse.x86_64-linux
+# shows Succeeded again.
 #
 # Updating: bump `version` + `hash` by hand (no surprise recompiles on flake
 # update). Get the hash with:
@@ -19,13 +24,14 @@
 #    which fails in the read-only /nix/store ("mkstemp: Permission denied"). So we
 #    decompress at BUILD time in the writable build dir, then install the result.
 #    The extracted binary is ad-hoc + linker-signed, so it runs on Apple Silicon.
+{ nixpkgs-clickhouse }:
 final: prev:
 let
   inherit (final.stdenv.hostPlatform) system;
 in
 {
   clickhouse =
-    if system != "aarch64-darwin" then prev.clickhouse
+    if system != "aarch64-darwin" then nixpkgs-clickhouse.legacyPackages.${system}.clickhouse
     else
       final.stdenv.mkDerivation rec {
         pname = "clickhouse";

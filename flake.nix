@@ -3,6 +3,8 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # Linux clickhouse only; see overlays/clickhouse.nix.
+    nixpkgs-clickhouse.url = "github:nixos/nixpkgs/e158d9ed9b51c98974c5e66e1ba1c9e0255fecaa";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -35,7 +37,7 @@
     };
 };
 
-  outputs = { nixpkgs, home-manager, nix-darwin, determinate, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, ... }:
+  outputs = { nixpkgs, nixpkgs-clickhouse, home-manager, nix-darwin, determinate, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, ... }:
     let
       # nixpkgs' deno lags behind upstream; deno-overlay exposes every release
       # so we can track latest. We auto-select the newest version available in
@@ -60,7 +62,7 @@
           [
             claude-code-overlay.overlays.default
             (import ./overlays/clawpatrol.nix)
-            (import ./overlays/clickhouse.nix)
+            (import ./overlays/clickhouse.nix { inherit nixpkgs-clickhouse; })
             (import ./overlays/herdr.nix)
             (import ./overlays/mr-boxington.nix)
             denoVersionsOverlay
