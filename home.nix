@@ -454,9 +454,10 @@ lib.mkMerge [
   # running executable's SHA-256 with standalone/current/codex every five minutes.
   # A shell wrapper always differs and triggers repeated app-server restarts,
   # even when both report the same version. Link directly to the native binary.
-  # Both Linux and Darwin native packages keep these binaries in libexec.
-  home.file.".codex/packages/standalone/current/codex".source = "${codexPkg}/libexec/codex";
-  home.file.".codex/packages/standalone/current/codex-code-mode-host".source = "${codexPkg}/libexec/codex-code-mode-host";
+  # Since 0.162.1 the native binaries live in lib/codex/bin (bin/codex is the
+  # wrapper). A stale path leaves a dangling link and the updater never swaps.
+  home.file.".codex/packages/standalone/current/codex".source = "${codexPkg}/lib/codex/bin/codex";
+  home.file.".codex/packages/standalone/current/codex-code-mode-host".source = "${codexPkg}/lib/codex/bin/codex-code-mode-host";
 
   home.file.".claude/agents/codex-reviewer.md".text = ''
     ---
@@ -1264,8 +1265,16 @@ lib.mkMerge [
   # ──────────────────────────────────────────────────────────────
   programs.gpg.enable = true;
   # home-manager's gpg-agent service is systemd-based, so it's Linux-only. On
-  # macOS gpg-agent is started on demand; set `pinentry-program` in
-  # ~/.gnupg/gpg-agent.conf (e.g. pkgs.pinentry_mac) if you want a GUI prompt.
+  # macOS gpg-agent is started on demand and reads gpg-agent.conf directly.
+  # Without an explicit pinentry-program, Nix's gnupg can't find any pinentry
+  # and signing fails with "No pinentry".
+  home.file.".gnupg/gpg-agent.conf" = lib.mkIf pkgs.stdenv.isDarwin {
+    text = ''
+      pinentry-program ${pkgs.pinentry_mac}/bin/pinentry-mac
+      default-cache-ttl 600
+      max-cache-ttl 7200
+    '';
+  };
   services.gpg-agent = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
     # Set a default pinentry here. Use pinentry-curses unless another module overrides it.
