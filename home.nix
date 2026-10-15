@@ -282,9 +282,8 @@ lib.mkMerge [
   xdg.configFile."nvim/init.lua".source = ./nvim/init.lua;
   xdg.configFile."nvim/lua".source = ./nvim/lua;
 
-  # herdr (all machines). Read-only symlink like nvim above — herdr only reads
-  # config.toml, so no writable-seed hack (cf. cmux). Keybinds mirror tmux/cmux;
-  # edit ./herdr/config.toml + `home-manager switch`, then `herdr server
+  # herdr (all machines). Read-only symlink like nvim above. Keybinds mirror
+  # tmux; edit ./herdr/config.toml + `home-manager switch`, then `herdr server
   # reload-config`. Validate edits with `herdr config check`.
   xdg.configFile."herdr/config.toml".source = ./herdr/config.toml;
 
@@ -317,26 +316,6 @@ lib.mkMerge [
   # Karabiner GUI can no longer save changes — manage keybinds here instead.
   xdg.configFile."karabiner/karabiner.json" =
     lib.mkIf pkgs.stdenv.isDarwin { source = ./karabiner/karabiner.json; };
-
-  # cmux terminal (macOS only). tmux-style `C-t` prefix chords so the muscle
-  # memory from programs.tmux below carries over to cmux's native splits/tabs
-  # (which is what keeps its per-surface agent progress tracking working).
-  # Action IDs verified against cmux docs; edit ./cmux/cmux.json + `home-manager switch`.
-  #
-  # NOT xdg.configFile (read-only store symlink): cmux re-saves this file on
-  # launch via atomic write-and-rename, which replaces the symlink with a fresh
-  # default template and wipes our bindings. Instead seed a *writable* copy cmux
-  # can read and re-own. Overwrite on every switch (unlike seedGhosttyOverrides'
-  # seed-if-missing) so the repo stays the source of truth and a clobbered file
-  # self-heals; cmux.json is an override layer, so keys we omit fall back to
-  # cmux's own Settings store.
-  home.activation.seedCmuxConfig = lib.mkIf pkgs.stdenv.isDarwin (
-    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      dest="${homeDirectory}/.config/cmux/cmux.json"
-      mkdir -p "$(dirname "$dest")"
-      install -m600 ${./cmux/cmux.json} "$dest"
-    ''
-  );
 
   # Zed re-saves settings.json itself from the UI, so it needs a writable file,
   # not an xdg.configFile store symlink. Re-seeded on every switch — UI-side
@@ -826,6 +805,7 @@ lib.mkMerge [
     # GUI apps / tools with nixpkgs darwin builds (migrated from brew casks)
     _1password-cli
     wezterm
+    rectangle
 
     # On NixOS this comes from nixos/common.nix's fonts.packages; darwin needs it via home-manager.
     (pkgs.google-fonts.override { fonts = [ "Google Sans Code" ]; })
@@ -1193,34 +1173,6 @@ lib.mkMerge [
           (( $+functions[_zsh_autosuggest_start] )) && _zsh_autosuggest_start
         fi
       '')
-      (lib.mkIf pkgs.stdenv.isDarwin ''
-        # cmux uses libghostty as its rendering engine and turns on the kitty
-        # keyboard protocol's "disambiguate" flag at the PTY level, with no option
-        # to disable it (cmux#3837). Unlike the Linux setup there is no tmux layer
-        # to shield the shell, so Ctrl+M / Ctrl+I / Ctrl+[ arrive as CSI-u
-        # sequences instead of their legacy bytes, so Ctrl+M stops acting as Enter
-        # and Ctrl+[ stops acting as Esc. Map the leaked sequences back to their
-        # legacy meaning. These are no-ops whenever the protocol is inactive (the
-        # sequences never arrive), so they are safe to set unconditionally on
-        # macOS. Ctrl+[ uses `bindkey -s` to re-inject a real Esc byte because Esc
-        # is a Meta prefix in our emacs keymap, not a single widget.
-        bindkey '\e[109;5u' accept-line   # Ctrl+M (kitty CSI-u) -> Enter
-        bindkey -s '\e[91;5u' '\e'        # Ctrl+[ (kitty CSI-u) -> Esc (Meta prefix)
-      '')
-      (lib.mkOrder 1550 ''
-        # Ghostty shell integration, hardened. We disable the home-manager
-        # ghostty module's own injection (programs.ghostty.enableZshIntegration
-        # = false) because its guard only checks that GHOSTTY_RESOURCES_DIR is
-        # set, not that the script exists. cmux renders with libghostty and sets
-        # that var to its app bundle (.../cmux.app/Contents/Resources/ghostty),
-        # which ships no shell-integration script, so the unguarded `source`
-        # errored on every new tab. Add a `-r` file check: real Ghostty loads
-        # integration, cmux/other libghostty hosts silently skip it.
-        if [[ -n $GHOSTTY_RESOURCES_DIR \
-              && -r "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration" ]]; then
-          source "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
-        fi
-      '')
     ];
   };
 
@@ -1338,13 +1290,9 @@ lib.mkMerge [
   # ──────────────────────────────────────────────────────────────
   programs.ghostty = {
     enable = true;
-    # nixpkgs has no macOS build of ghostty, so on darwin install it via the
-    # Homebrew cask and let home-manager manage only the config file.
-    package = if pkgs.stdenv.isDarwin then null else pkgs.ghostty;
-    # Replaced by a file-existence-guarded `source` in programs.zsh.initContent
-    # above: the module's injection only checks that GHOSTTY_RESOURCES_DIR is
-    # set, which breaks under cmux (libghostty sets the var but ships no script).
-    enableZshIntegration = false;
+    # ghostty-bin is upstream's signed macOS build (nixpkgs can't build it from
+    # source on darwin).
+    package = if pkgs.stdenv.isDarwin then pkgs.ghostty-bin else pkgs.ghostty;
     settings = {
       font-family = [
         "JetBrainsMono Nerd Font"
@@ -1383,6 +1331,11 @@ lib.mkMerge [
 
   # Faster than System Settings allows (its limits are 2 / 15). Units of 15ms.
   # Takes effect after logging out and back in.
+  # Real copies (not symlinks) in ~/Applications/Home Manager Apps: Spotlight
+  # indexes them and TCC grants (e.g. Accessibility) survive updates.
+  targets.darwin.copyApps.enable = pkgs.stdenv.isDarwin;
+  targets.darwin.linkApps.enable = false;
+
   targets.darwin.defaults.NSGlobalDomain = lib.mkIf pkgs.stdenv.isDarwin {
     KeyRepeat = 1;
     InitialKeyRepeat = 10;

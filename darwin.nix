@@ -69,7 +69,6 @@
     casks = [
       # "1password"
       # "1password-cli"
-      "cmux"
       # OpenAI's Codex desktop app (GUI; proprietary, auto-updating .app).
       "codex-app"
       # Reads ~/.config/karabiner/karabiner.json managed by home.nix.
@@ -79,7 +78,6 @@
       "stablyai/orca/orca"
       # "google-japanese-ime"
       # "raycast"
-      "rectangle"
       # "wireshark"
       # "ngrok"
       # "google-chrome"

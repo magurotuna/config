@@ -53,7 +53,7 @@ flake.nix              # Entry point: inputs, overlays, outputs for all machines
 ├── darwin.nix         # nix-darwin system layer: macOS defaults + Homebrew
 ├── nvim/              # Neovim config (init.lua + lua/, lazy.nvim for plugins)
 ├── claude/skills/     # Agent skills, deployed to ~/.claude/skills and ~/.agents/skills
-├── herdr/ cmux/ karabiner/ macos-hotkey/   # App configs deployed by home.nix
+├── herdr/ karabiner/ macos-hotkey/   # App configs deployed by home.nix
 ├── overlays/          # Prebuilt-binary packages (clawpatrol, clickhouse)
 └── nixos/
     ├── common.nix        # Shared NixOS system config
@@ -84,7 +84,7 @@ sudo). Applying one does not apply the other.
 - **Deno auto-latest**: An inline overlay in `flake.nix` selects the newest version deno-overlay exposes, so `nix flake update` transparently upgrades deno
 - **Prebuilt-binary overlays**: `overlays/` wraps upstream release artifacts instead of building from source (avoids uncached multi-hour builds). Bump clawpatrol with `./update-clawpatrol.sh <version>`; clickhouse is hand-pinned
 - **Agent skills single-sourced**: `claude/skills/<name>/` is deployed to both `~/.claude/skills` (Claude) and `~/.agents/skills` (Codex) by `home.nix`. Deployment is *not* automatic — add the name to the `verbatimSkills` list in `home.nix` and `git add` the files, or the flake never sees the skill. `output-learn` is the exception: it needs per-machine substitution, so it is generated separately and must stay out of `verbatimSkills`. Third-party skills come from a `flake = false` input instead (mizchi/explainer via `explainerSkills`), pinned in `flake.lock`
-- **Read-only vs writable config**: Most app configs are `xdg.configFile` store symlinks; `cmux` rewrites its config at runtime, so `home.nix` installs a writable copy via an activation script instead
+- **Read-only vs writable config**: Most app configs are `xdg.configFile` store symlinks; apps that rewrite their own config at runtime (Zed) get a writable copy via an activation script instead
 
 ## When Making Changes
 

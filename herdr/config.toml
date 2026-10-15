@@ -6,7 +6,7 @@
 # in home.nix). Safe because herdr only READS this file — its sole write is the
 # first-run onboarding flag, which we preempt below with `onboarding = false`.
 #
-# Keybindings intentionally mirror the tmux/cmux setup so muscle memory carries
+# Keybindings intentionally mirror the tmux setup so muscle memory carries
 # over: C-t prefix, hjkl pane focus, `|`/`-` splits, `c` new tab, `r` reload.
 # Run `herdr config check` after editing to validate.
 
@@ -51,7 +51,7 @@ switch_tab = "prefix+1..9"
 reload_config = "prefix+r"
 resize_mode = "prefix+shift+r"
 
-# Scrollback on `[`, echoing tmux/cmux copy-mode entry (bind [ / ctrl+t [).
+# Scrollback on `[`, echoing tmux copy-mode entry (bind [ / ctrl+t [).
 edit_scrollback = "prefix+["
 
 # Notifications when an agent finishes a turn or needs attention.
