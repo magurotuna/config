@@ -147,6 +147,9 @@
               # Untracked; maps the work email to its SSH signing key.
               programs.git.settings.gpg.ssh.allowedSignersFile = "~/.ssh/allowed_signers";
               home.activation.clawpatrolApp = lib.mkForce (lib.hm.dag.entryAnywhere "");
+              # No Karabiner here; bind the ctrl+. toggle in Ghostty itself
+              # (global keybinds need Accessibility permission).
+              programs.ghostty.settings.keybind = [ "global:ctrl+.=toggle_visibility" ];
             })
           ];
         };

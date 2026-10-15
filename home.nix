@@ -1115,18 +1115,6 @@ lib.mkMerge [
       export PATH="$HOME/.local/bin:$PATH"
       export PATH="/snap/bin:$PATH"
 
-      # uv (Python) completions - cached for speed
-      () {
-        local cache="''${XDG_DATA_HOME:-$HOME/.local/share}/zsh/uv-completion.zsh"
-        local uv_bin="${pkgs.uv}/bin/uv"
-        if [[ ! -f $cache || $uv_bin -nt $cache ]]; then
-          mkdir -p "''${cache:h}"
-          "$uv_bin" generate-shell-completion zsh > "$cache"
-        fi
-        source "$cache"
-      }
-
-
       # ─────────────────────────────────────────────────────────────
       # Zinit (plugin manager)
       # ─────────────────────────────────────────────────────────────
@@ -1142,6 +1130,18 @@ lib.mkMerge [
       # Completions (compinit runs synchronously; plugins deferred via turbo mode)
       autoload -Uz compinit
       compinit -C
+
+      # uv (Python) completions - cached for speed. Must come after compinit:
+      # the generated script calls compdef.
+      () {
+        local cache="''${XDG_DATA_HOME:-$HOME/.local/share}/zsh/uv-completion.zsh"
+        local uv_bin="${pkgs.uv}/bin/uv"
+        if [[ ! -f $cache || $uv_bin -nt $cache ]]; then
+          mkdir -p "''${cache:h}"
+          "$uv_bin" generate-shell-completion zsh > "$cache"
+        fi
+        source "$cache"
+      }
 
       zinit ice wait lucid blockf atpull'zinit creinstall -q .'
       zinit light zsh-users/zsh-completions
@@ -1378,6 +1378,13 @@ lib.mkMerge [
       # Required on macOS for background-opacity to take effect at all.
       macos-titlebar-style = "transparent";
     };
+  };
+
+  # Faster than System Settings allows (its limits are 2 / 15). Units of 15ms.
+  # Takes effect after logging out and back in.
+  targets.darwin.defaults.NSGlobalDomain = lib.mkIf pkgs.stdenv.isDarwin {
+    KeyRepeat = 1;
+    InitialKeyRepeat = 10;
   };
 
   home.activation.seedGhosttyOverrides = lib.mkIf pkgs.stdenv.isDarwin (
