@@ -1385,6 +1385,7 @@ lib.mkMerge [
   targets.darwin.defaults.NSGlobalDomain = lib.mkIf pkgs.stdenv.isDarwin {
     KeyRepeat = 1;
     InitialKeyRepeat = 10;
+    "com.apple.trackpad.scrolling" = 1.0;
   };
 
   home.activation.seedGhosttyOverrides = lib.mkIf pkgs.stdenv.isDarwin (
