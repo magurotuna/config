@@ -1,4 +1,4 @@
-{ config, pkgs, lib, homeDirectory, codexPkg, explainerSrc, ... }:
+{ config, pkgs, lib, username, homeDirectory, codexPkg, explainerSrc, ... }:
 
 let
   tree-sitter-cli = pkgs.rustPlatform.buildRustPackage rec {
@@ -221,7 +221,7 @@ lib.mkMerge [
 }
 {
   # Home Manager needs these to know where to install things
-  home.username = "yusuke";
+  home.username = username;
   home.homeDirectory = homeDirectory;
 
   # Version of Home Manager state - don't change this casually
@@ -708,7 +708,9 @@ lib.mkMerge [
 
     # Language servers
     lua-language-server
-    typescript-language-server
+    # Disabled Oct 15 2026: pnpm-deps hash mismatch in nixpkgs. Re-enable once
+    # upstream fixes it.
+    # typescript-language-server
     rust-analyzer
     gopls
     pyright
@@ -946,6 +948,9 @@ lib.mkMerge [
     envExtra = ''
       typeset -U path
       path=("${mbxShimDir}" $path)
+
+      # Untracked, machine-local env for every zsh (interactive or not).
+      [ -f ~/.zshenv.local ] && source ~/.zshenv.local
     '';
 
     # History settings

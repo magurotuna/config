@@ -70,6 +70,7 @@
             (import ./overlays/clickhouse.nix { inherit nixpkgs-clickhouse; })
             (import ./overlays/herdr.nix)
             (import ./overlays/mr-boxington.nix)
+            (import ./overlays/terraform.nix)
             denoVersionsOverlay
           ];
       };
@@ -90,6 +91,7 @@
         "yusuke@wsl" = home-manager.lib.homeManagerConfiguration {
           pkgs = mkPkgs "x86_64-linux";
           extraSpecialArgs = {
+            username = "yusuke";
             homeDirectory = "/home/yusuke";
             codexPkg = codex-cli-nix.packages.x86_64-linux.default;
             explainerSrc = explainer;
@@ -100,6 +102,7 @@
         "yusuke@nixos-mini" = home-manager.lib.homeManagerConfiguration {
           pkgs = mkPkgs "x86_64-linux";
           extraSpecialArgs = {
+            username = "yusuke";
             homeDirectory = "/home/yusuke";
             codexPkg = codex-cli-nix.packages.x86_64-linux.default;
             explainerSrc = explainer;
@@ -116,11 +119,36 @@
         "yusuke@macbook" = home-manager.lib.homeManagerConfiguration {
           pkgs = mkPkgs "aarch64-darwin";
           extraSpecialArgs = {
+            username = "yusuke";
             homeDirectory = "/Users/yusuke";
             codexPkg = codex-cli-nix.packages.aarch64-darwin.default;
             explainerSrc = explainer;
           };
           modules = [ ./home.nix ];
+        };
+
+        # Employer-managed work laptop. Machine-local, untracked files hold the
+        # employer-specific bits: ~/.ssh/config.local, ~/.zshenv.local,
+        # ~/.secrets.zsh, ~/.ssh/allowed_signers. Clawpatrol's /Applications
+        # install is skipped (no system extensions on a managed machine).
+        "yt@macbook" = home-manager.lib.homeManagerConfiguration {
+          pkgs = mkPkgs "aarch64-darwin";
+          extraSpecialArgs = {
+            username = "yt";
+            homeDirectory = "/Users/yt";
+            codexPkg = codex-cli-nix.packages.aarch64-darwin.default;
+            explainerSrc = explainer;
+          };
+          modules = [
+            ./home.nix
+            ({ lib, ... }: {
+              home.backupFileExtension = "pre-nix";
+              programs.ssh.includes = [ "~/.ssh/config.local" ];
+              # Untracked; maps the work email to its SSH signing key.
+              programs.git.settings.gpg.ssh.allowedSignersFile = "~/.ssh/allowed_signers";
+              home.activation.clawpatrolApp = lib.mkForce (lib.hm.dag.entryAnywhere "");
+            })
+          ];
         };
       };
 

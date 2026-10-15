@@ -14,18 +14,20 @@ committed is English.
 ## Project Overview
 
 Nix flake-based dotfiles and system configuration managed with home-manager, NixOS,
-and nix-darwin. Supports three machines:
+and nix-darwin. Supports four machines:
 - `yusuke@wsl` (x86_64-linux) - WSL2 on Windows
 - `yusuke@nixos-mini` (x86_64-linux) - NixOS desktop with KDE Plasma 6
 - `yusuke@macbook` (aarch64-darwin) - Apple Silicon Mac
+- `yt@macbook` (aarch64-darwin) - Employer-managed work laptop
 
 ## Common Commands
 
 ```bash
-# Apply home-manager changes (user environment; all three machines)
+# Apply home-manager changes (user environment; all four machines)
 home-manager switch --flake .#yusuke@wsl
 home-manager switch --flake .#yusuke@nixos-mini
 home-manager switch --flake .#yusuke@macbook
+home-manager switch --flake .#yt@macbook
 
 # Apply system changes
 sudo nixos-rebuild switch --flake .#nixos-mini   # NixOS (nixos-mini)
@@ -66,6 +68,7 @@ flake.nix              # Entry point: inputs, overlays, outputs for all machines
 | `yusuke@wsl`        | `home.nix`                                                    |
 | `yusuke@nixos-mini` | `home.nix` + `linux.nix` + `kde.nix` + xremap + plasma-manager |
 | `yusuke@macbook`    | `home.nix`                                                    |
+| `yt@macbook`        | `home.nix` + inline module (layers on employer-managed `~/.gitconfig` / SSH config; skips the Clawpatrol app install) |
 
 macOS is two independent layers: `darwinConfigurations.macbook` (system settings and
 Homebrew, needs sudo) and `homeConfigurations."yusuke@macbook"` (user environment, no
@@ -74,7 +77,7 @@ sudo). Applying one does not apply the other.
 ## Key Patterns
 
 - **Plugin management outside Nix**: Zsh plugins via zinit, Neovim plugins via lazy.nvim (not Nix-managed for flexibility)
-- **Secrets**: Stored in `~/.secrets.zsh` (not tracked), sourced at shell startup
+- **Secrets / machine-local config**: `~/.secrets.zsh` / `~/.zshenv.local` (zsh) and `~/.ssh/config.local` (SSH, `yt@macbook` only) are untracked and hold per-machine or employer-specific settings that must not be committed
 - **Unfree packages**: Allowed via `config.allowUnfree = true` in flake.nix (e.g. Terraform's BSL license)
 - **OSC 52 clipboard**: Used across tmux, ghostty, and neovim for consistent terminal clipboard support
 - **xremap**: Provides macOS-like keybindings on Linux (Emacs-style navigation, Alt for word movement); configured in `kde.nix`
@@ -88,4 +91,4 @@ sudo). Applying one does not apply the other.
 - User environment changes go in `home.nix` (or `linux.nix`/`kde.nix` for Linux/KDE, `darwin.nix` for macOS system settings)
 - NixOS system changes go in `nixos/common.nix` or `nixos/hosts/<hostname>/`
 - Commit `flake.lock` after running `nix flake update`
-- Consider which machines are affected when modifying shared configs — `home.nix` hits all three
+- Consider which machines are affected when modifying shared configs — `home.nix` hits all four
