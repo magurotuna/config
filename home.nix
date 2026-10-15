@@ -1354,6 +1354,16 @@ lib.mkMerge [
     autohide = true;
   };
 
+  # screencapture falls back to the Desktop if the folder is missing.
+  targets.darwin.defaults."com.apple.screencapture" = lib.mkIf pkgs.stdenv.isDarwin {
+    location = "${homeDirectory}/Pictures/Screenshots";
+  };
+  home.activation.createScreenshotsDir = lib.mkIf pkgs.stdenv.isDarwin (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run mkdir -p "${homeDirectory}/Pictures/Screenshots"
+    ''
+  );
+
   home.activation.seedGhosttyOverrides = lib.mkIf pkgs.stdenv.isDarwin (
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       overrides="${homeDirectory}/.config/ghostty/overrides"
