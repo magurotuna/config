@@ -1349,6 +1349,11 @@ lib.mkMerge [
     "com.apple.trackpad.scrolling" = 1.0;
   };
 
+  # Needs `killall Dock` (or a re-login) the first time.
+  targets.darwin.defaults."com.apple.dock" = lib.mkIf pkgs.stdenv.isDarwin {
+    autohide = true;
+  };
+
   home.activation.seedGhosttyOverrides = lib.mkIf pkgs.stdenv.isDarwin (
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       overrides="${homeDirectory}/.config/ghostty/overrides"
