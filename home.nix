@@ -526,6 +526,11 @@ lib.mkMerge [
   # Personal defaults load for every project; the vendored skill stays intact.
   home.file.".codex/AGENTS.md".text = adhdAlwaysOnText;
   xdg.configFile."opencode/AGENTS.md".text = adhdAlwaysOnText;
+  # `system` paints no background, so Ghostty's background-opacity shows through.
+  xdg.configFile."opencode/tui.json".text = builtins.toJSON {
+    "$schema" = "https://opencode.ai/tui.json";
+    theme = "system";
+  };
   home.file.".claude/output-styles/i-have-adhd.md".text = ''
     ---
     name: i-have-adhd
@@ -1302,6 +1307,8 @@ lib.mkMerge [
       theme = "Dracula";
       cursor-style = "block";
       background-opacity = 0.85;
+      # Also apply it to cells TUIs paint with an explicit background (opencode, nvim).
+      background-opacity-cells = true;
       window-padding-x = 8;
       gtk-tabs-location = "hidden";
       keybind = [
