@@ -1,4 +1,4 @@
-{ config, pkgs, lib, username, homeDirectory, codexPkg, explainerSrc, ... }:
+{ config, pkgs, lib, username, homeDirectory, codexPkg, ompPkg, explainerSrc, ... }:
 
 let
   tree-sitter-cli = pkgs.rustPlatform.buildRustPackage rec {
@@ -726,6 +726,11 @@ lib.mkMerge [
     claude-code
     cursor-cli
     opencode
+    # omp (oh-my-pi), from its upstream flake; built from source (no cache).
+    # Package only: config, plugins and credentials live under ~/.omp
+    # (writable, untracked). Its HM module's `settings` would turn config.yml
+    # into a read-only store symlink.
+    ompPkg
     clawpatrol # security firewall for agents; overlays/clawpatrol.nix
     herdr      # agent multiplexer; temporary selection fix in overlays/herdr.nix
 

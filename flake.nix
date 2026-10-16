@@ -97,6 +97,7 @@
             username = "yusuke";
             homeDirectory = "/home/yusuke";
             codexPkg = codex-cli-nix.packages.x86_64-linux.default;
+            ompPkg = oh-my-pi.packages.x86_64-linux.omp;
             explainerSrc = explainer;
           };
           modules = [ ./home.nix ];
@@ -108,6 +109,7 @@
             username = "yusuke";
             homeDirectory = "/home/yusuke";
             codexPkg = codex-cli-nix.packages.x86_64-linux.default;
+            ompPkg = oh-my-pi.packages.x86_64-linux.omp;
             explainerSrc = explainer;
           };
           modules = [
@@ -125,6 +127,7 @@
             username = "yusuke";
             homeDirectory = "/Users/yusuke";
             codexPkg = codex-cli-nix.packages.aarch64-darwin.default;
+            ompPkg = oh-my-pi.packages.aarch64-darwin.omp;
             explainerSrc = explainer;
           };
           modules = [ ./home.nix ];
@@ -140,16 +143,13 @@
             username = "yt";
             homeDirectory = "/Users/yt";
             codexPkg = codex-cli-nix.packages.aarch64-darwin.default;
+            ompPkg = oh-my-pi.packages.aarch64-darwin.omp;
             explainerSrc = explainer;
           };
           modules = [
             ./home.nix
             ({ lib, ... }: {
               home.backupFileExtension = "pre-nix";
-              # Package only. omp's own config, plugins and credentials live
-              # under ~/.omp (writable, untracked); its HM module's `settings`
-              # would turn config.yml into a read-only store symlink.
-              home.packages = [ oh-my-pi.packages.aarch64-darwin.omp ];
               programs.ssh.includes = [ "~/.ssh/config.local" ];
               # Untracked; maps the work email to its SSH signing key.
               programs.git.settings.gpg.ssh.allowedSignersFile = "~/.ssh/allowed_signers";
