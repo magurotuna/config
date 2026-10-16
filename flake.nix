@@ -35,6 +35,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+    # omp (oh-my-pi) coding agent. No `follows`: it pins its own bun/Rust
+    # toolchain and is built from source either way.
+    oh-my-pi.url = "github:can1357/oh-my-pi";
     # Agent skills deployed by home.nix; source only, not a flake.
     explainer = {
       url = "github:mizchi/explainer";
@@ -42,7 +45,7 @@
     };
 };
 
-  outputs = { nixpkgs, nixpkgs-clickhouse, home-manager, nix-darwin, determinate, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, explainer, ... }:
+  outputs = { nixpkgs, nixpkgs-clickhouse, home-manager, nix-darwin, determinate, xremap, plasma-manager, claude-code-overlay, codex-cli-nix, deno-overlay, explainer, oh-my-pi, ... }:
     let
       # nixpkgs' deno lags behind upstream; deno-overlay exposes every release
       # so we can track latest. We auto-select the newest version available in
@@ -143,6 +146,10 @@
             ./home.nix
             ({ lib, ... }: {
               home.backupFileExtension = "pre-nix";
+              # Package only. omp's own config, plugins and credentials live
+              # under ~/.omp (writable, untracked); its HM module's `settings`
+              # would turn config.yml into a read-only store symlink.
+              home.packages = [ oh-my-pi.packages.aarch64-darwin.omp ];
               programs.ssh.includes = [ "~/.ssh/config.local" ];
               # Untracked; maps the work email to its SSH signing key.
               programs.git.settings.gpg.ssh.allowedSignersFile = "~/.ssh/allowed_signers";
