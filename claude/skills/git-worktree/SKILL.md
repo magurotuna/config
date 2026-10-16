@@ -15,9 +15,11 @@ stashing or re-checking-out.
 
 - `wt.basedir = ../{gitroot}-wt` -> worktrees live next to the repo at
   `../<reponame>-wt/<branch>` (e.g. `../config-wt/feature-x`).
-- `wt.copyignored` and `wt.copyuntracked` are on -> gitignored files (like `.env`)
-  and untracked files are copied into each new worktree, so it can run immediately.
-  Be mindful that this includes secrets.
+- `wt.copyignored` and `wt.copyuntracked` are off -> gitignored files (like `.env`)
+  and untracked files are NOT copied into a new worktree. Copy or recreate any
+  local files it needs (secrets, `.env`) by hand before running it.
+- `git wt` also writes a `README.md` and `.gitignore` into the basedir's parent
+  folder (e.g. `../config-wt/`). That is expected; leave them alone.
 
 ## CRITICAL: directory switching does NOT work in agent shells
 
