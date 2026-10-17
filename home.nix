@@ -655,6 +655,8 @@ lib.mkMerge [
     k9s
     stern
     kubectl
+    kubelogin-oidc # kubectl-oidc_login: OIDC credential plugin for kubectl
+    kubevirt # virtctl: console, port-forward, and SSH access to KubeVirt VMs
     kubernetes-helm
     (lib.lowPrio minikube) # Prefer the standalone kubectl over minikube's kubectl symlink.
     talosctl
