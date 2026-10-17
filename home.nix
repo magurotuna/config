@@ -189,6 +189,29 @@ let
 
   '' + adhdAlwaysOnText);
 
+  # English writing rules based on the Google developer documentation style
+  # guide. Every agent loads them next to the i-have-adhd rules.
+  googleStyleText = builtins.readFile ./claude/google-style-english.md;
+
+  # Always-on instructions for agents that read a single user-level file.
+  agentAlwaysOnText = adhdAlwaysOnText + "\n" + googleStyleText;
+
+  cursorGoogleStyleManifest = pkgs.writeText "google-style-english-cursor-plugin.json" (builtins.toJSON {
+    name = "google-style-english-always";
+    version = "1.0.0";
+    description = "Always-on English writing rules based on the Google developer documentation style guide.";
+    homepage = "https://developers.google.com/style";
+    license = "CC-BY-4.0";
+    rules = "./rules/";
+  });
+  cursorGoogleStyleRule = pkgs.writeText "google-style-english.mdc" (''
+    ---
+    description: English writing rules for every conversation.
+    alwaysApply: true
+    ---
+
+  '' + googleStyleText);
+
   # Produces { "<target>/<name>".source = ./claude/skills/<name>; ... } for every
   # (target, skill) pair, plus the substituted output-learn SKILL.md per target.
   skillFiles =
@@ -524,8 +547,9 @@ lib.mkMerge [
   # skill, drop it in ./claude/skills/<name>/ and add <name> to `verbatimSkills`.
 
   # Personal defaults load for every project; the vendored skill stays intact.
-  home.file.".codex/AGENTS.md".text = adhdAlwaysOnText;
-  xdg.configFile."opencode/AGENTS.md".text = adhdAlwaysOnText;
+  home.file.".codex/AGENTS.md".text = agentAlwaysOnText;
+  xdg.configFile."opencode/AGENTS.md".text = agentAlwaysOnText;
+  home.file.".omp/agent/AGENTS.md".text = agentAlwaysOnText;
   # `system` paints no background, so Ghostty's background-opacity shows through.
   xdg.configFile."opencode/tui.json".text = builtins.toJSON {
     "$schema" = "https://opencode.ai/tui.json";
@@ -540,6 +564,10 @@ lib.mkMerge [
 
   '' + adhdAlwaysOnText;
 
+  # Claude Code activates one output style at a time, so the writing rules load
+  # from the user memory file instead.
+  home.file.".claude/CLAUDE.md".text = googleStyleText;
+
   # Cursor CLI discovers user-local plugins, but rejects plugin files whose
   # symlinks escape the plugin directory. Install regular copies from the store
   # on each switch. Removing this activation also requires deleting the copy.
@@ -549,6 +577,13 @@ lib.mkMerge [
     run install -m644 ${cursorAdhdManifest} "$dest/.cursor-plugin/plugin.json"
     run install -m644 ${cursorAdhdRule} "$dest/rules/i-have-adhd.mdc"
     run install -m644 ${./claude/skills/i-have-adhd/LICENSE} "$dest/LICENSE"
+  '';
+
+  home.activation.installCursorGoogleStylePlugin = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    dest="${homeDirectory}/.cursor/plugins/local/google-style-english-always"
+    run mkdir -p "$dest/.cursor-plugin" "$dest/rules"
+    run install -m644 ${cursorGoogleStyleManifest} "$dest/.cursor-plugin/plugin.json"
+    run install -m644 ${cursorGoogleStyleRule} "$dest/rules/google-style-english.mdc"
   '';
 
   home.file.".claude/statusline-command.sh" = {
