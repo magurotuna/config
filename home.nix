@@ -80,6 +80,20 @@ let
       wrapProgram $out/bin/codex --set-default HERDR_AGENT codex
     '';
   };
+  # herdr's OMP integration: an omp extension that reports omp's lifecycle
+  # state (working/blocked/idle) and session id to the herdr socket. herdr has
+  # no screen detection for omp, so without this file omp always shows idle and
+  # finished-turn notifications and sounds never fire. `herdr integration
+  # install omp` writes only this one file; generating it from the installed
+  # herdr keeps the extension version in step with the binary.
+  herdrOmpExtension = pkgs.runCommand "herdr-omp-agent-state.ts" {
+    nativeBuildInputs = [ pkgs.herdr ];
+  } ''
+    export HOME="$TMPDIR/home"
+    mkdir -p "$HOME/.omp/agent"
+    herdr integration install omp
+    install -Dm644 "$HOME/.omp/agent/extensions/herdr-omp-agent-state.ts" "$out"
+  '';
   tmuxCopyAction =
     if pkgs.stdenv.isDarwin
     then ''copy-pipe-and-cancel "/usr/bin/pbcopy"''
@@ -309,6 +323,13 @@ lib.mkMerge [
   # tmux; edit ./herdr/config.toml + `home-manager switch`, then `herdr server
   # reload-config`. Validate edits with `herdr config check`.
   xdg.configFile."herdr/config.toml".source = ./herdr/config.toml;
+
+  # omp loads every file in ~/.omp/agent/extensions at startup; see
+  # herdrOmpExtension above. Restart running omp sessions after a switch.
+  # Do not run `herdr integration install omp` (or the herdr settings
+  # integrations tab): it replaces this symlink with a regular file, and the
+  # next switch then refuses to clobber it.
+  home.file.".omp/agent/extensions/herdr-omp-agent-state.ts".source = herdrOmpExtension;
 
   # mbx uses XDG paths on Linux and Library/Application Support on macOS, so
   # home.file owns the platform-specific destination instead of xdg.configFile.
@@ -779,8 +800,9 @@ lib.mkMerge [
     opencode
     # omp (oh-my-pi), from its upstream flake; built from source (no cache).
     # Package only: config, plugins and credentials live under ~/.omp
-    # (writable, untracked). Its HM module's `settings` would turn config.yml
-    # into a read-only store symlink.
+    # (writable, untracked); home.file deploys only AGENTS.md and the herdr
+    # extension there. Its HM module's `settings` would turn config.yml into a
+    # read-only store symlink.
     ompPkg
     clawpatrol # security firewall for agents; overlays/clawpatrol.nix
     herdr      # agent multiplexer; temporary selection fix in overlays/herdr.nix
