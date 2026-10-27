@@ -388,59 +388,73 @@ lib.mkMerge [
   # ──────────────────────────────────────────────────────────────
   # Claude Code
   # ──────────────────────────────────────────────────────────────
-  home.file.".claude/settings.json".text = ''
-    {
-      "statusLine": {
-        "type": "command",
-        "command": "${homeDirectory}/.claude/statusline-command.sh"
-      },
-      "enabledPlugins": {
-        "rust-analyzer-lsp@claude-plugins-official": false,
-        "code-simplifier@claude-plugins-official": true,
-        "gopls-lsp@claude-plugins-official": true,
-        "typescript-lsp@claude-plugins-official": true
-      },
-      "permissions": {
-        "defaultMode": "auto",
-        "allow": [
-          "Bash(gh search:*)",
-          "Bash(gh api:*)"
-        ]
-      },
-      "alwaysThinkingEnabled": true,
-      "includeCoAuthoredBy": false,
-      "effortLevel": "high",
-      "modelSettings": {
-        "claude-opus-5-5": { "effortLevel": "xhigh" }
-      },
-      "advisorModel": "fable",
-      "remoteControlAtStartup": true,
-      "plansDirectory": "./plans",
-      "outputStyle": "i-have-adhd",
-      "hooks": {
-        "Stop": [
-          {
-            "hooks": [
-              {
-                "type": "command",
-                "command": "pw-play ${homeDirectory}/.local/share/sounds/claude-done.oga 2>/dev/null || afplay /System/Library/Sounds/Glass.aiff 2>/dev/null || true"
-              }
-            ]
-          }
-        ],
-        "Notification": [
-          {
-            "hooks": [
-              {
-                "type": "command",
-                "command": "pw-play ${homeDirectory}/.local/share/sounds/claude-notification.oga 2>/dev/null || afplay /System/Library/Sounds/Ping.aiff 2>/dev/null || true"
-              }
-            ]
-          }
-        ]
-      }
-    }
-  '';
+  # Claude Code rewrites settings.json at runtime (`/effort`, `/model`, and
+  # others), so it cannot be a read-only store symlink. On every switch, the
+  # keys below are deep-merged over the existing file and win; every other key
+  # (effortLevel, model, modelSettings, ...) keeps its runtime value. A key that
+  # you delete here stays in the file until you remove it by hand.
+  home.activation.claudeSettings = lib.hm.dag.entryAfter [ "linkGeneration" ] (
+    let
+      managed = pkgs.writeText "claude-settings-managed.json" (builtins.toJSON {
+        statusLine = {
+          type = "command";
+          command = "${homeDirectory}/.claude/statusline-command.sh";
+        };
+        enabledPlugins = {
+          "rust-analyzer-lsp@claude-plugins-official" = false;
+          "code-simplifier@claude-plugins-official" = true;
+          "gopls-lsp@claude-plugins-official" = true;
+          "typescript-lsp@claude-plugins-official" = true;
+        };
+        permissions = {
+          defaultMode = "auto";
+          allow = [
+            "Bash(gh search:*)"
+            "Bash(gh api:*)"
+          ];
+        };
+        alwaysThinkingEnabled = true;
+        includeCoAuthoredBy = false;
+        advisorModel = "fable";
+        remoteControlAtStartup = true;
+        plansDirectory = "./plans";
+        outputStyle = "i-have-adhd";
+        hooks = {
+          Stop = [{
+            hooks = [{
+              type = "command";
+              command = "pw-play ${homeDirectory}/.local/share/sounds/claude-done.oga 2>/dev/null || afplay /System/Library/Sounds/Glass.aiff 2>/dev/null || true";
+            }];
+          }];
+          Notification = [{
+            hooks = [{
+              type = "command";
+              command = "pw-play ${homeDirectory}/.local/share/sounds/claude-notification.oga 2>/dev/null || afplay /System/Library/Sounds/Ping.aiff 2>/dev/null || true";
+            }];
+          }];
+        };
+      });
+    in
+    ''
+      dest="${homeDirectory}/.claude/settings.json"
+      run mkdir -p "$(dirname "$dest")"
+      # A leftover store symlink from older generations is replaced by a copy.
+      if [ -L "$dest" ]; then
+        current="$(cat "$dest" 2>/dev/null || echo '{}')"
+        run rm -f "$dest"
+      elif [ -f "$dest" ]; then
+        current="$(cat "$dest")"
+      else
+        current='{}'
+      fi
+      merged="$(printf '%s' "$current" | ${pkgs.jq}/bin/jq --slurpfile m ${managed} '. * $m[0]')"
+      if [ -z "''${DRY_RUN:-}" ]; then
+        printf '%s\n' "$merged" > "$dest.tmp"
+        chmod 600 "$dest.tmp"
+        mv "$dest.tmp" "$dest"
+      fi
+    ''
+  );
   # Sound files for Claude Code hooks (Linux only; macOS uses built-in sounds).
   # mkIf on the whole entry keeps it (and the Linux-only package reference) off
   # darwin entirely, where the hooks fall back to afplay.
