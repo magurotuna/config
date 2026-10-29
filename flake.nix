@@ -154,6 +154,18 @@
               # Untracked; maps the work email to its SSH signing key.
               programs.git.settings.gpg.ssh.allowedSignersFile = "~/.ssh/allowed_signers";
               home.activation.clawpatrolApp = lib.mkForce (lib.hm.dag.entryAnywhere "");
+              # Skip skills that write to personal GitHub repos, so that work
+              # content does not leak into them. The paths must match the
+              # `skillFiles` keys in home.nix.
+              home.file = lib.genAttrs
+                (lib.concatMap
+                  (target: [
+                    "${target}/standup"
+                    "${target}/publish-research-artifact"
+                    "${target}/output-learn/SKILL.md"
+                  ])
+                  [ ".claude/skills" ".agents/skills" ])
+                (_: { enable = false; });
               # No Karabiner here; bind the ctrl+. toggle in Ghostty itself
               # (global keybinds need Accessibility permission).
               programs.ghostty.settings.keybind = [ "global:ctrl+.=toggle_visibility" ];
