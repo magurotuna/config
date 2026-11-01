@@ -287,6 +287,10 @@ in
   # Use curses so the prompt appears inline in the terminal (avoids popup hiding behind quick terminal)
   services.gpg-agent.pinentry.package = pkgs.pinentry-curses;
 
+  # One year, so the passphrase is effectively asked once per agent start.
+  services.gpg-agent.defaultCacheTtl = lib.mkForce 31536000;
+  services.gpg-agent.maxCacheTtl = lib.mkForce 31536000;
+
   # ──────────────────────────────────────────────────────────────
   # xremap: macOS-like keybindings
   # Super (Cmd) = app shortcuts, Ctrl = Emacs movement, Alt = word nav
