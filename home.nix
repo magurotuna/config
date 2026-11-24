@@ -156,6 +156,7 @@ let
     "git-worktree"
     "i-have-adhd"
     "publish-research-artifact"
+    "triple-review"
   ];
 
   # Pinned upstream via the `explainer` flake input; bump with
